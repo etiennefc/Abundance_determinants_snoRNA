@@ -1,0 +1,295 @@
+{
+  "numerical_features": ["sno_length", "conservation_score", "intron_number", "intron_length",
+                        "distance_upstream_exon", "distance_downstream_exon",
+                        "dist_to_bp", "sno_mfe", "terminal_stem_mfe",
+                        "terminal_stem_length_score"],
+  "numerical_features_scaled": ["sno_length_norm", "conservation_score_norm", "intron_number_norm", "intron_length_norm",
+                        "distance_upstream_exon_norm", "distance_downstream_exon_norm",
+                        "dist_to_bp_norm", "sno_mfe_norm", "terminal_stem_mfe_norm",
+                        "terminal_stem_length_score_norm"],
+  "categorical_features": ["sno_type", "sno_target", "host_biotype2", "host_function",
+                          "NMD_susceptibility", "di_promoter", "abundance_cutoff_host"],
+  "intronic_features": ["intron_length", "distance_upstream_exon", "distance_downstream_exon",
+                        "dist_to_bp"],
+  "feature_effect": ["conservation_score_norm", "terminal_stem_mfe_norm", "sno_mfe_norm",
+                    "host_expressed", "all_four", "top_10", "top_10_intergenic", "top_10_all", "top_11_all", "Other"],
+  "one_feature": ["conservation_score_norm", "terminal_stem_mfe_norm", "sno_mfe_norm",
+                    "host_expressed", "intron_number_norm", "all_four", "all_five", "intergenic", "dist_to_bp_norm"],
+  "feature_hue": ["sno_type", "abundance_cutoff", "abundance_cutoff_2"],
+  "intron_group_feature": ["sno_mfe", "terminal_stem_mfe", "conservation_score", "intron_number", "sno_length", "dist_to_bp"],
+  "pca_hue": ["label", "intergenic"],
+  "models": ["log_reg", "svc", "rf", "gbm"],
+  "models2": ["log_reg", "svc", "rf", "gbm", "knn"],
+  "sno_type": ["CD", "HACA"],
+  "hg_biotype": ["intronic", "intergenic"],
+  "confusion_value": ["TN", "FP", "FN", "TP"],
+  "FN": ["ENSG00000201240", "ENSG00000221102", "cluster_672",
+        "ENSG00000221164", "ENSG00000201247", "ENSG00000199666",
+        "ENSG00000212615", "snoDB1989", "snoDB1292"],
+  "FP": ["ENSG00000278123", "ENSG00000238390", "ENSG00000212498",
+        "ENSG00000278089", "NR_132974", "ENSG00000222588"],
+  "TN": ["ENSG00000199571", "ENSG00000201348", "ENSG00000238372", "ENSG00000253041",
+        "ENSG00000201666","ENSG00000239182", "ENSG00000199370", "ENSG00000274535",
+        "ENSG00000207109", "NR_145799"],
+  "TP": ["ENSG00000206597", "ENSG00000281910", "ENSG00000264346",
+        "ENSG00000199785", "ENSG00000238649", "ENSG00000212135", "ENSG00000200987"],
+  "path":
+  {
+    "coco_output_dir": "/home/etienne/Graham/scratch/new_gtf_tgirt_seq/tgirt_seq_pipeline/results/coco/",
+    "merge_coco_output": "data/coco_output/",
+    "r_env_dir": ".snakemake/conda/*/bin/R",
+    "bedtools_dir": ".snakemake/conda/*/bin/bedtools",
+    "bp_window_table": "data/branch_point/bp_window.csv",
+    "bp_distance": "data/branch_point/bp_distance.csv",
+    "bp_distance_simple": "data/branch_point/bp_distance_simple.tsv",
+    "sno_distance_bp": "results/tables/intron_nb_exon_AND_bp_distance_sno_HG.tsv",
+    "host_gene_df": "data/references/final_host_gene_list_v101.csv",
+    "host_functions": "data/references/host_functions.tsv",
+    "refseq_gtf": "data/references/refseq.gtf",
+    "gtf_tsv_table": "/home/etienne/Graham/projects/def-scottmic/scottmic_group/annotation_and_sequence/Ensembl_V101_Scottlab_2020/hg38_Ensembl_V101_Scottlab_2020_genes.tsv",
+    "gtf": "data/references/hg38_Ensembl_V101_Scottlab_2020.gtf",
+    "sorted_gtf_bed": "data/bed_files/hg38_Ensembl_V101_Scottlab_2020_sorted.gtf.bed",
+    "hg_bed": "data/bed_files/host_genes.gtf.bed",
+    "genome_v101": "data/references/Homo_sapiens.GRCh38.dna.primary_assembly_V101.fa",
+    "genome_chr": "data/references/genome_w_chr.fa",
+    "hg_gtf": "data/references/host_gene_v101.gtf",
+    "all_sno_bed": "data/bed_files/all_snoRNA.bed",
+    "sno_bed": "data/bed_files/",
+    "sno_bed_vap": "data/vap_bed_files/",
+    "sno_tpm_df": "data/coco_output/tpm_w_biotype_v101_sno_HG.csv",
+    "sno_tpm_df_cutoff": "data/coco_output/tpm_w_biotype_v101_sno_HG_cutoff.tsv",
+    "variable_sno_label_same_host": "results/tables/variable_sno_label_same_host.tsv",
+    "sno_bed_wo_snhg14": "/home/etienne/Desktop/Étienne/Predictor/Maitrise/Fichiers_textes/bed_files/all_intronic_snoRNA_wo_snhg14.bed",
+    "snhg14_bed": "data/references/snhg14.bed",
+    "snhg14_gtf": "data/references/snhg14.gtf",
+    "sno_snhg14_bed": "/home/etienne/Desktop/Étienne/Predictor/Maitrise/Fichiers_textes/bed_files/snhg14_snoRNA.bed",
+    "sno_location_exon": "data/sno_location_exon",
+    "sno_location_table": "results/tables/intron_nb_exon_distance_sno_HG.tsv",
+    "sno_length": "data/sno_length/sno_length.tsv",
+    "intersection_sno_conservation": "data/references/intersection_sno_conservation_bedgraph.bed",
+    "sno_conservation": "data/references/sno_conservation.tsv",
+    "phastcons_bw": "data/references/phastcons_100_vert.bw",
+    "phastcons_bg": "data/references/phastcons_100_vert.bedGraph",
+    "snodb": "data/references/snoDB1.1.1_for_hg38_Ensembl_V101_Scottlab_2020.tsv",
+    "snodb_formatted": "data/references/snodb_formatted.tsv",
+    "nmd_lykke_andersen_corrigendum": "data/references/NMD_substrates_HG_Lykke_andersen_2016_relaxed_CORRIGENDUM.csv",
+    "di_promoter_nepal": "data/references/di_promoters_nepal.csv",
+    "lnctard": "data/references/lncRNA_functions.tsv",
+    "protein_coding_HG_functions": "data/references/protein_coding_functions.tsv",
+    "sno_sequences": "data/structure/stability/sno_sequences.tsv",
+    "structure_stability_fasta": "data/structure/stability/sno_mfe.fa",
+    "structure_stability_tsv": "data/structure/stability/sno_mfe.tsv",
+    "flanking_regions_cd_left": "data/terminal_stem/extended_region_cd_left.bed",
+    "flanking_regions_cd_right": "data/terminal_stem/extended_region_cd_right.bed",
+    "flanking_regions_haca_left": "data/terminal_stem/extended_region_haca_left.bed",
+    "flanking_regions_haca_right": "data/terminal_stem/extended_region_haca_right.bed",
+    "flanking_regions_sno_fasta": "data/terminal_stem/terminal_stem_sequences.fa",
+    "terminal_stem_mfe_fasta": "data/terminal_stem/terminal_stem_mfe.fa",
+    "terminal_stem_mfe_tsv": "data/terminal_stem/terminal_stem_mfe.tsv",
+    "terminal_stem_length": "data/terminal_stem/terminal_stem_length.tsv",
+    "feature_df": "results/tables/all_features_labels.tsv",
+    "scaled_feature_df": "results/tables/all_features_labels_scaled.tsv",
+    "scaled_feature_train_df": "results/tables/all_features_labels_scaled_train.tsv",
+    "scaled_feature_cv_df": "results/tables/all_features_labels_scaled_cv.tsv",
+    "scaled_feature_test_df": "results/tables/all_features_labels_scaled_test.tsv",
+    "scaled_feature_y_train": "results/tables/labels_train.tsv",
+    "scaled_feature_y_cv": "results/tables/labels_cv.tsv",
+    "scaled_feature_y_test": "results/tables/labels_test.tsv",
+    "one_hot_encoded_df": "results/tables/all_features_labels_scaled_encoded.tsv",
+    "one_hot_encoded_df_before_split": "results/tables/all_features_labels_encoded_before_split.tsv",
+    "hyperparameter_tuning": "results/tables/hyperparameter_tuning/",
+    "trained_models": "results/trained_models/",
+    "training_accuracy": "results/tables/training_accuracy/",
+    "test_accuracy": "results/tables/test_accuracy/",
+    "confusion_matrix_f1": "results/tables/confusion_matrix_f1/",
+    "merged_confusion_matrix": "results/tables/confusion_matrix_f1/merged_confusion_matrix.tsv",
+    "snora77b_terminal_stem_fasta": "data/structure/stability/snora77b_stem_structure_mfe.fa",
+    "snora77b_fasta": "data/structure/stability/snora77b_mfe.fa",
+    "one_hot_encoded_df_wo_clusters": "results/tables/all_features_labels_scaled_encoded_wo_clusters.tsv",
+    "one_hot_encoded_df_wo_feature": "results/tables/all_features_labels_scaled_encoded_wo_",
+    "one_hot_encoded_df_one_feature": "results/tables/all_features_labels_scaled_encoded_one_feature",
+    "top_5_features_df": "results/tables/top_5_features_across_models.tsv",
+    "all_feature_rank_df": "results/tables/all_features_rank_across_models.tsv"
+  },
+  "hyperparameter_space":
+  {
+    "log_reg":
+    {
+      "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+      "solver": ["newton-cg", "lbfgs", "liblinear", "sag", "saga"]
+    },
+    "svc":
+    {
+      "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+      "gamma": ["auto", "scale"],
+      "kernel": ["linear", "poly", "rbf", "sigmoid"],
+      "degree": [3, 4, 5]
+    },
+    "rf":
+    {
+      "n_estimators": [10, 100, 1000, 5000],
+      "max_depth": [1, 2, 3, 4, 5],
+      "min_samples_split": [2, 5, 10],
+      "min_samples_leaf": [1, 2, 3, 4]
+    },
+    "gbm":
+    {
+      "loss": ["deviance", "exponential"],
+      "n_estimators": [10, 100, 1000, 5000],
+      "max_depth": [1, 2, 3, 4, 5],
+      "min_samples_split": [2, 5, 10],
+      "min_samples_leaf": [1, 2, 3, 4]
+    },
+    "knn":
+    {
+      "n_neighbors": [2, 5, 10, 30],
+      "weights": ["uniform", "distance"],
+      "leaf_size": [5, 10, 30],
+      "p": [1, 2]
+    }
+  },
+  "download":
+  {
+    "refseq_gtf": "https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/Homo_sapiens/latest_assembly_versions/GCF_000001405.39_GRCh38.p13/GCF_000001405.39_GRCh38.p13_genomic.gtf.gz",
+    "ensembl_genome": "http://ftp.ensembl.org/pub/release-101/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz",
+    "phastcons": "http://hgdownload.soe.ucsc.edu/goldenPath/hg38/phastCons100way/hg38.phastCons100way.bw",
+    "snodb": "ZENODO_LINK_TO_UPDATE",
+    "final_host_gene_list_v101": "ZENODO_LINK_TO_UPDATE",
+    "nmd_lykke_andersen_corrigendum": "ZENODO_LINK_TO_UPDATE",
+    "di_promoter_nepal": "ZENODO_LINK_TO_UPDATE",
+    "lnctard": "http://bio-bigdata.hrbmu.edu.cn/LncTarD/download/lncTarD.txt",
+    "forgi": "https://github.com/ViennaRNA/forgi.git"
+  },
+  "figures":
+  {
+    "bivariate_density": "results/figures/bivariate_density/",
+    "density": "results/figures/density/",
+    "density_split_sno_type": "results/figures/density/sno_type/",
+    "pairplot": "results/figures/pairplot/",
+    "bar": "results/figures/barplot/",
+    "bar_split_sno_type": "results/figures/barplot/sno_type/",
+    "donut": "results/figures/donut/",
+    "pie": "results/figures/pie/",
+    "roc": "results/figures/roc/",
+    "heatmap": "results/figures/heatmap/",
+    "summary_shap": "results/figures/summary_shap/",
+    "summary_shap_snotype": "results/figures/summary_shap_snotype/",
+    "summary_shap_hg_biotype": "results/figures/summary_shap_hg_biotype/",
+    "decision_plot": "results/figures/decision_plot/",
+    "decision_plot_FN": "results/figures/decision_plot/false_negatives/",
+    "decision_plot_FP": "results/figures/decision_plot/false_positives/",
+    "decision_plot_TP": "results/figures/decision_plot/true_positives/",
+    "decision_plot_TN": "results/figures/decision_plot/true_negatives/",
+    "decision_plot_FN_scale_after_split": "results/figures/decision_plot/scale_after_split/false_negatives/",
+    "decision_plot_FP_scale_after_split": "results/figures/decision_plot/scale_after_split/false_positives/",
+    "decision_plot_TP_scale_after_split": "results/figures/decision_plot/scale_after_split/true_positives/",
+    "decision_plot_TN_scale_after_split": "results/figures/decision_plot/scale_after_split/true_negatives/",
+    "upset": "results/figures/upset/",
+    "scatter": "results/figures/scatter/",
+    "violin": "results/figures/violin",
+    "pca": "results/figures/pca/",
+    "t_sne": "results/figures/t_sne/",
+    "forgi_structure": "results/figures/forgi_structure/"
+  },
+  "colors_complex":
+  {
+    "simple": "#737373",
+    "model_colors":
+    {
+      "log_reg" : "#1f77b4",
+      "svc" : "#ff7f0e",
+      "rf": "#2ca02c",
+      "gbm" : "#d62728",
+      "knn" : "#9467bd"
+    },
+    "sno_type":
+    {
+      "C/D": "#377eb8",
+      "H/ACA": "#e41a1c"
+    },
+    "terminal_stem_strength_cd":
+    {
+      "Strong": "#377eb8",
+      "Weak": "#a2bbdb"
+    },
+    "terminal_stem_strength_haca":
+    {
+      "Strong": "#e41a1c",
+      "Weak": "#ff907b"
+    },
+    "sno_target":
+    {
+      "Orphan": "#33a02c",
+      "rRNA": "#fec44f",
+      "snRNA": "#fb9a99"
+    },
+    "host_biotype2":
+    {
+      "intergenic": "#1b9e77",
+      "non_coding": "#e7298a",
+      "protein_coding": "#7570b3"
+    },
+    "host_function":
+    {
+      "functional_ncRNA": "#fb9a99",
+      "non_functional_ncRNA": "#e31a1c",
+      "Ribosomal protein": "#a6cee3",
+      "Ribosome biogenesis & translation": "#1f78b4",
+      "RNA binding, processing, splicing": "#b2df8a",
+      "Other": "#fdbf6f",
+      "Poorly characterized": "#ff7f00",
+      "intergenic": "#33a02c"
+    },
+    "NMD_susceptibility":
+    {
+      "True": "#000000",
+      "False": "#525252",
+      "intergenic": "#bdbdbd"
+    },
+    "di_promoter":
+    {
+      "dual_initiation": "#000000",
+      "simple_initiation": "#525252",
+      "intergenic": "#bdbdbd"
+    },
+    "label":
+    {
+      "expressed": "#f46d43",
+      "not_expressed": "#66c2a5"
+    },
+    "intergenic":
+    {
+      "intergenic": "#1b9e77",
+      "intronic": "#666666"
+    },
+    "abundance_cutoff":
+    {
+      "expressed": "#f46d43",
+      "not_expressed": "#66c2a5"
+    },
+    "abundance_cutoff_2":
+    {
+      "expressed": "#f46d43",
+      "not_expressed": "#66c2a5"
+    },
+    "abundance_cutoff_host":
+    {
+      "host_expressed": "#000000",
+      "host_not_expressed": "#525252",
+      "intergenic": "#bdbdbd"
+    },
+    "rank_top_features":
+    {
+      "1": "#4a1486",
+      "2": "#6a51a3",
+      "3": "#807dba",
+      "4": "#9e9ac8",
+      "5": "#dadaeb"
+    },
+    "intron_subgroup":
+    {
+      "long_intron": "#737373",
+      "small_intron": "#bdbdbd"
+    }
+  }
+}
