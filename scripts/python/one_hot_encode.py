@@ -50,4 +50,7 @@ final_df = pd.concat(dfs, axis=1)
 final_df = pd.concat([final_df, numerical_features_label], axis=1)
 final_df = final_df.set_index('gene_id_sno')
 
+# Remove duplicated columns to keep only one (e.g. 'intergenic', which is created 5 times when one-hot encoding host-related columns)
+final_df = final_df.loc[:,~final_df.columns.duplicated()]
+
 final_df.to_csv(snakemake.output.one_hot_encoded_df, sep='\t')

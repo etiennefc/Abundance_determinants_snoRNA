@@ -22,6 +22,8 @@ rule pie_labels:
         pie = os.path.join(config['figures']['pie'], 'abundance_status.svg')
     params:
         colors = config['colors_complex']['abundance_cutoff_2']
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/pie.py"
 
@@ -29,13 +31,15 @@ rule donut_labels_sno_type:
     """ Generate a donut chart of the number and % of expressed vs not expressed
         snoRNAs (outer donut) and per sno_type (inner donut)."""
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         donut = os.path.join(config['figures']['donut'],
                             'abundance_status_sno_type.svg')
     params:
         label_colors = config['colors_complex']['abundance_cutoff_2'],
         sno_type_colors = config['colors_complex']['sno_type']
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/donut_labels_sno_type.py"
 
@@ -43,13 +47,15 @@ rule donut_labels_host_biotype:
     """ Generate a donut chart of the number and % of expressed vs not expressed
         snoRNAs (outer donut) and per host biotype (inner donut)."""
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         donut = os.path.join(config['figures']['donut'],
                             'abundance_status_host_biotype.svg')
     params:
         label_colors = config['colors_complex']['abundance_cutoff_2'],
         host_biotype_colors = config['colors_complex']['host_biotype2']
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/donut_labels_host_biotype.py"
 
@@ -57,12 +63,14 @@ rule density_features_simple:
     """ Generate a simple density plot of the distribution for all numerical
         input features without any separation. """
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         density_features_simple = os.path.join(config['figures']['density'],
                                     '{numerical_features}.svg')
     params:
         simple_color = config['colors_complex']['simple']
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/density_features_simple.py"
 
@@ -71,12 +79,14 @@ rule density_features:
         features. The separation can be done on either the sno_type,
         abundance_cutoff or abundance_cutoff_2. """
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         density_features = os.path.join(config['figures']['density'],
                             '{numerical_features}_{feature_hue}.svg')
     params:
         hue_color = lambda wildcards: config['colors_complex'][wildcards.feature_hue]
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/density_features.py"
 
@@ -85,7 +95,7 @@ rule density_features_split:
         features by separating by sno_type and abundance_cutoff_2 (so 1 density
         plot for C/D and 1 for H/ACA per feature). """
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         density_features_cd = os.path.join(config['figures']['density_split_sno_type'],
                             '{numerical_features}_cd.svg'),
@@ -93,6 +103,8 @@ rule density_features_split:
                             '{numerical_features}_haca.svg')
     params:
         hue_color = config['colors_complex']['abundance_cutoff_2']
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/density_features_split.py"
 
@@ -101,7 +113,7 @@ rule density_normalized_mfe_split:
         by sno length by separating by sno_type and abundance_cutoff_2 (so 1
         density plot for C/D and 1 for H/ACA per feature)."""
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         density_features_cd = os.path.join(config['figures']['density_split_sno_type'],
                             'sno_mfe_length_normalized_cd.svg'),
@@ -109,24 +121,28 @@ rule density_normalized_mfe_split:
                             'sno_mfe_length_normalized_haca.svg')
     params:
         hue_color = config['colors_complex']['abundance_cutoff_2']
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/density_normalized_mfe_split.py"
 
-rule density_scaled_features_split:
-    """ Generate a density plot of the distribution for all SCALED numerical
-        features by separating by sno_type and abundance_cutoff_2 (so 1 density
-        plot for C/D and 1 for H/ACA per feature). """
-    input:
-        df = config['path']['scaled_feature_df']
-    output:
-        density_features_cd = os.path.join(config['figures']['density_split_sno_type'],
-                            '{numerical_features_scaled}_cd.svg'),
-        density_features_haca = os.path.join(config['figures']['density_split_sno_type'],
-                            '{numerical_features_scaled}_haca.svg')
-    params:
-        hue_color = config['colors_complex']['abundance_cutoff_2']
-    script:
-        "../scripts/python/graphs/density_scaled_features_split.py"
+#rule density_scaled_features_split:
+#    """ Generate a density plot of the distribution for all SCALED numerical
+#        features by separating by sno_type and abundance_cutoff_2 (so 1 density
+#        plot for C/D and 1 for H/ACA per feature). """
+#    input:
+#        df = ****scaled_feature_df scale after split, but which iteration of cv-train-test split?**** 
+#    output:
+#        density_features_cd = os.path.join(config['figures']['density_split_sno_type'],
+#                            '{numerical_features_scaled}_cd.svg'),
+#        density_features_haca = os.path.join(config['figures']['density_split_sno_type'],
+#                            '{numerical_features_scaled}_haca.svg')
+#    params:
+#        hue_color = config['colors_complex']['abundance_cutoff_2']
+#    conda:
+#        "../envs/python.yaml"	
+#    script:
+#        "../scripts/python/graphs/density_scaled_features_split.py"
 
 rule density_intron_groups_sno_type_features:
     """ Split intronic snoRNAs into small (<5000 nt) vs long (>=5000 nt) introns
@@ -134,7 +150,7 @@ rule density_intron_groups_sno_type_features:
         plot. The density plot shows the difference between expressed and not
         expressed snoRNAs across a variety of numerical features."""
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         density_small = os.path.join(config['figures']['density_split_sno_type'],
                             '{sno_type}_small_intron_{intron_group_feature}.svg'),
@@ -142,6 +158,8 @@ rule density_intron_groups_sno_type_features:
                             '{sno_type}_long_intron_{intron_group_feature}.svg')
     params:
         hue_color = config['colors_complex']['abundance_cutoff_2']
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/density_intron_groups_sno_type_features.py"
 
@@ -149,13 +167,15 @@ rule donut_labels_intron_subgroup:
     """ Create a donut chart of the expressed and not expressed snoRNAs (inner
         donut) per intron length subgroup."""
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         donut = os.path.join(config['figures']['donut'],
                             'abundance_status_intron_subgroup.svg')
     params:
         label_colors = config['colors_complex']['abundance_cutoff_2'],
         intron_subgroup_colors = config['colors_complex']['intron_subgroup']
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/donut_labels_intron_subgroup.py"
 
@@ -165,7 +185,7 @@ rule pairplot_features:
         abundance_cutoff_2. Generate also the same pair plot, but for either C/D
         or H/ACA snoRNAs separately."""
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         pairplot = os.path.join(config['figures']['pairplot'],
                             'numerical_features.svg'),
@@ -175,6 +195,8 @@ rule pairplot_features:
                             'numerical_features_haca.svg')
     params:
         hue_color = config['colors_complex']['abundance_cutoff_2']
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/pairplot_numerical.py"
 
@@ -183,7 +205,7 @@ rule bar_categorical_features:
         (abundance_cutoff_2) for the categorical features. Generate also the
         same bar graph but separately for C/D and H/ACA snoRNAs."""
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         bar_categorical_features = os.path.join(config['figures']['bar'],
                             '{categorical_features}.svg'),
@@ -193,6 +215,8 @@ rule bar_categorical_features:
                             '{categorical_features}_haca.svg')
     params:
         hue_color = lambda wildcards: config['colors_complex'][wildcards.categorical_features]
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/bar_categorical.py"
 
@@ -202,7 +226,7 @@ rule bar_large_scale_features:
         with a hue of expressed vs non_expressed snoRNAs (abundance_cutoff_2)
         (and one graph per snoRNA type)."""
     input:
-        df = config['path']['feature_df']
+        df = rules.merge_feature_df.output.feature_df
     output:
         bar_cd = os.path.join(config['figures']['bar_split_sno_type'],
                         '{intronic_features}_cd.svg'),
@@ -210,5 +234,7 @@ rule bar_large_scale_features:
                             '{intronic_features}_haca.svg')
     params:
         hue_color = config['colors_complex']['abundance_cutoff_2']
+    conda:
+        "../envs/python.yaml"	
     script:
         "../scripts/python/graphs/bar_intronic_features.py"

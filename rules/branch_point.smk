@@ -24,7 +24,7 @@ rule branch_point:
         transcript_id_df = rules.sno_exon_location.output.output_table,
         hg_gtf = rules.generate_HG_gtf.output.hg_gtf,
         bedtools_dir = rules.find_bedtools_dir.output.bedtools_dir,
-        genome = rules.ensembl_genome.output.genome  #works with original downloaded fasta, did not test with modified fasta where "chr" is added after the ">"
+        genome = rules.ensembl_genome.output.genome  
     output:
         bp_window_table = config['path']['bp_window_table'],
         bp_distance = config['path']['bp_distance']

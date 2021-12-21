@@ -1,6 +1,6 @@
 import os
 
-
+### Remove fill_na_feature_scaling, one_hot_encode, fill_na_feature_scaling_after_split
 
 rule fill_na_feature_scaling:
     """ Fill NA values across columns in the feature df, fixing them at -5
@@ -34,9 +34,10 @@ rule one_hot_encode:
 
 rule one_hot_encode_before_split:
     """ One-hot encode categorical features in the feature df (using
-        OneHotEncoder) and also label-encode labels."""
+        OneHotEncoder) and also label-encode labels BEFORE splitting into
+        cv/train/test sets."""
     input:
-        feature_df = config['path']['feature_df']
+        feature_df = rules.merge_feature_df.output.feature_df
     output:
         one_hot_encoded_df = config['path']['one_hot_encoded_df_before_split']
     conda:

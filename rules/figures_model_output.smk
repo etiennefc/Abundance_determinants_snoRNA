@@ -7,6 +7,22 @@ include: "cv_train_test_one_feature.smk"
 include: "cv_train_test_scale_after_split.smk"
 include: "terminal_stem.smk"
 include: "structure.smk"
+include: "cv_train_test_10_iterations.smk"
+
+
+rule modify_shap:
+    """ Modify SHAP summary plot script (within _beewswarm.py) so that it sorts
+        features vertically according to the median of abs(shap_values) and not
+        by sum of shap_values."""
+    output:
+        fake_log = "log/modify_shap.log"
+    params:
+        path = config['path']['shap_path']
+    shell:
+        "mkdir -p log/ &&"
+        "sed -i -E 's/np.sum\(np.abs/np.median\(np.abs/g' {params.path} && "
+        "sed -i -E 's/global_shap_values = np.abs\(shap_values\).mean\(0\)/global_shap_values = np.median\(np.abs\(shap_values\), axis=0\)/g' {params.path}"
+        "&> {output.fake_log}"
 
 rule create_local_env_2:
     """ Import matplotlib, seaborn, sklearn, shap in local snakemake
@@ -47,6 +63,53 @@ rule scatter_accuracies:
             colors = config['colors_complex']['model_colors']
         script:
             "../scripts/python/graphs/scatter_accuracies.py"
+
+rule scatter_accuracies_10_iterations:
+    """ Generate a connected scatter plot for each model to show their accuracy
+        of prediction on the CV, training and test sets to highlight possible
+        overfitting. Show the average accuracy plus std deviation across all 10
+        iterations."""
+        input:
+            cv_accuracy = expand(rules.hyperparameter_tuning_cv_scale_after_split_10_iterations.output.best_hyperparameters, **config),
+            training_accuracy = expand(rules.train_models_scale_after_split_10_iterations.output.training_accuracy, **config),
+            test_accuracy = expand(rules.test_models_scale_after_split_10_iterations.output.test_accuracy, **config)
+        output:
+            scatter = os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_10_iterations.svg')
+        conda:
+            "../envs/python.yaml"
+        params:
+            colors = config['colors_complex']['model_colors']
+        script:
+            "../scripts/python/graphs/scatter_accuracies_10_iterations.py"
+
+rule scatter_accuracies_20_iterations:
+    """ Generate a connected scatter plot for each model to show their accuracy
+        of prediction on the CV, training and test sets to highlight possible
+        overfitting. Show the average accuracy plus std deviation across all 20
+        iterations."""
+        input:
+            cv_accuracy = expand(os.path.join(config['path']['hyperparameter_tuning'],
+                                    '{mod}_best_params_scale_after_split_{iteration_20}.tsv'),
+                                    mod=['log_reg', 'svc', 'rf', 'gbm', 'knn'],
+                                    iteration_20=config['iteration_20']),
+            training_accuracy = expand(os.path.join(config['path']['training_accuracy'],
+                                    '{mod}_training_accuracy_scale_after_split_{iteration_20}.tsv'),
+                                    mod=['log_reg', 'svc', 'rf', 'gbm', 'knn'],
+                                    iteration_20=config['iteration_20']),
+            test_accuracy = expand(os.path.join(config['path']['test_accuracy'],
+                                    '{mod}_test_accuracy_scale_after_split_{iteration_20}.tsv'),
+                                    mod=['log_reg', 'svc', 'rf', 'gbm', 'knn'],
+                                    iteration_20=config['iteration_20']),
+        output:
+            scatter = os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_20_iterations.svg')
+        conda:
+            "../envs/python.yaml"
+        params:
+            colors = config['colors_complex']['model_colors']
+        script:
+            "../scripts/python/graphs/scatter_accuracies_20_iterations.py"
 
 rule roc_curve:
     """ Generate a roc curve for each trained model based on their performance
@@ -206,6 +269,26 @@ rule shap_global_snotype_scale_after_split:
     script:
         "../scripts/python/graphs/summary_shap_snotype_scale_after_split.py"
 
+rule shap_global_snotype_scale_after_split_10_iterations:
+    """ Generate a summary plot based on SHAP values (Shapley additive
+        explanations) for each model explaining the effect of all features on
+        the prediction of either C/D or H/ACA snoRNA abundance status in the
+        test set across 10 iterations combined."""
+    input:
+        fake_log = "log/modify_shap.log",
+        X_train = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.train, **config),
+        X_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.test, **config),
+        df = rules.merge_feature_df.output.feature_df,
+        pickled_trained_model = expand(rules.train_models_scale_after_split_10_iterations.output.pickled_trained_model,
+                                    iteration=config['iteration'], models2=config['models3'], allow_missing=True)
+    output:
+        summary_plot = os.path.join(config['figures']['summary_shap_snotype'],
+                        '{models3}_{sno_type}_test_set_100_background_scale_after_split_10_iterations.svg')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/summary_shap_snotype_scale_after_split_10_iterations.py"
+
 rule shap_global_hg_biotype:
     """ Generate a summary plot based on SHAP values (Shapley additive
         explanations) for each model explaining the effect of all features on
@@ -278,6 +361,27 @@ rule global_bar_plot_scale_after_split:
     script:
         "../scripts/python/graphs/global_shap_bar_plot_scale_after_split.py"
 
+rule bar_shap_global_snotype_scale_after_split_10_iterations:
+    """ Generate a summary plot based on SHAP values (Shapley additive
+        explanations) for each model explaining the effect of all features on
+        the prediction of either C/D or H/ACA snoRNA abundance status in the
+        test set across 10 iterations combined."""
+    input:
+        fake_log = "log/modify_shap.log",
+        X_train = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.train, **config),
+        X_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.test, **config),
+        df = rules.merge_feature_df.output.feature_df,
+        pickled_trained_model = expand(rules.train_models_scale_after_split_10_iterations.output.pickled_trained_model,
+                                    iteration=config['iteration'], models2=config['models3'], allow_missing=True)
+    output:
+        summary_plot = os.path.join(config['figures']['bar'],
+                        '{models3}_{sno_type}_test_set_100_background_scale_after_split_10_iterations.svg')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/bar_summary_shap_snotype_scale_after_split_10_iterations.py"
+
+
 rule upset_models_confusion:
     """ Create an upset plot per confusion matrix value (TN, FN, FP and TP) to
         compare the number of common snoRNAs (mis)classified by each model.
@@ -318,6 +422,29 @@ rule upset_models_confusion_scale_after_split:
     script:
         "../scripts/python/graphs/upset_per_confusion_value.py"
 
+rule upset_models_confusion_scale_after_split_10_iterations:
+    """ Create an upset plot per confusion matrix value (TN, FN, FP and TP) to
+        compare the number of common snoRNAs (mis)classified by each model.
+        Return also a merged df of all confusion matrices values (for all models
+        in one df) (output hardcoded within script). RF is excluded due to overfitting."""
+    input:
+        log_reg = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.confusion_matrix,
+                        iteration=config['iteration'], models2='log_reg', allow_missing=True),
+        svc = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.confusion_matrix,
+                        iteration=config['iteration'], models2='svc', allow_missing=True),
+        rf = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.confusion_matrix,
+                        iteration=config['iteration'], models2='rf', allow_missing=True)
+    params:
+        df_output_path = expand("results/tables/confusion_matrix_f1/merged_confusion_matrix_{iteration}.tsv",
+                                iteration=config['iteration'])
+    output:
+        upset = os.path.join(config['figures']['upset'],
+                        '{confusion_value}_all_models_scale_after_split_10_iterations.svg')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/upset_per_confusion_value_10_iterations.py"
+
 rule upset_top_features_df:
     """ Create a dataframe containing the top 5 features (their name, rank and
         feature_importance) of all four models (not RF because it overfits)."""
@@ -344,11 +471,43 @@ rule all_feature_rank_df:
                                     'log_reg_trained_scale_after_split.sav'),
         other_model = expand(os.path.join(config['path']['trained_models'],
                                     '{mod}_trained_scale_after_split.sav'),
-                                    mod = ['svc', 'gbm', 'knn']),
+                                    mod = ['svc', 'gbm', 'knn'])
     output:
         rank_features_df = config['path']['all_feature_rank_df']
     script:
         "../scripts/python/all_feature_rank_df.py"
+
+rule all_feature_rank_df_10_iterations:
+    """ Create a dataframe containing the rank of importance for each feature
+        and per model for all 10 iterations."""
+    input:
+        X_train = rules.fill_na_feature_scaling_after_split_10_iterations.output.train,
+        X_test = rules.fill_na_feature_scaling_after_split_10_iterations.output.test,
+        log_reg = expand(rules.train_models_scale_after_split_10_iterations.output.pickled_trained_model,
+                                    models2='log_reg', allow_missing=True),
+        svc = expand(rules.train_models_scale_after_split_10_iterations.output.pickled_trained_model,
+                                    models2='svc', allow_missing=True),
+        rf = expand(rules.train_models_scale_after_split_10_iterations.output.pickled_trained_model,
+                                    models2='rf', allow_missing=True)
+    output:
+        rank_features_df = "results/tables/all_features_rank_across_models_{iteration}.tsv"
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/all_feature_rank_df_10_iterations.py"
+
+rule concat_feature_rank_iterations_df:
+    """ Concat all dfs produced by the all_feature_rank_df_10_iterations rule
+        into one df containing all iterations."""
+    input:
+        dfs = expand(rules.all_feature_rank_df_10_iterations.output.rank_features_df,
+                    iteration=config['iteration'])
+    output:
+        concat_df = config['path']['all_feature_rank_df_10_iterations']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/concat_feature_rank_iterations_df.py"
 
 rule violin_feature_rank:
     """ Create a violin plot where each violin on the x axis corresponds to one
@@ -362,6 +521,21 @@ rule violin_feature_rank:
         model_colors = config['colors_complex']['model_colors']
     script:
         "../scripts/python/graphs/violin_feature_rank.py"
+
+rule violin_feature_rank_10_iterations:
+    """ Create a violin plot where each violin on the x axis corresponds to one
+        feature and where the distribution of ranks (across 3 models and their
+        10 respective iterations) is represented on the y axis."""
+    input:
+        rank_features_df = rules.concat_feature_rank_iterations_df.output.concat_df
+    output:
+        violin = os.path.join(config['figures']['violin'], 'ranks_per_feature_10_iterations.svg')
+    params:
+        model_colors = config['colors_complex']['model_colors']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/violin_feature_rank_10_iterations.py"
 
 rule pairplot_top_5:
     """ Create a pairplot per snoRNA type to show the dependence between the top

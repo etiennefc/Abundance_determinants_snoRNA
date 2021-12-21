@@ -17,7 +17,7 @@ sno_info_df = pd.read_csv(snakemake.input.snodb_info, sep='\t')
 sno_type_dict = sno_info_df.set_index('gene_id_sno')['sno_type'].to_dict()
 
 # Get 15 nt flanking regions upstream and downstream of C/D and H/ACA snoRNAs
-# The .saveas() is needed to create a temporary version of the object since it's used afeterwards (otherwise, it does not work)
+# The .saveas() is needed to create a temporary version of the object since it's used afterwards (otherwise, it does not work)
 flanking = all_sno_bed.flank(genome="hg38", b=15) #this is a bedtools object
 cd_flank = BedTool(line for line in flanking if sno_type_dict[line[3]] == 'C/D').saveas()  # where line[3] corresponds to the gene_id
 haca_flank = BedTool(line for line in flanking if sno_type_dict[line[3]] == 'H/ACA').saveas()  # where line[3] corresponds to the gene_id

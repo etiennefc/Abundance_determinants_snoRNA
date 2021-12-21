@@ -11,7 +11,7 @@ rule flank_extend_snoRNA:
         H/ACA box snoRNAs."""
     input:
         all_sno_bed = rules.gtf_to_bed.output.all_sno_bed,
-        snodb_info = config['path']['snodb_formatted']
+        snodb_info = rules.format_snodb.output.snodb_formatted
     output:
         flanking_cd_left = config['path']['flanking_regions_cd_left'],
         flanking_cd_right = config['path']['flanking_regions_cd_right'],

@@ -1,15 +1,17 @@
 #!/usr/bin/python3
 import pandas as pd
+import numpy as np
 
 """ Generate a merged dataframe of all snoRNA features and labels that will be
     used by the predictor. The labels are 'expressed' or 'not_expressed' using
     the column 'abundance_cutoff_2'. The features are: snoRNA length, type,
     target, host gene (HG) biotype and function, HG NMD susceptibility, HG
-    promoter type, intron number and length in which the snoRNA is encoded,
-    snoRNA distance to upstream and downstream exons, snoRNA distance to
-    predicted branch_point, snoRNA structure stability (Minimal Free Energy or
-    MFE), snoRNA terminal stem stability (MFE) and snoRNA terminal stem length
-    score. """
+    promoter type, intron rank (from 5', 3' and relative to the total number of
+    intron) and length in which the snoRNA is encoded, total number of intron of
+    the snoRNA's HG, snoRNA distance to upstream and downstream exons, snoRNA
+    distance to predicted branch_point, snoRNA structure stability (Minimal Free
+    Energy or MFE), snoRNA terminal stem stability (MFE) and snoRNA terminal
+    stem length score. """
 
 # Labels (abundance_cutoff and abundance_cutoff_2); feature abundance_cutoff_host
 tpm_df_labels = pd.read_csv(snakemake.input.abundance_cutoff, sep='\t')
@@ -22,9 +24,6 @@ sno_length = pd.read_csv(snakemake.input.sno_length, sep='\t',
 snodb_nmd_di_promoters = pd.read_csv(snakemake.input.snodb_nmd_di_promoters, sep='\t')
 snodb_nmd_di_promoters = snodb_nmd_di_promoters[['gene_id_sno', 'sno_type', 'sno_target',
                             'host_biotype2', 'NMD_susceptibility', 'di_promoter', 'host_function']]
-location_bp = pd.read_csv(snakemake.input.location_and_branchpoint, sep='\t')
-location_bp = location_bp[['gene_id_sno', 'intron_number', 'intron_length',
-                        'distance_upstream_exon', 'distance_downstream_exon', 'dist_to_bp']]
 sno_mfe = pd.read_csv(snakemake.input.sno_structure_mfe, sep='\t',
             names=['gene_id_sno', 'sno_mfe'])
 terminal_stem_mfe = pd.read_csv(snakemake.input.terminal_stem_mfe, sep='\t',
@@ -34,8 +33,23 @@ terminal_stem_length_score = pd.read_csv(snakemake.input.terminal_stem_length_sc
 conservation = pd.read_csv(snakemake.input.sno_conservation, sep='\t')
 conservation.columns = ['gene_id_sno', 'conservation_score']
 
+# Get sno location within intron (distances to branchpoint and to up/downstream exons)
+location_bp = pd.read_csv(snakemake.input.location_and_branchpoint, sep='\t')
+location_bp = location_bp[['gene_id_sno', 'intron_number', 'intron_length', 'exon_number_per_hg',
+                        'distance_upstream_exon', 'distance_downstream_exon', 'dist_to_bp']]
+# Change 'intron_number' col for 'intron_rank_5prime' (i.e. a better name) and compute actual total number of introns
+# Compute also intron rank but counting from the 3' ('intron_rank_3prime') and relative_intron_rank (intron_rank_5prime / intron_number)
+location_bp = location_bp.rename(columns={"intron_number": "intron_rank_5prime"})
+location_bp['total_intron_number'] = location_bp['exon_number_per_hg'] - 1
+location_bp['intron_rank_3prime'] = location_bp['exon_number_per_hg'] - location_bp['intron_rank_5prime']
+location_bp.loc[location_bp['intron_rank_5prime'] == 0, 'intron_rank_3prime'] = 0  # patch for snoRNAs encoded (completely or with an overlap) within an exon of a HG
+location_bp['relative_intron_rank'] = location_bp['intron_rank_3prime'] / location_bp['total_intron_number']
+location_bp = location_bp.replace(np.inf, 0)  # replace relative_intron_rank to 0 when total_intron_number is equal to  0
+location_bp = location_bp.drop(columns=['exon_number_per_hg'])
+
+
 # Merge iteratively all of these dataframes
-df_list  = [tpm_df_labels, sno_length, conservation, snodb_nmd_di_promoters,
+df_list = [tpm_df_labels, sno_length, conservation, snodb_nmd_di_promoters,
             location_bp, sno_mfe, terminal_stem_mfe, terminal_stem_length_score]
 df_label = df_list[0]
 temp = [df_label]

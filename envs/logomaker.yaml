@@ -1,0 +1,10 @@
+channels:
+  - default
+  - bioconda
+  - conda-forge
+dependencies:
+  - python = 3.6.13
+  - matplotlib = 3.3.4
+  - pandas = 1.1.5
+  - numpy = 1.19.5
+  - logomaker = 0.8

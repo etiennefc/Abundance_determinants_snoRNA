@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.patches as mpatches
-from matplotlib_venn import venn2
 import numpy as np
 from sklearn import metrics
 
@@ -198,20 +197,6 @@ def pairplot(df, hue, hue_color_dict, path, **kwargs):
     plt.savefig(path, bbox_inches='tight', dpi=500)
 
 
-def venn(set1, set2, labels, title, path, **kwargs):
-    """
-    Creates a Venn diagram of two sets.
-    """
-    plt.rcParams['svg.fonttype'] = 'none'
-    ax = venn2([set(set1), set(set2)], set_labels = labels, **kwargs)
-    ax.get_label_by_id('A').set_x(-0.65)
-    ax.get_label_by_id('A').set_y(0.05)
-    ax.get_label_by_id('B').set_x(0.65)
-    ax.get_label_by_id('B').set_y(0.05)
-    plt.title(title)
-    plt.savefig(path, dpi=600, bbox_inches='tight')
-
-
 def scatter(df, x_col, y_col, hue_col, xlabel, ylabel, title, color_dict, path,
             **kwargs):
     """
@@ -333,23 +318,69 @@ def connected_scatter(df, df_hue, hue_col, colors, col_name_for_x_axis,
     plt.savefig(path, bbox_inches='tight', dpi=600)
 
 
+def connected_scatter_errbars(df, df_hue, hue_col, color_dict, col_name_for_x_axis, stdev,
+                        xticklabels, xlabel, ylabel, path, **kwargs):
+    """
+    Creates a connected scatter plot with multiple lines and error bars. The input
+    df must be of the following form: a number of lines that correspond to the
+    number of gene/model; each line is composed of multiple columns where each column
+    corresponds to a categorical value on the x axis (ex: type of dataset (cv,
+    train, test)); each line must have a different index (ex: one line per model).
+    To create a graph without a hue, you must also create a hue_col but with the
+    same value for each line and report only one color.
+    """
+    # Format the input df so that it is in the good orientation
+    # Add also a 'col_name_for_x_axis' column which will correspond to the x axis values
+    transposed_df = df.transpose()
+    transposed_df[col_name_for_x_axis] = transposed_df.index
+
+
+
+
+    print(transposed_df)
+    print(stdev)
+    # Create one line at the time by enumerating across columns
+    rc = {'ytick.labelsize': 30, 'xtick.labelsize': 30}
+    plt.rcParams.update(**rc)
+    plt.rcParams['svg.fonttype'] = 'none'
+
+    fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+    ax.set_xticklabels(xticklabels)
+
+    for i, id in enumerate(transposed_df.iloc[:, :-1].columns):
+        sns.lineplot(data=transposed_df, x=col_name_for_x_axis, y=id, marker='o',
+                    markeredgecolor=color_dict[id], markerfacecolor=color_dict[id],
+                    color=color_dict[id], sort=False, markersize=10, **kwargs)
+        ax.errorbar(transposed_df[col_name_for_x_axis], transposed_df[id],
+                    [dictio[id] for dictio in stdev], capsize=20, color=color_dict[id])
+    ax.set_xlabel(xlabel, fontsize=35)
+    ax.set_ylabel(ylabel, fontsize=35)
+    ax.set_ylim(0.75, 1.025)
+    legend_list = []
+    for i, crit in enumerate(color_dict.keys()):
+        legend_element = mpatches.Patch(color=color_dict[crit], label=crit)
+        legend_list.append(legend_element)
+    ax.legend(handles=legend_list, loc='upper right', bbox_to_anchor=(0.3, 1), fontsize=25)
+
+    plt.savefig(path, bbox_inches='tight', dpi=600)
+
+
 def violin(df, x_col, y_col, hue_violin, hue_swarm, xlabel, ylabel, title, violin_colors, swarm_colors, path, **kwargs):
     """
     Create a violin plot.
     """
-    rc={'ytick.labelsize': 30, 'xtick.labelsize': 30, 'legend.fontsize':12,
-        'axes.titlesize': 20, 'axes.labelsize': 20}
+    rc={'ytick.labelsize': 30, 'xtick.labelsize': 25, 'legend.fontsize':25}
     plt.rcParams.update(**rc)
     plt.rcParams['svg.fonttype'] = 'none'
     sns.set_context(rc=rc)
 
     fig, ax = plt.subplots(figsize=(22, 8))
     ax = sns.violinplot(data=df, x=x_col, y=y_col, hue=hue_violin, palette=violin_colors, scale='count', cut=0, **kwargs)
-    ax = sns.swarmplot(data=df, x=x_col, y=y_col, hue=hue_swarm, palette=swarm_colors, alpha=0.3, **kwargs)
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
+    ax = sns.swarmplot(data=df, x=x_col, y=y_col, hue=hue_swarm, palette=swarm_colors, alpha=0.7, **kwargs)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
     plt.title(title)
-    plt.xlabel(xlabel, fontsize=35)
-    plt.ylabel(ylabel, fontsize=35)
+    plt.xlabel(xlabel, fontsize=40)
+    plt.ylabel(ylabel, fontsize=40)
 
     plt.savefig(path, bbox_inches='tight', dpi=600)
 
@@ -454,6 +485,94 @@ def simple_bar(values, x_tick_labels, title, xlabel, ylabel, path, **kwargs):
     plt.xlabel(xlabel, fontsize=40)
     plt.ylabel(ylabel, fontsize=40)
     plt.bar([x for x in range(len(values))], values, **kwargs)
+    plt.savefig(path, bbox_inches='tight', dpi=600)
+
+
+def upset_avg_3_cat(sorted_val_vertical_bars, sorted_stdev_vertical_bars,
+                    avg_nb, stdev_nb, names, values, vlines_pos, ymins, ymaxs,
+                    ylabel_vertical_bars, xlabel_horizontal_bars,
+                    ytick_labels_scatter, optional_annot, path, **kwargs):
+    """
+    Create an upset plot with 3 different categories (ex: 3 models) of average
+    values (+- stdev) across iterations of these models (not a real upset plot
+    per se, since we feed directly the average intersections). The upset plot is
+    composed of a vertical bar chart (showing the average size of intersection),
+    a scatter plot (under the vertical bar chart, showing what are the
+    intersection categories) and a horizontal bar chart showing the average
+    number (+- stdev) of items within the 3 different categories.
+    **sorted_val_vertical_bars: list of decreasing average values used for the vertical bar chart
+    **sorted_stdev_vertical_bars: same as sorted_val_vertical_bars, but standard
+                                deviation (across iterations), not the averages
+    **avg_nb: list of average values used for the horizontal bar chart (ordered from bottom to top)
+    **stdev_nb: same as avg_nb but standard deviation (across iterations), not the averages
+    **names: list of all possible x values on the vertical bar chart (ex: TP_TP_TP, TP_FN_TP, ...)
+            (the order of the three elements is highly important, as the 1st element
+            is for log_reg, the 2nd for svc and the 3rd for rf)
+    **values: list of corresponding values (for items in names) on the y axis in
+            the scatter plot (ex: y=0 for rf, y=1 for svc and y=2 for log_reg)
+    **vlines_pos: list of position of each vertical line on the scatter plot
+    **ymins and ymaxs: list of minimal or maximal values for each vertical line
+                    on the scatter plot (values are either 0, 2 or 2)
+    **ylabel_vertical_bars: ylabel for vertical bar chart
+    **xlabel_horizontal_bars: xlabel for horizontal bar chart
+    **ytick_labels_scatter: list of y tick labels (from top to bottom) of the scatter
+                            plot (ex: ['rf', 'svc', 'log_reg'])
+    """
+    plt.rcParams['svg.fonttype'] = 'none'
+    fig, ax = plt.subplots(2, 2, gridspec_kw={'height_ratios': [2, 1], 'width_ratios': [1, 5]})
+    fig.tight_layout()
+    plt.subplots_adjust(hspace=0.1, wspace=0.7)
+    ax[0, 0].axis('off')
+
+    # Add optional annotation in the first quadrant (ex: "True negatives")
+    ax[0, 0].text(0.5, 0.5, optional_annot, fontsize=25)
+
+    # Create vertical bar chart
+    ax[0, 1].bar([x for x in range(len(sorted_val_vertical_bars))],
+                [val[1] for val in sorted_val_vertical_bars],
+                yerr=[val[1] for val in sorted_stdev_vertical_bars], capsize=10,
+                color='black')
+    ax[0, 1].set_ylabel(ylabel_vertical_bars)
+
+    ## Create scatter with vertical lines linking between vertical dots
+    # First, add grey dots for all possible values as background
+    ax[1, 1].scatter(list(np.repeat([x for x in range(len(sorted_val_vertical_bars))],
+                    len(avg_nb))), [x for x in range(len(avg_nb))] * len(sorted_val_vertical_bars),
+                    color='lightgrey', s=75, clip_on=False)
+    # Second, add black dots for actual existing values
+    ax[1, 1].scatter(names, values, color='black', s=75, clip_on=False)
+    # Third, add vertical lines
+    ax[1, 1].vlines(vlines_pos, ymins, ymaxs, color='black')
+
+    # Remove/modify ticks and spines for subplots in the upset plot
+    ax[0, 1].xaxis.set_tick_params(width=0)
+    ax[1, 1].xaxis.set_tick_params(width=0)
+    ax[1, 1].yaxis.set_tick_params(width=0)
+    ax[1, 0].yaxis.set_tick_params(width=0)
+    ax[1, 0].spines['right'].set_color("lightgrey")
+    ax[1, 0].spines['left'].set_linewidth(0)
+    ax[1, 0].spines['top'].set_linewidth(0)
+    ax[0, 1].spines['right'].set_linewidth(0)
+    ax[0, 1].spines['bottom'].set_linewidth(0)
+    ax[0, 1].spines['top'].set_linewidth(0)
+    ax[1, 1].spines['top'].set_linewidth(0)
+    ax[1, 1].spines['bottom'].set_linewidth(0)
+    ax[1, 1].spines['right'].set_linewidth(0)
+    ax[1, 1].spines['left'].set_linewidth(0)
+
+    # Create horizontal bar chart
+    ax[1, 0].barh(np.arange(len(avg_nb)), avg_nb, xerr=stdev_nb, capsize=5,
+                    color="black", height=0.5)
+    ax[1, 0].set_xlabel(xlabel_horizontal_bars)
+    ax[1, 0].invert_xaxis()
+    ax[1, 0].sharey(ax[1, 1])
+    ax[0, 1].sharex(ax[1, 1])
+    ax[1, 1].set_xticklabels(['']*len(sorted_val_vertical_bars))
+    ytick_labels_scatter.insert(0, "")
+    ytick_labels_scatter.append("")
+    ax[1, 1].set_yticklabels(ytick_labels_scatter)
+    plt.setp(ax[1, 0].get_yticklabels(), visible=False)
+
     plt.savefig(path, bbox_inches='tight', dpi=600)
 
 

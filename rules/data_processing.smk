@@ -60,6 +60,18 @@ rule abundance_cutoff:
     script:
         "../scripts/python/abundance_cutoff.py"
 
+rule abundance_cutoff_all_biotypes:
+    """ Define a cutoff to classify all types of RNA as 'expressed' or
+        'not_expressed' across tissues."""
+    input:
+        tpm_df = rules.add_gene_biotype.output.tpm_biotype
+    output:
+        abundance_cutoff_df = config['path']['all_RNA_biotypes_tpm_df_cutoff']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/abundance_cutoff_all_biotypes.py"    
+
 rule generate_HG_gtf:
     """ Generate a gtf containing only the host genes (including SNHG14) from a
         complete gtf. The SNHG14 gtf is generate via the rule refseq_gtf."""
@@ -87,7 +99,7 @@ rule gtf_to_bed:
         """awk -v OFS='\t' 'NR>6 {{print $1, $4, $5, "to_remove"$10"to_remove", $6, $7, $2, $3, $8, "to_delete"$0}}' {input.gtf} | """
         """sed -E 's/to_remove"//g; s/";to_remove//g; s/to_delete.*gene_id/gene_id/g' | """
         """sort -n -k1,1 -k2,2 > {output.gtf_bed} && """
-        """awk '$8=="gene" {{print $0}}' {output.gtf_bed}  | grep snoRNA > {output.all_sno_bed}"""
+        """awk '$8=="gene" {{print $0}}' {output.gtf_bed}  | grep snoRNA | sed 's/\t$//g; s/^/chr/g' | sort -k1,1 -k2,2n > {output.all_sno_bed}"""
 
 rule HG_gtf_to_bed:
     """ Convert a HG gtf into a bed format."""
