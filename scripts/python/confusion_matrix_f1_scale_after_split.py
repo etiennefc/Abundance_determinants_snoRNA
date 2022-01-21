@@ -15,7 +15,7 @@ y_test.index = X_test.index  # set gene_id_sno as index
 # Unpickle and thus instantiate the trained model defined by the 'models' wildcard
 model = pickle.load(open(snakemake.input.pickled_trained_model, 'rb'))
 
-# Predict label (expressed (1) or not_expressed (1)) on test data and compare to y_test
+# Predict label (expressed (1) or not_expressed (0)) on test data and compare to y_test
 y_pred = model.predict(X_test)
 
 # Compute the confusion matrix (where T:True, F:False, P:Positive, N:Negative)

@@ -10,8 +10,9 @@ import numpy as np
     intron) and length in which the snoRNA is encoded, total number of intron of
     the snoRNA's HG, snoRNA distance to upstream and downstream exons, snoRNA
     distance to predicted branch_point, snoRNA structure stability (Minimal Free
-    Energy or MFE), snoRNA terminal stem stability (MFE) and snoRNA terminal
-    stem length score. """
+    Energy or MFE), snoRNA terminal stem stability (MFE), snoRNA terminal
+    stem length score, snoRNA conservation and hamming_distance_box (per box or
+    global hamming distance). """
 
 # Labels (abundance_cutoff and abundance_cutoff_2); feature abundance_cutoff_host
 tpm_df_labels = pd.read_csv(snakemake.input.abundance_cutoff, sep='\t')
@@ -33,6 +34,11 @@ terminal_stem_length_score = pd.read_csv(snakemake.input.terminal_stem_length_sc
 conservation = pd.read_csv(snakemake.input.sno_conservation, sep='\t')
 conservation.columns = ['gene_id_sno', 'conservation_score']
 
+hamming = pd.read_csv(snakemake.input.hamming_distance_box, sep='\t')
+#hamming = hamming[['gene_id', 'C_hamming', 'D_hamming', 'C_prime_hamming', 'D_prime_hamming', 'H_hamming', 'ACA_hamming']]  # get hamming distance per box only (not combined)
+hamming = hamming[['gene_id', 'combined_box_hamming']]  # get combined hamming distance for all boxes in a snoRNA
+hamming = hamming.rename(columns={'gene_id': 'gene_id_sno'})
+
 # Get sno location within intron (distances to branchpoint and to up/downstream exons)
 location_bp = pd.read_csv(snakemake.input.location_and_branchpoint, sep='\t')
 location_bp = location_bp[['gene_id_sno', 'intron_number', 'intron_length', 'exon_number_per_hg',
@@ -49,8 +55,11 @@ location_bp = location_bp.drop(columns=['exon_number_per_hg'])
 
 
 # Merge iteratively all of these dataframes
-df_list = [tpm_df_labels, sno_length, conservation, snodb_nmd_di_promoters,
+#df_list = [tpm_df_labels, sno_length, conservation, hamming, snodb_nmd_di_promoters,
+ #           location_bp, sno_mfe, terminal_stem_mfe, terminal_stem_length_score]
+df_list = [tpm_df_labels, sno_length, hamming, snodb_nmd_di_promoters,
             location_bp, sno_mfe, terminal_stem_mfe, terminal_stem_length_score]
+
 df_label = df_list[0]
 temp = [df_label]
 for i, df in enumerate(df_list[1:]):

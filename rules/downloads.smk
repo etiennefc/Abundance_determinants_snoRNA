@@ -75,3 +75,21 @@ rule forgi_viennrna_download:
         forgi_log = "log/forgi.log"
     shell:
         "pip install --upgrade forgi &> {output.forgi_log}"
+
+rule eclip_encode_download:
+    """ Download the eCLIP-Seq datasets for the TARDBP RNA binding protein.
+        Convert the bigBed into a bed file."""
+    output:
+        bed_file_1 = config['path']['TARDBP_rep1_eclip_bed'],
+        bed_file_2 = config['path']['TARDBP_rep2_eclip_bed']
+    params:
+        link_bed_file_1 = config['download']['TARDBP_rep1_eclip'],
+        link_bed_file_2 = config['download']['TARDBP_rep2_eclip']
+    conda:
+        "../envs/bigbedtobed.yaml"
+    shell:
+        "wget -O temp_bigbed_1.bb {params.link_bed_file_1} && "
+        "bigBedToBed temp_bigbed_1.bb {output.bed_file_1} && "
+        "wget -O temp_bigbed_2.bb {params.link_bed_file_2} && "
+        "bigBedToBed temp_bigbed_2.bb {output.bed_file_2} && "
+        "rm temp_bigbed_*"

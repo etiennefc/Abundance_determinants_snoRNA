@@ -596,6 +596,34 @@ def roc_curve(classifier_list, X_test, y_test, xlabel, ylabel, title, path):
     plt.savefig(path, dpi=600, bbox_inches='tight')
 
 
+def roc_curve_error_fill(model_name_list, mean_aucs, mean_fpr, mean_tprs, std_tprs,
+                        model_colors, output_path, **kwargs):
+    """
+    Create a roc curve for each average model and add +/- stdev as a cloud
+    (error fill) above and below each curve. Each argument is a list where each
+    element corresponds to an average model across iterations.
+    """
+    rc = {'ytick.labelsize': 35, 'xtick.labelsize': 35}
+    plt.rcParams.update(**rc)
+    plt.rcParams['svg.fonttype'] = 'none'
+    fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+    for i, avg_model in enumerate(model_name_list):
+        mean_auc = mean_aucs[i]
+        mean_auc = str(np.round(mean_auc, 3))
+        ax.plot(mean_fpr, mean_tprs[i],
+                label=f'{avg_model} (mean AUC = {mean_auc})',
+                lw=1.5, color=model_colors[avg_model])
+        std_tpr_upper = np.minimum(mean_tprs[i] + std_tprs[i], 1)
+        std_tpr_lower = np.maximum(mean_tprs[i] - std_tprs[i], 0)
+        ax.fill_between(mean_fpr, std_tpr_upper, std_tpr_lower, color=model_colors[avg_model], alpha=0.2)
+    ax.plot([0.02, 0.98], [0.02, 0.98], transform=ax.transAxes, color='grey', linestyle='--')
+    plt.margins(x=0.02, y=0.02)
+    plt.xlabel("False positive rate", fontsize=40)
+    plt.ylabel("True positive rate", fontsize=40)
+    ax.legend(loc="lower right", fontsize=30)
+    plt.savefig(output_path, dpi=600, bbox_inches='tight')
+
+
 def count_list_x(initial_df, global_col, criteria, specific_col):
     """
     Create a list of lists using initial_col to split the global list and

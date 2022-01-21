@@ -1,17 +1,20 @@
 {
-  "numerical_features": ["sno_length", "conservation_score", "intron_rank_5prime", "intron_rank_3prime", "relative_intron_rank", "total_intron_number", "intron_length",
+  "numerical_features": ["sno_length", "intron_rank_5prime", "intron_rank_3prime", "relative_intron_rank", "total_intron_number", "intron_length",
                         "distance_upstream_exon", "distance_downstream_exon",
                         "dist_to_bp", "sno_mfe", "terminal_stem_mfe",
-                        "terminal_stem_length_score"],
-  "numerical_features_scaled": ["sno_length_norm", "conservation_score_norm", "total_intron_number_norm", "intron_length_norm", "intron_rank_5prime_norm", 
+                        "terminal_stem_length_score", "combined_box_hamming"],
+  "numerical_features_scaled": ["sno_length_norm", "total_intron_number_norm", "intron_length_norm", "intron_rank_5prime_norm",
                         "intron_rank_3prime_norm", "relative_intron_rank_norm",
                         "distance_upstream_exon_norm", "distance_downstream_exon_norm",
                         "dist_to_bp_norm", "sno_mfe_norm", "terminal_stem_mfe_norm",
                         "terminal_stem_length_score_norm"],
+  "top_10_numerical_features": ["combined_box_hamming", "terminal_stem_mfe", "sno_mfe", "relative_intron_rank"],
+  "top_10_categorical_features": ["host_expressed", "dual_initiation", "rRNA", "Orphan", "True", "intergenic"],
   "categorical_features": ["sno_type", "sno_target", "host_biotype2", "host_function",
                           "NMD_susceptibility", "di_promoter", "abundance_cutoff_host"],
   "intronic_features": ["intron_length", "distance_upstream_exon", "distance_downstream_exon",
                         "dist_to_bp"],
+  "comparison_confusion_val": ["FP_vs_TN_TP", "FN_vs_TN_TP"],
   "iteration": ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"],
   "random_state_iteration":
   {
@@ -57,7 +60,7 @@
   "one_feature": ["conservation_score_norm", "terminal_stem_mfe_norm", "sno_mfe_norm",
                     "host_expressed", "intron_number_norm", "all_four", "all_five", "intergenic", "dist_to_bp_norm"],
   "feature_hue": ["sno_type", "abundance_cutoff", "abundance_cutoff_2"],
-  "intron_group_feature": ["sno_mfe", "terminal_stem_mfe", "conservation_score", "total_intron_number", "sno_length", "dist_to_bp", "intron_rank_3prime", "intron_rank_5prime", "relative_intron_rank"],
+  "intron_group_feature": ["sno_mfe", "terminal_stem_mfe", "combined_box_hamming", "total_intron_number", "sno_length", "dist_to_bp", "intron_rank_3prime", "intron_rank_5prime", "relative_intron_rank"],
   "pca_hue": ["label", "intergenic"],
   "models": ["log_reg", "svc", "rf", "gbm"],
   "models2": ["log_reg", "svc", "rf", "gbm", "knn"],
@@ -197,7 +200,11 @@
     "h_aca_box_location_expressed": "data/references/h_aca_box_location_expressed.tsv",
     "h_aca_box_location_not_expressed": "data/references/h_aca_box_location_not_expressed.tsv",
     "h_aca_box_location": "data/references/h_aca_box_location.tsv",
-    "hamming_distance_box_df": "data/references/hamming_distance_box_df.tsv"
+    "hamming_distance_box_df": "data/references/hamming_distance_box_df.tsv",
+    "TARDBP_rep1_eclip_bed": "data/references/eCLIP/TARDBP_rep1.bed",
+    "TARDBP_rep2_eclip_bed": "data/references/eCLIP/TARDBP_rep2.bed",
+    "sno_presence_test_sets": "data/references/sno_presence_test_sets.tsv",
+    "sno_per_confusion_value": "data/references/sno_per_confusion_value/"
   },
   "hyperparameter_space":
   {
@@ -246,16 +253,20 @@
     "nmd_lykke_andersen_corrigendum": "ZENODO_LINK_TO_UPDATE",
     "di_promoter_nepal": "ZENODO_LINK_TO_UPDATE",
     "lnctard": "http://bio-bigdata.hrbmu.edu.cn/LncTarD/download/lncTarD.txt",
-    "forgi": "https://github.com/ViennaRNA/forgi.git"
+    "forgi": "https://github.com/ViennaRNA/forgi.git",
+    "TARDBP_rep1_eclip": "https://www.encodeproject.org/files/ENCFF022DCK/@@download/ENCFF022DCK.bigBed",
+    "TARDBP_rep2_eclip": "https://www.encodeproject.org/files/ENCFF118WWO/@@download/ENCFF118WWO.bigBed"
   },
   "figures":
   {
     "bivariate_density": "results/figures/bivariate_density/",
     "density": "results/figures/density/",
     "density_split_sno_type": "results/figures/density/sno_type/",
+    "density_confusion_value": "results/figures/density/confusion_value/",
     "pairplot": "results/figures/pairplot/",
     "bar": "results/figures/barplot/",
     "bar_split_sno_type": "results/figures/barplot/sno_type/",
+    "bar_confusion_value": "results/figures/barplot/confusion_value/",
     "donut": "results/figures/donut/",
     "pie": "results/figures/pie/",
     "roc": "results/figures/roc/",
@@ -380,6 +391,18 @@
     {
       "long_intron": "#737373",
       "small_intron": "#bdbdbd"
+    },
+    "confusion_value":
+    {
+      "TP": "#8dd3c7",
+      "TN": "#bebada",
+      "FP": "#fb8072",
+      "FN": "#80b1d3"
+    },
+    "top_10_categorical_features":
+    {
+      "True": "#000000",
+      "False": "#525252"
     }
   }
 }

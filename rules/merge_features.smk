@@ -11,7 +11,8 @@ rule merge_feature_df:
         location_and_branchpoint = rules.get_best_bp.output.sno_distance_bp,
         sno_structure_mfe = rules.fasta_to_tsv.output.mfe_final,
         terminal_stem_mfe = rules.fasta_to_tsv_terminal_stem_mfe.output.mfe_stem_final,
-        terminal_stem_length_score = rules.get_terminal_stem_length.output.length_stem
+        terminal_stem_length_score = rules.get_terminal_stem_length.output.length_stem,
+        hamming_distance_box = rules.hamming_distance_box_all.output.hamming_distance_box_df
     output:
         feature_df = config['path']['feature_df']
     conda:

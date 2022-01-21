@@ -24,7 +24,7 @@
     "time": "0-4:30:00",
     "mail-user": "etienne.fafard-couture@usherbrooke.ca",
     "mail-type": "FAIL"
-  }, 
+  },
   "bw_to_bg":
   {
     "cpus-per-task": "1",
@@ -32,7 +32,7 @@
     "time": "0-1:30:00",
     "mail-user": "etienne.fafard-couture@usherbrooke.ca",
     "mail-type": "FAIL"
-  },     
+  },
   "gtf_to_bed":
   {
     "cpus-per-task": "1",
@@ -56,12 +56,12 @@
     "time": "0-5:30:00",
     "mail-user": "etienne.fafard-couture@usherbrooke.ca",
     "mail-type": "FAIL"
-  },  
+  },
   "all_feature_rank_df_10_iterations":
   {
     "cpus-per-task": "1",
     "mem": "2G",
-    "time": "0-5:00:00",
+    "time": "0-7:00:00",
   },
   "hyperparameter_tuning_cv_scale_after_split_10_iterations":
   {
@@ -71,7 +71,23 @@
     "mail-user": "etienne.fafard-couture@usherbrooke.ca",
     "mail-type": "FAIL"
   },
+  "hyperparameter_tuning_cv_scale_after_split_10_iterations_only_hamming":
+  {
+    "cpus-per-task": "1",
+    "mem": "4G",
+    "time": "0-3:00:00",
+    "mail-user": "etienne.fafard-couture@usherbrooke.ca",
+    "mail-type": "FAIL"
+  },
   "train_models_scale_after_split_10_iterations":
+  {
+    "cpus-per-task": "1",
+    "mem": "4G",
+    "time": "0-3:00:00",
+    "mail-user": "etienne.fafard-couture@usherbrooke.ca",
+    "mail-type": "FAIL"
+  },
+  "train_models_scale_after_split_10_iterations_only_hamming":
   {
     "cpus-per-task": "1",
     "mem": "4G",

@@ -16,7 +16,10 @@ wildcard_constraints:
     pca_hue = "({})".format("|".join(config["pca_hue"])),
     models2 = "({})".format("|".join(config["models2"])),
     iteration = "({})".format("|".join(config["iteration"])),
-    iteration_20 = "({})".format("|".join(config["iteration_20"]))
+    iteration_20 = "({})".format("|".join(config["iteration_20"])),
+    top_10_numerical_features = "({})".format("|".join(config["top_10_numerical_features"])),
+    top_10_categorical_features = "({})".format("|".join(config["top_10_categorical_features"])),
+    comparison_confusion_val = "({})".format("|".join(config["comparison_confusion_val"]))
 
 #Include data processing rules to generate the dataset
 include: "rules/data_processing.smk"
@@ -38,6 +41,7 @@ include: "rules/other_figures.smk"
 #include: "rules/cv_train_test_scale_after_split.smk"
 #include: "rules/shap_retest.smk"
 include: "rules/cv_train_test_10_iterations.smk"
+include: "rules/cv_train_test_10_iterations_only_hamming.smk"
 #include: "rules/cv_train_test_20_iterations.smk"
 
 rule all:
@@ -68,7 +72,9 @@ rule all:
         #features_df = config['path']['feature_df'],
         #abundance_cutoff_df = config['path']['all_RNA_biotypes_tpm_df_cutoff'],
         figures = get_figures_path(config),
-        hamming_distance_box_df = config['path']['hamming_distance_box_df'],
+        sno_presence_test_sets = config['path']['sno_presence_test_sets'],
+        sno_per_confusion_value = expand(os.path.join(config['path']['sno_per_confusion_value'], '{confusion_value}_snoRNAs_10_iterations.tsv'), **config)
+        #hamming_distance_box_df = config['path']['hamming_distance_box_df'],
         #h_aca_box_location_expressed = config['path']['h_aca_box_location_expressed'],
         #a = config['path']['c_d_and_prime_box_location_not_expressed'],
         ##log_create_env = "log/create_local_env.log",  #to put in all_downloads
@@ -141,7 +147,8 @@ rule all_downloads:
     input:
         snhg14_bed = config['path']['snhg14_bed'],
         lnctard = config['path']['lnctard'],
-        forgi_log = "log/forgi.log"
+        eclip_bed = config['path']['TARDBP_rep1_eclip_bed']
+        #forgi_log = "log/forgi.log"
 
 
 #rule merge_feature_df:

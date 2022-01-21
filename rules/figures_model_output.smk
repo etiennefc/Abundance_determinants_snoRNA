@@ -8,7 +8,7 @@ include: "cv_train_test_scale_after_split.smk"
 include: "terminal_stem.smk"
 include: "structure.smk"
 include: "cv_train_test_10_iterations.smk"
-
+include: "cv_train_test_10_iterations_only_hamming.smk"
 
 rule modify_shap:
     """ Modify SHAP summary plot script (within _beewswarm.py) so that it sorts
@@ -76,6 +76,26 @@ rule scatter_accuracies_10_iterations:
         output:
             scatter = os.path.join(config['figures']['scatter'],
                         'all_model_accuracies_cv_train_test_10_iterations.svg')
+        conda:
+            "../envs/python.yaml"
+        params:
+            colors = config['colors_complex']['model_colors']
+        script:
+            "../scripts/python/graphs/scatter_accuracies_10_iterations.py"
+
+rule scatter_accuracies_10_iterations_only_hamming:
+    """ Generate a connected scatter plot for each model to show their accuracy
+        of prediction on the CV, training and test sets to highlight possible
+        overfitting. Show the average accuracy plus std deviation across all 10
+        iterations. These models were trained using only the combined_box_hamming
+        feature."""
+        input:
+            cv_accuracy = expand(rules.hyperparameter_tuning_cv_scale_after_split_10_iterations_only_hamming.output.best_hyperparameters, **config),
+            training_accuracy = expand(rules.train_models_scale_after_split_10_iterations_only_hamming.output.training_accuracy, **config),
+            test_accuracy = expand(rules.test_models_scale_after_split_10_iterations_only_hamming.output.test_accuracy, **config)
+        output:
+            scatter = os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_10_iterations_only_hamming.svg')
         conda:
             "../envs/python.yaml"
         params:
@@ -220,6 +240,45 @@ rule roc_curve_scale_after_split:
                         'roc_curves_test_set_5_models_scale_after_split.svg')
     script:
         "../scripts/python/graphs/roc_curve_scale_after_split.py"
+
+rule roc_curve_scale_after_split_10_iterations:
+    """ Generate a roc curve for each trained model based on their performance
+        on the test dataset based on the CV, train, test sets scaled after they
+        were generated. Add a shadow of +/- 1 stdev around each model roc curve."""
+    input:
+        X_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.test, **config),
+        y_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.y_test, **config),
+        pickled_trained_model = expand(rules.train_models_scale_after_split_10_iterations.output.pickled_trained_model,
+                                    iteration=config['iteration'], models2=config['models2'])
+    output:
+        roc_curve = os.path.join(config['figures']['roc'],
+                        'roc_curves_test_set_5_models_scale_after_split_10_iterations.svg')
+    params:
+        model_colors_dict = config['colors_complex']['model_colors']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/roc_curve_scale_after_split_10_iterations.py"
+
+rule roc_curve_scale_after_split_10_iterations_only_hamming:
+    """ Generate a roc curve for each trained model based on their performance
+        on the test dataset based on the CV, train, test sets scaled after they
+        were generated. Add a shadow of +/- 1 stdev around each model roc curve.
+        These models were trained only with the feature combined_box_hamming."""
+    input:
+        X_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations_only_hamming.output.test, **config),
+        y_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations_only_hamming.output.y_test, **config),
+        pickled_trained_model = expand(rules.train_models_scale_after_split_10_iterations_only_hamming.output.pickled_trained_model,
+                                    iteration=config['iteration'], models2=config['models2'])
+    output:
+        roc_curve = os.path.join(config['figures']['roc'],
+                        'roc_curves_test_set_5_models_scale_after_split_10_iterations_only_hamming.svg')
+    params:
+        model_colors_dict = config['colors_complex']['model_colors']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/roc_curve_scale_after_split_10_iterations.py"
 
 rule shap_global:
     """ Generate a summary plot based on SHAP values (Shapley additive
@@ -428,11 +487,11 @@ rule upset_models_confusion_scale_after_split_10_iterations:
         Return also a merged df of all confusion matrices values (for all models
         in one df) (output hardcoded within script). RF is excluded due to overfitting."""
     input:
-        log_reg = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.confusion_matrix,
+        log_reg = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.info_df,
                         iteration=config['iteration'], models2='log_reg', allow_missing=True),
-        svc = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.confusion_matrix,
+        svc = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.info_df,
                         iteration=config['iteration'], models2='svc', allow_missing=True),
-        rf = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.confusion_matrix,
+        rf = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.info_df,
                         iteration=config['iteration'], models2='rf', allow_missing=True)
     params:
         df_output_path = expand("results/tables/confusion_matrix_f1/merged_confusion_matrix_{iteration}.tsv",
@@ -536,6 +595,34 @@ rule violin_feature_rank_10_iterations:
         "../envs/python.yaml"
     script:
         "../scripts/python/graphs/violin_feature_rank_10_iterations.py"
+
+rule heatmap_feature_rank_correlation:
+    """ Create a heatmap showing the spearman correlation between feature
+        predictive ranks across 10 iterations. One heatmap per model."""
+    input:
+        rank_features_df = rules.concat_feature_rank_iterations_df.output.concat_df
+    output:
+        heatmaps = expand(os.path.join(config['figures']['heatmap'],
+                    '{model_name}_feature_rank_correlation_10_iterations.svg'),
+                    model_name=['log_reg', 'svc', 'rf'])
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/heatmap_feature_rank_correlation.py"
+
+rule clustermap_feature_rank_correlation:
+    """ Create a clustered heatmap showing the spearman correlation between feature
+        predictive ranks across 10 iterations. One heatmap per model."""
+    input:
+        rank_features_df = rules.concat_feature_rank_iterations_df.output.concat_df
+    output:
+        heatmaps = expand(os.path.join(config['figures']['heatmap'],
+                    '{model_name}_feature_rank_correlation_10_iterations_clustered.svg'),
+                    model_name=['log_reg', 'svc', 'rf'])
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/clustermap_feature_rank_correlation.py"
 
 rule pairplot_top_5:
     """ Create a pairplot per snoRNA type to show the dependence between the top
@@ -894,3 +981,98 @@ rule heatmap_shap:
         heatmap = os.path.join(config['figures']['heatmap'], '{models2}_shap_heatmap.svg')
     script:
         "../scripts/python/graphs/heatmap_shap.py"
+
+rule sno_presence_in_all_test_sets:
+    """ Find the snoRNAs that found in at leat 1 test set (across the 10
+        iterations) and those that are never found in the test set."""
+    input:
+        test_sets = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.test, **config),
+        all_sno_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df
+    output:
+        sno_presence_test_sets = config['path']['sno_presence_test_sets']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/sno_presence_in_all_test_sets.py"
+
+rule regroup_sno_confusion_value_iterations:
+    """ Regroup all snoRNAs by confusion value (TP, TN, FP, FN) across the 10
+        iterations."""
+    input:
+        confusion_value_df = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.info_df,
+                                models2=config['models3'], iteration=config['iteration'])
+    output:
+        sno_per_confusion_value = os.path.join(config['path']['sno_per_confusion_value'],
+                                    '{confusion_value}_snoRNAs_10_iterations.tsv')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/regroup_sno_confusion_value_iterations.py"
+
+rule num_feature_distribution_comparison_confusion_value_top10:
+    """ Create feature distribution (density plot) to compare the numerical
+        features contained in the top 10 most predictive features. """
+    input:
+        feature_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df,
+        sno_per_confusion_value = expand(rules.regroup_sno_confusion_value_iterations.output.sno_per_confusion_value,
+                                            **config)
+    output:
+        density = os.path.join(config['figures']['density_confusion_value'],
+                                "{comparison_confusion_val}_{top_10_numerical_features}.svg")
+    params:
+        color_dict = config['colors_complex']['confusion_value']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/num_feature_distribution_comparison_confusion_value_top10.py"
+
+rule num_feature_distribution_comparison_confusion_value_top10_snotype:
+    """ Create feature distribution (density plot) to compare the numerical
+        features contained in the top 10 most predictive features per snoRNA type. """
+    input:
+        feature_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df,
+        sno_per_confusion_value = expand(rules.regroup_sno_confusion_value_iterations.output.sno_per_confusion_value,
+                                            **config)
+    output:
+        density = os.path.join(config['figures']['density_confusion_value'],
+                                "{comparison_confusion_val}_{top_10_numerical_features}_{sno_type}.svg")
+    params:
+        color_dict = config['colors_complex']['confusion_value']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/num_feature_distribution_comparison_confusion_value_top10_snotype.py"
+
+rule cat_feature_distribution_comparison_confusion_value_top10:
+    """ Create feature distribution (bar chart) to compare the categorical
+        features contained in the top 10 most predictive features. """
+    input:
+        feature_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df,
+        sno_per_confusion_value = expand(rules.regroup_sno_confusion_value_iterations.output.sno_per_confusion_value,
+                                            **config)
+    output:
+        bar = os.path.join(config['figures']['bar_confusion_value'],
+                                "{comparison_confusion_val}_{top_10_categorical_features}.svg")
+    params:
+        color_dict = config['colors_complex']['top_10_categorical_features']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/cat_feature_distribution_comparison_confusion_value_top10.py"
+
+rule cat_feature_distribution_comparison_confusion_value_top10_snotype:
+    """ Create feature distribution (bar chart) to compare the categorical
+        features contained in the top 10 most predictive features per snoRNA type. """
+    input:
+        feature_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df,
+        sno_per_confusion_value = expand(rules.regroup_sno_confusion_value_iterations.output.sno_per_confusion_value,
+                                            **config)
+    output:
+        bar = os.path.join(config['figures']['bar_confusion_value'],
+                                "{comparison_confusion_val}_{top_10_categorical_features}_{sno_type}.svg")
+    params:
+        color_dict = config['colors_complex']['top_10_categorical_features']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/cat_feature_distribution_comparison_confusion_value_top10_snotype.py"

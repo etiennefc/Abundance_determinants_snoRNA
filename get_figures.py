@@ -14,7 +14,10 @@ def get_figures_path(config):
 
     # Connected scatter plot of average accuracies of all models in CV, train and test sets across 10 iterations
     files.append(os.path.join(config['figures']['scatter'], 'all_model_accuracies_cv_train_test_10_iterations.svg'))
-    #files.extend(expand(config['figures']['upset'] + '{confusion_value}_all_models_scale_after_split_10_iterations.svg', **config))
+    files.extend(expand(config['figures']['upset'] + '{confusion_value}_all_models_scale_after_split_10_iterations.svg', **config))
+
+    # Connected scatter plot of average accuracies of all models in CV, train and test sets across 10 iterations trained only with combined_box_hamming
+    files.append(os.path.join(config['figures']['scatter'], 'all_model_accuracies_cv_train_test_10_iterations_only_hamming.svg'))
 
     # Connected scatter plot of average accuracies of all models in CV, train and test sets across 20 iterations
     #files.append(os.path.join(config['figures']['scatter'], 'all_model_accuracies_cv_train_test_20_iterations.svg'))
@@ -40,8 +43,8 @@ def get_figures_path(config):
     # Feature distribution
     files.extend(expand(config['figures']['density'] + '{numerical_features}.svg', **config))
     files.extend(expand(config['figures']['density'] + numerical, **config))
-    files.extend(expand(config['figures']['pairplot'] + cd_numerical, **config))
-    files.extend(expand(config['figures']['pairplot'] + haca_numerical, **config))
+    #files.extend(expand(config['figures']['pairplot'] + cd_numerical, **config))
+    #files.extend(expand(config['figures']['pairplot'] + haca_numerical, **config))
     files.extend(expand(config['figures']['bar'] + '{categorical_features}.svg', **config))
     files.extend(expand(config['figures']['bar_split_sno_type'] + '{categorical_features}_cd.svg', **config))
     files.extend(expand(config['figures']['bar_split_sno_type'] + '{categorical_features}_haca.svg', **config))
@@ -60,8 +63,29 @@ def get_figures_path(config):
     files.extend(expand(config['figures']['density_split_sno_type'] + '{sno_type}_small_intron_{intron_group_feature}.svg', **config))
     files.extend(expand(config['figures']['density_split_sno_type'] + '{sno_type}_long_intron_{intron_group_feature}.svg', **config))
     files.append(os.path.join(config['figures']['donut'], 'abundance_status_intron_subgroup.svg'))
-##
-##    # Model performance and output
+
+    # Model performance and output
+    files.append(os.path.join(config['figures']['roc'],
+                'roc_curves_test_set_5_models_scale_after_split_10_iterations.svg'))
+    files.append(os.path.join(config['figures']['roc'],
+                'roc_curves_test_set_5_models_scale_after_split_10_iterations_only_hamming.svg'))
+
+    # Confusion value comparisons of predictive features
+    files.extend(expand(os.path.join(config['figures']['density_confusion_value'],
+                            "{comparison_confusion_val}_{top_10_numerical_features}.svg"), **config))
+    files.extend(expand(os.path.join(config['figures']['density_confusion_value'],
+                            "{comparison_confusion_val}_{top_10_numerical_features}_{sno_type}.svg"), **config))
+    files.extend(expand(os.path.join(config['figures']['bar_confusion_value'],
+                            "{comparison_confusion_val}_{top_10_categorical_features}.svg"), **config))
+    files.extend(expand(os.path.join(config['figures']['bar_confusion_value'],
+                            "{comparison_confusion_val}_{top_10_categorical_features}_{sno_type}.svg"), **config))
+    # Feature rank correlation across iterations
+    #files.extend(expand(os.path.join(config['figures']['heatmap'],
+    #            '{model_name}_feature_rank_correlation_10_iterations.svg'),
+    #            model_name=['log_reg', 'svc', 'rf']))
+    #files.extend(expand(os.path.join(config['figures']['heatmap'],
+    #            '{model_name}_feature_rank_correlation_10_iterations_clustered.svg'),
+    #            model_name=['log_reg', 'svc', 'rf']))
 ##    files.append(os.path.join(config['figures']['roc'], 'roc_curves_test_set_4_models.svg'))
 ##    files.append(os.path.join(config['figures']['roc'], 'roc_curves_test_set_5_models.svg'))
 ##    files.append(os.path.join(config['figures']['roc'], 'roc_curves_test_set_5_models_wo_clusters.svg'))

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import pandas as pd
 import functions as ft
+import math
 df = pd.read_csv(snakemake.input.df, sep='\t')
 
 # Select intronic snoRNAs and create intron subgroup (small vs long intron)
@@ -65,7 +66,14 @@ if snakemake.wildcards.intron_group_feature == 'dist_to_bp':
     ft.density_x_size(df_list_long, snakemake.wildcards.intron_group_feature, 'Density', 'linear', '',
             colors, hues, snakemake.output.density_long, (12, 6), dist_to_bp_min2, dist_to_bp_max2)
 else:
-    ft.density_x_size(df_list_small, snakemake.wildcards.intron_group_feature, 'Density', 'linear', '',
-            colors, hues, snakemake.output.density_small, (12, 6), min, max)
-    ft.density_x_size(df_list_long, snakemake.wildcards.intron_group_feature, 'Density', 'linear', '',
-            colors, hues, snakemake.output.density_long, (12, 6), min, max)
+    if (math.isnan(max) == True) | (math.isnan(min) == True):  # when looking at C,D,C',D' hamming for H/ACA snoRNAs or H,ACA hamming for C/D, the result is NaN values
+        min_modified, max_modified = 0, 1
+        ft.density_x_size(df_list_small, snakemake.wildcards.intron_group_feature, 'Density', 'linear', '',
+                colors, hues, snakemake.output.density_small, (12, 6), min_modified, max_modified)
+        ft.density_x_size(df_list_long, snakemake.wildcards.intron_group_feature, 'Density', 'linear', '',
+                colors, hues, snakemake.output.density_long, (12, 6), min_modified, max_modified)
+    else:
+        ft.density_x_size(df_list_small, snakemake.wildcards.intron_group_feature, 'Density', 'linear', '',
+                colors, hues, snakemake.output.density_small, (12, 6), min, max)
+        ft.density_x_size(df_list_long, snakemake.wildcards.intron_group_feature, 'Density', 'linear', '',
+                colors, hues, snakemake.output.density_long, (12, 6), min, max)
