@@ -15,7 +15,12 @@
   "intronic_features": ["intron_length", "distance_upstream_exon", "distance_downstream_exon",
                         "dist_to_bp"],
   "comparison_confusion_val": ["FP_vs_TN_TP", "FN_vs_TN_TP"],
+  "manual_iteration": ["manual_first", "manual_second", "manual_third", "manual_fourth", "manual_fifth", "manual_sixth", "manual_seventh",
+                      "manual_eighth", "manual_ninth", "manual_tenth"],
   "iteration": ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"],
+  "tissue": ["Breast_1", "Breast_2", "Breast_3", "Ovary_1", "Ovary_2", "Ovary_3", "Liver_1", "Liver_2", "Liver_3", "Testis_1", "Testis_2", "Testis_3",
+              "Brain_1", "Brain_2", "Brain_3", "Prostate_1", "Prostate_2", "Prostate_3", "Skeletal_muscle_1", "Skeletal_muscle_2", "Skeletal_muscle_3",
+            "HCT116_1", "HCT116_2", "MCF7_1", "MCF7_2", "PC3_1", "PC3_2", "SKOV_frg_1", "SKOV_frg_2", "TOV112D_1", "TOV112D_2"],
   "random_state_iteration":
   {
     "first": 42,
@@ -99,6 +104,7 @@
     "genome_chr": "data/references/genome_w_chr.fa",
     "hg_gtf": "data/references/host_gene_v101.gtf",
     "all_sno_bed": "data/bed_files/all_snoRNA.bed",
+    "all_sno_bed_formated": "data/bed_files/all_snoRNA_formated.bed",
     "sno_bed": "data/bed_files/",
     "sno_bed_vap": "data/vap_bed_files/",
     "sno_tpm_df": "data/coco_output/tpm_w_biotype_v101_sno_HG.csv",
@@ -133,6 +139,7 @@
     "terminal_stem_mfe_fasta": "data/terminal_stem/terminal_stem_mfe.fa",
     "terminal_stem_mfe_tsv": "data/terminal_stem/terminal_stem_mfe.tsv",
     "terminal_stem_length": "data/terminal_stem/terminal_stem_length.tsv",
+    "combined_rbp_score_df": "results/tables/combined_rbp_score.tsv",
     "feature_df": "results/tables/all_features_labels.tsv",
     "scaled_feature_df": "results/tables/all_features_labels_scaled.tsv",
     "scaled_feature_train_df": "results/tables/all_features_labels_scaled_train.tsv",
@@ -159,6 +166,7 @@
     "top_5_features_df": "results/tables/top_5_features_across_models.tsv",
     "all_feature_rank_df": "results/tables/all_features_rank_across_models.tsv",
     "all_feature_rank_df_10_iterations": "results/tables/all_features_rank_across_models_10_iterations.tsv",
+    "all_feature_rank_df_manual_split": "results/tables/all_features_rank_across_models_manual_split_iterations.tsv",
     "shap_path": "./.snakemake/conda/*/lib/python*/site-packages/shap/plots/_beeswarm.py",
     "all_cd_fa": "data/references/all_cd.fa",
     "all_haca_fa": "data/references/all_haca.fa",
@@ -203,8 +211,26 @@
     "hamming_distance_box_df": "data/references/hamming_distance_box_df.tsv",
     "TARDBP_rep1_eclip_bed": "data/references/eCLIP/TARDBP_rep1.bed",
     "TARDBP_rep2_eclip_bed": "data/references/eCLIP/TARDBP_rep2.bed",
+    "liftover_chain_file": "data/references/liftover_hg19_to_hg38.chain",
+    "par_clip": "data/references/PAR_CLIP/",
+    "NOP58_repA_par_clip": "data/references/PAR_CLIP/NOP58_repA.bed",
+    "NOP58_repB_par_clip": "data/references/PAR_CLIP/NOP58_repB.bed",
+    "NOP56_par_clip": "data/references/PAR_CLIP/NOP56.bed",
+    "FBL_par_clip": "data/references/PAR_CLIP/FBL.bed",
+    "FBL_mnase_par_clip": "data/references/PAR_CLIP/FBL_mnase.bed",
+    "DKC1_par_clip": "data/references/PAR_CLIP/DKC1.bed",
     "sno_presence_test_sets": "data/references/sno_presence_test_sets.tsv",
-    "sno_per_confusion_value": "data/references/sno_per_confusion_value/"
+    "sno_per_confusion_value": "data/references/sno_per_confusion_value/",
+    "shap_10_iterations": "results/tables/shap_10_iterations/",
+    "real_confusion_value": "results/tables/real_confusion_value/",
+    "sashimi_script": "scripts/python/ggsashimi.py",
+    "bams": "data/bams/",
+    "filtered_bams": "results/filtered_bams/",
+    "transcriptome": "data/references/hg38_transcriptome.fa",
+    "kallisto_index" : "data/references/kallisto.idx",
+    "trimmed_reads": "data/trimmed_reads/",
+    "gene_name": "data/references/gene_name.txt",
+    "multi_HG_different_label_snoRNAs": "results/tables/multi_HG_different_label_snoRNAs.tsv"
   },
   "hyperparameter_space":
   {
@@ -255,7 +281,15 @@
     "lnctard": "http://bio-bigdata.hrbmu.edu.cn/LncTarD/download/lncTarD.txt",
     "forgi": "https://github.com/ViennaRNA/forgi.git",
     "TARDBP_rep1_eclip": "https://www.encodeproject.org/files/ENCFF022DCK/@@download/ENCFF022DCK.bigBed",
-    "TARDBP_rep2_eclip": "https://www.encodeproject.org/files/ENCFF118WWO/@@download/ENCFF118WWO.bigBed"
+    "TARDBP_rep2_eclip": "https://www.encodeproject.org/files/ENCFF118WWO/@@download/ENCFF118WWO.bigBed",
+    "liftover_chain_file": "https://hgdownload.cse.ucsc.edu/goldenpath/hg19/liftOver/hg19ToHg38.over.chain.gz",
+    "NOP58_repA_par_clip": "ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1067nnn/GSM1067861/suppl/GSM1067861%5FETHZ%5FBSSE%5F100205%5F433DMAAXX%5F7%2Ebed%2Egz",
+    "NOP58_repB_par_clip": "ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1067nnn/GSM1067862/suppl/GSM1067862%5FETHZ%5FBSSE%5F100205%5F433DMAAXX%5F8%2Ebed%2Egz",
+    "NOP56_par_clip": "ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1067nnn/GSM1067863/suppl/GSM1067863%5FETHZ%5FBSSE%5F100427%5FBS%2DDSU%2DATTILA%5F1234%5F613TBAAXX%5F6%2Ebed%2Egz",
+    "FBL_par_clip": "ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1067nnn/GSM1067864/suppl/GSM1067864%5FETHZ%5FBSSE%5F100427%5FBS%2DDSU%2DATTILA%5F1234%5F613TBAAXX%5F7%2Ebed%2Egz",
+    "FBL_mnase_par_clip": "ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1067nnn/GSM1067865/suppl/GSM1067865%5FETHZ%5FBSSE%5F110126%5F708K9AAXX%5F4%2Ebed%2Egz",
+    "DKC1_par_clip": "ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1067nnn/GSM1067866/suppl/GSM1067866%5FETHZ%5FBSSE%5F110126%5F708K9AAXX%5F6%2Ebed%2Egz",
+    "sashimi_script": "https://raw.githubusercontent.com/guigolab/ggsashimi/master/ggsashimi.py"
   },
   "figures":
   {
@@ -283,6 +317,8 @@
     "decision_plot_FP_scale_after_split": "results/figures/decision_plot/scale_after_split/false_positives/",
     "decision_plot_TP_scale_after_split": "results/figures/decision_plot/scale_after_split/true_positives/",
     "decision_plot_TN_scale_after_split": "results/figures/decision_plot/scale_after_split/true_negatives/",
+    "decision_plot_10_iterations": "results/figures/decision_plot/10_iterations/",
+    "decision_plot_snora77b": "results/figures/decision_plot_snora77b/",
     "upset": "results/figures/upset/",
     "scatter": "results/figures/scatter/",
     "violin": "results/figures/violin",
@@ -290,7 +326,8 @@
     "t_sne": "results/figures/t_sne/",
     "forgi_structure": "results/figures/forgi_structure/",
     "logo": "results/figures/logo/",
-    "logo_w_flanking": "results/figures/logo/logo_w_flanking/"
+    "logo_w_flanking": "results/figures/logo/logo_w_flanking/",
+    "sashimi": "results/figures/sashimi/"
   },
   "colors_complex":
   {
@@ -326,7 +363,7 @@
     },
     "host_biotype2":
     {
-      "intergenic": "#1b9e77",
+      "intergenic": "#e6ab02",
       "non_coding": "#e7298a",
       "protein_coding": "#7570b3"
     },
@@ -403,6 +440,16 @@
     {
       "True": "#000000",
       "False": "#525252"
+    },
+    "multi_HG_labels":
+    {
+      "HG_different_snoRNA_labels": "#1f78b4",
+      "HG_same_snoRNA_labels": "#a6cee3"
+    },
+    "found_motif":
+    {
+      "motif_was_found": "#bdbdbd",
+      "no_motif_was_found": "#252525"
     }
   }
 }

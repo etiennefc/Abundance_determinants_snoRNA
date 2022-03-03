@@ -17,6 +17,7 @@ wildcard_constraints:
     models2 = "({})".format("|".join(config["models2"])),
     iteration = "({})".format("|".join(config["iteration"])),
     iteration_20 = "({})".format("|".join(config["iteration_20"])),
+    manual_iteration = "({})".format("|".join(config["manual_iteration"])),
     top_10_numerical_features = "({})".format("|".join(config["top_10_numerical_features"])),
     top_10_categorical_features = "({})".format("|".join(config["top_10_categorical_features"])),
     comparison_confusion_val = "({})".format("|".join(config["comparison_confusion_val"]))
@@ -42,7 +43,12 @@ include: "rules/other_figures.smk"
 #include: "rules/shap_retest.smk"
 include: "rules/cv_train_test_10_iterations.smk"
 include: "rules/cv_train_test_10_iterations_only_hamming.smk"
+include: "rules/cv_train_test_manual_split.smk"
 #include: "rules/cv_train_test_20_iterations.smk"
+include: "rules/clip_seq.smk"
+include: "rules/candidate_analyses.smk"
+#include: "rules/kallisto.smk"
+include: "rules/shap_subgroups.smk"
 
 rule all:
     input:
@@ -54,10 +60,10 @@ rule all:
         #                '{models2}_confusion_matrix_w_f1_score_scale_after_split_{iteration}.tsv'),
         #                models2=config['models2'], iteration=config['iteration']),
         # Bed for VAP
-        expressed_intronic_sno_bed = os.path.join(config['path']['sno_bed_vap'],
-                                    "expressed_intronic_snoRNA.bed"),
+        #expressed_intronic_sno_bed = os.path.join(config['path']['sno_bed_vap'],
+        #                            "expressed_intronic_snoRNA.bed"),
         # Modify SHAP _beeswarm script to sort by median and not by average or sum of SHAP values
-        fake_log = "log/modify_shap.log",
+        #fake_log = "log/modify_shap.log",
         #concat_df = config['path']['all_feature_rank_df_10_iterations'],
         #
         # Do 20 different iterations of the cv-train-test
@@ -71,9 +77,29 @@ rule all:
         #small_expressed_cd = config['path']['small_expressed_cd_fa'],
         #features_df = config['path']['feature_df'],
         #abundance_cutoff_df = config['path']['all_RNA_biotypes_tpm_df_cutoff'],
-        figures = get_figures_path(config),
-        sno_presence_test_sets = config['path']['sno_presence_test_sets'],
-        sno_per_confusion_value = expand(os.path.join(config['path']['sno_per_confusion_value'], '{confusion_value}_snoRNAs_10_iterations.tsv'), **config)
+        # Do manual split of 10 test sets
+        confusion_matrix = expand(os.path.join(config['path']['confusion_matrix_f1'],
+                                '{models2}_confusion_matrix_w_f1_score_scale_after_split_{manual_iteration}.tsv'), **config),
+        test_accuracy = expand(os.path.join(config['path']['test_accuracy'],
+                                    '{models2}_test_accuracy_scale_after_split_{manual_iteration}.tsv'), **config),
+        get_all_shap = expand(os.path.join(config['path']['shap_10_iterations'], '{models2}_{manual_iteration}_shap_values.tsv'), **config),
+
+        # Train with only combined_hamming as feature
+        training_accuracy_only_hamming = expand(os.path.join(config['path']['training_accuracy'],
+                                            '{models2}_training_accuracy_scale_after_split_only_hamming_{manual_iteration}.tsv'), **config),
+        test_accuracy_only_hamming = expand(os.path.join(config['path']['test_accuracy'],
+                                            '{models2}_test_accuracy_scale_after_split_only_hamming_{manual_iteration}.tsv'), **config),
+        #sno_presence_test_sets = config['path']['sno_presence_test_sets'],
+        #sno_per_confusion_value = expand(os.path.join(config['path']['sno_per_confusion_value'], '{confusion_value}_snoRNAs_10_iterations.tsv'), **config),
+        #concat_shap = expand(os.path.join(config['path']['shap_10_iterations'], '{models2}_{confusion_value}_shap_values_concat.tsv'), **config),
+        #merge_beds = expand(os.path.join(config['path']['par_clip'], '{rbp}_merged.bed'),
+        #                    rbp=['DKC1', 'FBL', 'FBL_mnase', 'NOP56', 'NOP58_repA', 'NOP58_repB']),
+        #real_confusion_value_df = expand(os.path.join(config['path']['real_confusion_value'], '{confusion_value}_w_features.tsv'), **config),
+        #transcript_tpm = "results/kallisto/transcript_tpm.tsv",
+        mapped_snoRNA_bed = expand(os.path.join(config['path']['par_clip'], '{rbp}_mapped_to_snoRNAs.bed'),
+                            rbp=['NOP58_repA', 'NOP58_repB', 'NOP56', 'FBL', 'FBL_mnase', 'DKC1']),
+        multi_HG_different_label_snoRNAs = config['path']['multi_HG_different_label_snoRNAs'],
+        #fake_log2 = 'log/fake_log_snora77b.log'
         #hamming_distance_box_df = config['path']['hamming_distance_box_df'],
         #h_aca_box_location_expressed = config['path']['h_aca_box_location_expressed'],
         #a = config['path']['c_d_and_prime_box_location_not_expressed'],
@@ -147,25 +173,13 @@ rule all_downloads:
     input:
         snhg14_bed = config['path']['snhg14_bed'],
         lnctard = config['path']['lnctard'],
-        eclip_bed = config['path']['TARDBP_rep1_eclip_bed']
+        eclip_bed = config['path']['TARDBP_rep1_eclip_bed'],
+        bed_dkc1 = config['path']['DKC1_par_clip']
         #forgi_log = "log/forgi.log"
 
 
-#rule merge_feature_df:
-#    """ Merge all feature columns (numerical or categorical) inside one
-#        dataframe."""
-#    input:
-#        abundance_cutoff = rules.abundance_cutoff.output.abundance_cutoff_df,
-#        sno_conservation = rules.sno_conservation.output.sno_conservation,
-#        sno_length = rules.sno_length.output.sno_length,
-#        snodb_nmd_di_promoters = rules.format_snodb.output.snodb_formatted,
-#        location_and_branchpoint = rules.get_best_bp.output.sno_distance_bp,
-#        sno_structure_mfe = rules.fasta_to_tsv.output.mfe_final,
-#        terminal_stem_mfe = rules.fasta_to_tsv_terminal_stem_mfe.output.mfe_stem_final,
-#        terminal_stem_length_score = rules.get_terminal_stem_length.output.length_stem
-#    output:
-#        feature_df = config['path']['feature_df']
-#    conda:
-#        "envs/python.yaml"
-#    script:
-#        "scripts/python/merge_features.py"
+rule all_figures:
+    input:
+        # Modify SHAP _beeswarm script to sort by median and not by average or sum of SHAP values
+        fake_log = "log/modify_shap.log",
+        figures = get_figures_path(config)

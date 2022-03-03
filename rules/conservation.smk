@@ -243,3 +243,33 @@ rule logomaker_w_flanking_nt:
         "../envs/logomaker.yaml"
     script:
         "../scripts/python/graphs/logo_box.py"
+
+rule logomaker_wo_blank_plus_pie:
+    """ Create logo (consensus sequence) of c,d,c',d' boxes from sequences
+        of expressed or not expressed C/D box snoRNAs. Same for H and ACA boxes.
+        Only show boxes that were found (no empty/blank space in logos). Create
+        also one pie chart per logo to show the number of found motif (vs not
+        found motif) per box. Show also the entropy per logo."""
+    input:
+        box_fastas = rules.convert_motif_table_to_fa.output
+    output:
+        box_logos = expand(os.path.join(config['figures']['logo'], '{box_wo_blank}.svg'),
+                            box_wo_blank=['expressed_c_box_wo_blank', 'not_expressed_c_box_wo_blank',
+                                'expressed_d_box_wo_blank', 'not_expressed_d_box_wo_blank',
+                                'expressed_c_prime_box_wo_blank', 'not_expressed_c_prime_box_wo_blank',
+                                'expressed_d_prime_box_wo_blank', 'not_expressed_d_prime_box_wo_blank',
+                                'expressed_h_box_wo_blank', 'not_expressed_h_box_wo_blank',
+                                'expressed_aca_box_wo_blank', 'not_expressed_aca_box_wo_blank']),
+        pie_logos = expand(os.path.join(config['figures']['pie'], '{box}.svg'),
+                            box=['expressed_c_box', 'not_expressed_c_box',
+                                'expressed_d_box', 'not_expressed_d_box',
+                                'expressed_c_prime_box', 'not_expressed_c_prime_box',
+                                'expressed_d_prime_box', 'not_expressed_d_prime_box',
+                                'expressed_h_box', 'not_expressed_h_box',
+                                'expressed_aca_box', 'not_expressed_aca_box'])
+    params:
+        color_dict = config['colors_complex']['found_motif']
+    conda:
+        "../envs/logomaker.yaml"
+    script:
+        "../scripts/python/graphs/logo_box_wo_blank_plus_pie.py"

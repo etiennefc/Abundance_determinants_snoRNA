@@ -27,10 +27,37 @@ for path in sno_per_confusion_value_paths:
 
 # Get the snoRNA feature value for each confusion value in the comparison
 confusion_val1, confusion_val2_3 = comparison.split('_vs_')
-confusion_val2, confusion_val3 = confusion_val2_3.split('_')
-df1 = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value[confusion_val1])]
+confusion_val2, confusion_val3 = confusion_val2_3.split('_')  # this is respectively TN and TP
+df1 = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value[confusion_val1])]  # this removes duplicates (snoRNA is counted only once per confusion value)
 df2 = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value[confusion_val2])]
 df3 = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value[confusion_val3])]
+
+# Get only snoRNAs that are always predicted as their confusion value
+# (i.e. remove snoRNAs that are for example predicted in an iteration as FP and in another as TN)
+if confusion_val1 == 'FP':
+    all_fp = df1['gene_id_sno'].to_list()
+    all_tn = df2['gene_id_sno'].to_list()
+    all_tp = df3['gene_id_sno'].to_list()
+    all_fn = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value['FN'])]
+    all_fn = list(pd.unique(all_fn['gene_id_sno']))
+    real_fp = list(set(all_fp) - set(all_tn))
+    real_tn = list(set(all_tn) - set(all_fp))
+    real_tp = list(set(all_tp) - set(all_fn))
+    df1 = df1[df1['gene_id_sno'].isin(real_fp)]
+    df2 = df2[df2['gene_id_sno'].isin(real_tn)]
+    df3 = df3[df3['gene_id_sno'].isin(real_tp)]
+elif confusion_val1 == 'FN':
+    all_fn = df1['gene_id_sno'].to_list()
+    all_tn = df2['gene_id_sno'].to_list()
+    all_tp = df3['gene_id_sno'].to_list()
+    all_fp = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value['FP'])]
+    all_fp = list(pd.unique(all_fp['gene_id_sno']))
+    real_fn = list(set(all_fn) - set(all_tp))
+    real_tn = list(set(all_tn) - set(all_fp))
+    real_tp = list(set(all_tp) - set(all_fn))
+    df1 = df1[df1['gene_id_sno'].isin(real_fn)]
+    df2 = df2[df2['gene_id_sno'].isin(real_tn)]
+    df3 = df3[df3['gene_id_sno'].isin(real_tp)]
 
 # Count feature values to create the bar chart in the order (TN, FP/FN, TP)
 count_list = []

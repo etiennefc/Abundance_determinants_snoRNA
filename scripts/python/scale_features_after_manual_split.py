@@ -23,7 +23,7 @@ df_0 = df_0.fillna(-5)
 df = df_0.copy()
 df = shuffle(df, random_state=random_state)
 
-X = df[['gene_id_sno', 'combined_box_hamming']]
+X = df.drop('label', axis=1)
 y = df['label']
 
 # Configure the cross-validation strategy (StratifiedKFold where k=10)

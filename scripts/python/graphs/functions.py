@@ -42,6 +42,22 @@ def heatmap(df, col_color_dict, category, category2, cmap, cbar_label, path, **k
     plt.savefig(path, bbox_inches='tight', dpi=900)
 
 
+def heatmap_simple(df, cmap, cbar_label, path, **kwargs):
+    """
+    Creates a simple clustered heatmap.
+    """
+
+    plt.rcParams['svg.fonttype'] = 'none'
+
+    # Create the heatmap (clustered by rows and columns)
+    graph = sns.clustermap(df, cmap=cmap, xticklabels=True, yticklabels=True, **kwargs)
+    plt.xlabel(xlabel=cbar_label, labelpad=-2)
+    #plt.setp(graph.ax_heatmap.xaxis.get_ticklabels(), rotation=90, fontsize=2)
+
+
+    plt.savefig(path, bbox_inches='tight', dpi=600)
+
+
 def donut_2(counts, labels, colors, title, legend_labels, legend_colors, path,
             **kwargs):
     """
@@ -385,7 +401,25 @@ def violin(df, x_col, y_col, hue_violin, hue_swarm, xlabel, ylabel, title, violi
     plt.savefig(path, bbox_inches='tight', dpi=600)
 
 
-def bar_from_lst_of_lst(list_of_list, bar_positions, bar_colors, xticklabels, xlabel, ylabel, hue_list, path, **kwargs):
+def violin_wo_swarm(df, x_col, y_col, hue_violin, xlabel, ylabel, title, violin_colors, path, **kwargs):
+    """
+    Create a violin plot.
+    """
+    rc={'ytick.labelsize': 30, 'xtick.labelsize': 25, 'legend.fontsize':25}
+    plt.rcParams.update(**rc)
+    plt.rcParams['svg.fonttype'] = 'none'
+    sns.set_context(rc=rc)
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    ax = sns.violinplot(data=df, x=x_col, y=y_col, hue=hue_violin, palette=violin_colors, scale='count', cut=0, **kwargs)
+    plt.title(title)
+    plt.xlabel(xlabel, fontsize=40)
+    plt.ylabel(ylabel, fontsize=40)
+
+    plt.savefig(path, bbox_inches='tight', dpi=600)
+
+
+def bar_from_lst_of_lst(list_of_list, bar_positions, bar_colors, width, xticklabels, xlabel, ylabel, hue_list, path, **kwargs):
     """
     Creates a grouped bar chart from a list of lists. Width is generally of 0.3 if the hue is of 2 possibilities) and
     bar_positions is generally equal to [0.15, 0.45] (for 2 bars per tick).
@@ -398,10 +432,10 @@ def bar_from_lst_of_lst(list_of_list, bar_positions, bar_colors, xticklabels, xl
     for i, type in enumerate(list_of_list):
         x_pos = np.arange(len(type))
         x_pos_i = [x + bar_positions[i] for x in x_pos]
-        plt.bar(x_pos_i, type, color=bar_colors[i], width=0.3, **kwargs)
+        plt.bar(x_pos_i, type, color=bar_colors[i], width=width, **kwargs)
 
     #plt.yscale('log')
-    plt.xticks([r + 0.3 for r in range(len(type))], xticklabels, fontsize=21, rotation=90)
+    plt.xticks([r + width for r in range(len(type))], xticklabels, fontsize=21, rotation=90)
     plt.xlabel(xlabel, fontsize=30)
     plt.ylabel(ylabel, fontsize=30)
 
@@ -463,7 +497,7 @@ def stacked_bar(lists, x_tick_labels, labels, title, xlabel, ylabel, colors, pat
 
     ax = df.plot.bar(stacked=True, figsize=(12,8), color=colors, **kwargs)
     ax.set_xticklabels(x_tick_labels, rotation=0)
-    plt.legend(fontsize=35, loc=5, bbox_to_anchor=(0.5, 1.25))
+    plt.legend(fontsize=35, loc=5, bbox_to_anchor=(0.75, 1.25))
     plt.title(title)
     plt.xlabel(xlabel, fontsize=40)
     plt.ylabel(ylabel, fontsize=40)
@@ -706,6 +740,16 @@ def make_autopct(values):
         return '{v:d} \n ({p:.1f}%)'.format(p=pct,v=val)
     return my_autopct
 
+def fisher_contingency(group1, group2, col, crit):
+    count1a = len(group1[group1[col] == crit])
+    count1b = len(group1[group1[col] != crit])
+    count2a = len(group2[group2[col] == crit])
+    count2b = len(group2[group2[col] != crit])
+
+    dict = {'group1': [count1a, count1b], 'group2': [count2a, count2b]}
+    table = pd.DataFrame(data=dict, index=[crit, '!= '+crit])
+    print(table)
+    return table
 
 '''
 def violin_df(df_list, common_col_str, criteria):

@@ -5,6 +5,8 @@ channels:
 dependencies:
   - python = 3.6.13
   - matplotlib = 3.3.4
+  - seaborn =0.11.1
   - pandas = 1.1.5
   - numpy = 1.19.5
+  - scipy =1.5.2
   - logomaker = 0.8

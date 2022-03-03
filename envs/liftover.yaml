@@ -1,0 +1,5 @@
+channels:
+  - default
+  - bioconda
+dependencies:
+  - ucsc-liftover

@@ -93,3 +93,58 @@ rule eclip_encode_download:
         "wget -O temp_bigbed_2.bb {params.link_bed_file_2} && "
         "bigBedToBed temp_bigbed_2.bb {output.bed_file_2} && "
         "rm temp_bigbed_*"
+
+rule liftover_chain_file_download:
+    """ Download the chain file (hg19 to hg38) needed for the liftover of par-clip beds"""
+    output:
+        liftover_chain_file = config['path']['liftover_chain_file']
+    params:
+        link_chain_file = config['download']['liftover_chain_file']
+    shell:
+        "wget -O {output.liftover_chain_file}.gz {params.link_chain_file} && "
+        "gunzip {output.liftover_chain_file}"
+
+rule par_clip_download:
+    """ Download the PAR-CLIP datasets of NOP58, NOP56, FBL and DKC1 from the
+        Kishore et al. 2013 Genome Biology paper. Sort them by chr and start."""
+    input:
+        chain_file = rules.liftover_chain_file_download.output.liftover_chain_file
+    output:
+        bed_nop58_repA = config['path']['NOP58_repA_par_clip'],
+        bed_nop58_repB = config['path']['NOP58_repB_par_clip'],
+        bed_nop56 = config['path']['NOP56_par_clip'],
+        bed_fbl = config['path']['FBL_par_clip'],
+        bed_fbl_mnase = config['path']['FBL_mnase_par_clip'],
+        bed_dkc1 = config['path']['DKC1_par_clip']
+    params:
+        link_bed_nop58_repA = config['download']['NOP58_repA_par_clip'],
+        link_bed_nop58_repB = config['download']['NOP58_repB_par_clip'],
+        link_bed_nop56 = config['download']['NOP56_par_clip'],
+        link_bed_fbl = config['download']['FBL_par_clip'],
+        link_bed_fbl_mnase = config['download']['FBL_mnase_par_clip'],
+        link_bed_dkc1 = config['download']['DKC1_par_clip']
+    conda:
+        "../envs/liftover.yaml"
+    shell:
+        "paths=$(echo {params}) && "
+        "arr=(${{paths// / }}) && "
+        "outputs=$(echo {output}) && "
+        "arr_outputs=(${{outputs// / }}) && "
+        "for index in ${{!arr[@]}}; do "
+        "echo $index; "
+        "echo ${{arr[$index]}}; "
+        "wget -O temp_par${{index}}.gz ${{arr[$index]}}; "
+        "gunzip temp_par${{index}}.gz; "
+        "liftOver temp_par${{index}} {input.chain_file} temp_liftover${{index}} unmapped_${{index}}; "
+        "sort -k1,1 -k2,2n temp_liftover${{index}} > ${{arr_outputs[$index]}}; "
+        "done; "
+        "rm temp_par* && rm temp_liftover* && rm unmapped_*"
+
+rule sashimi_script_download:
+    """ Download the script needed to create sashimi plots."""
+    output:
+        sashimi_script = config['path']['sashimi_script']
+    params:
+        link = config['download']['sashimi_script']
+    shell:
+        "wget {params.link} -O {output.sashimi_script} && chmod u+x {output.sashimi_script}"

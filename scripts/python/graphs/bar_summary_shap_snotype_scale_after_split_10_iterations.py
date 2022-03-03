@@ -9,6 +9,7 @@ import numpy as np
 X_train_all = snakemake.input.X_train
 X_test_all = snakemake.input.X_test
 model_all = snakemake.input.pickled_trained_model
+model_all = [path for path in model_all if snakemake.wildcards.models3 in path]
 feature_df = pd.read_csv(snakemake.input.df, sep='\t')
 cd_sno = feature_df[feature_df['sno_type'] == 'C/D']['gene_id_sno'].to_list()
 haca_sno = feature_df[feature_df['sno_type'] == 'H/ACA']['gene_id_sno'].to_list()

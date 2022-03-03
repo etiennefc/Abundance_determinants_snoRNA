@@ -9,6 +9,7 @@ include: "terminal_stem.smk"
 include: "structure.smk"
 include: "cv_train_test_10_iterations.smk"
 include: "cv_train_test_10_iterations_only_hamming.smk"
+include: "cv_train_test_manual_split.smk"
 
 rule modify_shap:
     """ Modify SHAP summary plot script (within _beewswarm.py) so that it sorts
@@ -90,9 +91,9 @@ rule scatter_accuracies_10_iterations_only_hamming:
         iterations. These models were trained using only the combined_box_hamming
         feature."""
         input:
-            cv_accuracy = expand(rules.hyperparameter_tuning_cv_scale_after_split_10_iterations_only_hamming.output.best_hyperparameters, **config),
-            training_accuracy = expand(rules.train_models_scale_after_split_10_iterations_only_hamming.output.training_accuracy, **config),
-            test_accuracy = expand(rules.test_models_scale_after_split_10_iterations_only_hamming.output.test_accuracy, **config)
+            cv_accuracy = expand(rules.hyperparameter_tuning_cv_scale_after_manual_split_only_hamming.output.best_hyperparameters, **config),
+            training_accuracy = expand(rules.train_models_scale_after_manual_split_only_hamming.output.training_accuracy, **config),
+            test_accuracy = expand(rules.test_models_scale_after_manual_split_only_hamming.output.test_accuracy, **config)
         output:
             scatter = os.path.join(config['figures']['scatter'],
                         'all_model_accuracies_cv_train_test_10_iterations_only_hamming.svg')
@@ -130,6 +131,25 @@ rule scatter_accuracies_20_iterations:
             colors = config['colors_complex']['model_colors']
         script:
             "../scripts/python/graphs/scatter_accuracies_20_iterations.py"
+
+rule scatter_accuracies_manual_split_iterations:
+    """ Generate a connected scatter plot for each model to show their accuracy
+        of prediction on the CV, training and test sets to highlight possible
+        overfitting. Show the average accuracy plus std deviation across all 10
+        manual split iterations."""
+        input:
+            cv_accuracy = expand(rules.hyperparameter_tuning_cv_scale_after_manual_split.output.best_hyperparameters, **config),
+            training_accuracy = expand(rules.train_models_scale_after_manual_split.output.training_accuracy, **config),
+            test_accuracy = expand(rules.test_models_scale_after_manual_split.output.test_accuracy, **config)
+        output:
+            scatter = os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_manual_split_iterations.svg')
+        conda:
+            "../envs/python.yaml"
+        params:
+            colors = config['colors_complex']['model_colors']
+        script:
+            "../scripts/python/graphs/scatter_accuracies_10_iterations.py"
 
 rule roc_curve:
     """ Generate a roc curve for each trained model based on their performance
@@ -260,16 +280,35 @@ rule roc_curve_scale_after_split_10_iterations:
     script:
         "../scripts/python/graphs/roc_curve_scale_after_split_10_iterations.py"
 
+rule roc_curve_scale_after_manual_split:
+    """ Generate a roc curve for each trained model based on their performance
+        on the test dataset based on the CV, train, test sets scaled after they
+        were generated. Add a shadow of +/- 1 stdev around each model roc curve."""
+    input:
+        X_test = expand(rules.fill_na_feature_scaling_after_manual_split.output.test, **config),
+        y_test = expand(rules.fill_na_feature_scaling_after_manual_split.output.y_test, **config),
+        pickled_trained_model = expand(rules.train_models_scale_after_manual_split.output.pickled_trained_model,
+                                    manual_iteration=config['manual_iteration'], models2=config['models2'])
+    output:
+        roc_curve = os.path.join(config['figures']['roc'],
+                        'roc_curves_test_set_5_models_scale_after_manual_split.svg')
+    params:
+        model_colors_dict = config['colors_complex']['model_colors']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/roc_curve_scale_after_split_10_iterations.py"
+
 rule roc_curve_scale_after_split_10_iterations_only_hamming:
     """ Generate a roc curve for each trained model based on their performance
         on the test dataset based on the CV, train, test sets scaled after they
         were generated. Add a shadow of +/- 1 stdev around each model roc curve.
         These models were trained only with the feature combined_box_hamming."""
     input:
-        X_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations_only_hamming.output.test, **config),
-        y_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations_only_hamming.output.y_test, **config),
-        pickled_trained_model = expand(rules.train_models_scale_after_split_10_iterations_only_hamming.output.pickled_trained_model,
-                                    iteration=config['iteration'], models2=config['models2'])
+        X_test = expand(rules.fill_na_feature_scaling_after_manual_split_only_hamming.output.test, **config),
+        y_test = expand(rules.fill_na_feature_scaling_after_manual_split_only_hamming.output.y_test, **config),
+        pickled_trained_model = expand(rules.train_models_scale_after_manual_split_only_hamming.output.pickled_trained_model,
+                                    manual_iteration=config['manual_iteration'], models2=config['models2'])
     output:
         roc_curve = os.path.join(config['figures']['roc'],
                         'roc_curves_test_set_5_models_scale_after_split_10_iterations_only_hamming.svg')
@@ -334,7 +373,7 @@ rule shap_global_snotype_scale_after_split_10_iterations:
         the prediction of either C/D or H/ACA snoRNA abundance status in the
         test set across 10 iterations combined."""
     input:
-        fake_log = "log/modify_shap.log",
+        fake_log = rules.modify_shap.output.fake_log,
         X_train = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.train, **config),
         X_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.test, **config),
         df = rules.merge_feature_df.output.feature_df,
@@ -426,7 +465,7 @@ rule bar_shap_global_snotype_scale_after_split_10_iterations:
         the prediction of either C/D or H/ACA snoRNA abundance status in the
         test set across 10 iterations combined."""
     input:
-        fake_log = "log/modify_shap.log",
+        fake_log = rules.modify_shap.output.fake_log,
         X_train = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.train, **config),
         X_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.test, **config),
         df = rules.merge_feature_df.output.feature_df,
@@ -485,7 +524,7 @@ rule upset_models_confusion_scale_after_split_10_iterations:
     """ Create an upset plot per confusion matrix value (TN, FN, FP and TP) to
         compare the number of common snoRNAs (mis)classified by each model.
         Return also a merged df of all confusion matrices values (for all models
-        in one df) (output hardcoded within script). RF is excluded due to overfitting."""
+        in one df) (output hardcoded within script). GBM and KNN are excluded due to overfitting."""
     input:
         log_reg = expand(rules.confusion_matrix_f1_scale_after_split_10_iterations.output.info_df,
                         iteration=config['iteration'], models2='log_reg', allow_missing=True),
@@ -499,6 +538,29 @@ rule upset_models_confusion_scale_after_split_10_iterations:
     output:
         upset = os.path.join(config['figures']['upset'],
                         '{confusion_value}_all_models_scale_after_split_10_iterations.svg')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/upset_per_confusion_value_10_iterations.py"
+
+rule upset_models_confusion_scale_after_manual_split:
+    """ Create an upset plot per confusion matrix value (TN, FN, FP and TP) to
+        compare the number of common snoRNAs (mis)classified by each model.
+        Return also a merged df of all confusion matrices values (for all models
+        in one df) (output hardcoded within script). GBM and KNN are excluded due to overfitting."""
+    input:
+        log_reg = expand(rules.confusion_matrix_f1_scale_after_manual_split.output.info_df,
+                        manual_iteration=config['manual_iteration'], models2='log_reg', allow_missing=True),
+        svc = expand(rules.confusion_matrix_f1_scale_after_manual_split.output.info_df,
+                        manual_iteration=config['manual_iteration'], models2='svc', allow_missing=True),
+        rf = expand(rules.confusion_matrix_f1_scale_after_manual_split.output.info_df,
+                        manual_iteration=config['manual_iteration'], models2='rf', allow_missing=True)
+    params:
+        df_output_path = expand("results/tables/confusion_matrix_f1/merged_confusion_matrix_{manual_iteration}.tsv",
+                                manual_iteration=config['manual_iteration'])
+    output:
+        upset = os.path.join(config['figures']['upset'],
+                        '{confusion_value}_all_models_scale_after_manual_split.svg')
     conda:
         "../envs/python.yaml"
     script:
@@ -567,6 +629,7 @@ rule concat_feature_rank_iterations_df:
         "../envs/python.yaml"
     script:
         "../scripts/python/concat_feature_rank_iterations_df.py"
+
 
 rule violin_feature_rank:
     """ Create a violin plot where each violin on the x axis corresponds to one
@@ -815,6 +878,7 @@ rule shap_local_TP_scale_after_split:
         shap_local_TP_log = "log/shap_local_TP_{models2}_scale_after_split.log"
     script:
         "../scripts/python/graphs/decision_plot_TP_scale_after_split.py"
+
 
 rule structure_snora77b:
     """ Generate with RNAfold the structure of SNORA77B (ENSG00000264346) and
@@ -1076,3 +1140,154 @@ rule cat_feature_distribution_comparison_confusion_value_top10_snotype:
         "../envs/python.yaml"
     script:
         "../scripts/python/graphs/cat_feature_distribution_comparison_confusion_value_top10_snotype.py"
+
+rule get_all_shap_values:
+    """ Get the SHAP values of all features for each snoRNA across the 10 test
+        set iterations and for each model (log_reg, svc and rf). Shap values are
+        given in the form of log(odds) not probability."""
+    input:
+        X_train = rules.fill_na_feature_scaling_after_split_10_iterations.output.train,
+        X_test = rules.fill_na_feature_scaling_after_split_10_iterations.output.test,
+        pickled_trained_model = rules.train_models_scale_after_split_10_iterations.output.pickled_trained_model
+    output:
+        shap = os.path.join(config['path']['shap_10_iterations'], '{models2}_{iteration}_shap_values.tsv'),
+        expected_value = os.path.join(config['path']['shap_10_iterations'], '{models2}_{iteration}_expected_value.tsv')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/get_all_shap_values.py"
+
+rule get_all_shap_values_manual_split:
+    """ Get the SHAP values of all features for each snoRNA across the 10 test
+        set manual split iterations and for each model (log_reg, svc and rf). Shap values are
+        given in the form of log(odds) not probability."""
+    input:
+        X_train = rules.fill_na_feature_scaling_after_manual_split.output.train,
+        X_test = rules.fill_na_feature_scaling_after_manual_split.output.test,
+        pickled_trained_model = rules.train_models_scale_after_manual_split.output.pickled_trained_model
+    output:
+        shap = os.path.join(config['path']['shap_10_iterations'], '{models2}_{manual_iteration}_shap_values.tsv'),
+        expected_value = os.path.join(config['path']['shap_10_iterations'], '{models2}_{manual_iteration}_expected_value.tsv')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/get_all_shap_values_manual_split.py"
+
+rule all_feature_rank_df_manual_split:
+    """ Create a dataframe containing the rank of importance for each feature
+        and per model for all 10 manual iterations."""
+    input:
+        shap_vals = expand(rules.get_all_shap_values_manual_split.output.shap,
+                                    models2=config['models3'], allow_missing=True)
+    output:
+        rank_features_df = "results/tables/all_features_rank_across_models_{manual_iteration}.tsv"
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/all_feature_rank_df_manual_split.py"
+
+
+rule concat_feature_rank_manual_split_iterations_df:
+    """ Concat all dfs produced by the all_feature_rank_df_manual_split rule
+        into one df containing all iterations."""
+    input:
+        dfs = expand(rules.all_feature_rank_df_manual_split.output.rank_features_df,
+                    manual_iteration=config['manual_iteration'])
+    output:
+        concat_df = config['path']['all_feature_rank_df_manual_split']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/concat_feature_rank_iterations_df.py"
+
+rule violin_feature_rank_manual_split:
+    """ Create a violin plot where each violin on the x axis corresponds to one
+        feature and where the distribution of ranks (across 3 models and their
+        10 respective manual iterations) is represented on the y axis."""
+    input:
+        rank_features_df = rules.concat_feature_rank_manual_split_iterations_df.output.concat_df
+    output:
+        violin = os.path.join(config['figures']['violin'], 'ranks_per_feature_manual_split_iterations.svg')
+    params:
+        model_colors = config['colors_complex']['model_colors']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/violin_feature_rank_manual_split.py"
+
+rule decision_plot_scale_after_split_10_iterations_per_confusion_value:
+    """ Explain locally (per snoRNA) the decision taken by the 3 classifiers
+        using SHAP on the confusion value (FN, FP, TN or TP) examples present across the 10
+        iterations and that are common to all models."""
+    input:
+        shap_values = expand(rules.get_all_shap_values.output.shap, models2=config['models3'], iteration=config['iteration']),
+        expected_value = expand(rules.get_all_shap_values.output.expected_value, models2=config['models3'], iteration=config['iteration']),
+        sno_per_confusion_value = expand(rules.regroup_sno_confusion_value_iterations.output.sno_per_confusion_value, **config)
+    output:
+        shap_local_log_reg = os.path.join(config['figures']['decision_plot_10_iterations'], '{confusion_value}_10_iterations_log_reg.svg'),
+        shap_local_svc = os.path.join(config['figures']['decision_plot_10_iterations'], '{confusion_value}_10_iterations_svc.svg'),
+        shap_local_rf = os.path.join(config['figures']['decision_plot_10_iterations'], '{confusion_value}_10_iterations_rf.svg')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/decision_plot_scale_after_split_10_iterations_per_confusion_value.py"
+
+rule concat_all_shap_values:
+    """ Concat all the SHAP values across the 10 test set iterations into one
+        per model and confusion value."""
+    input:
+        all_shap = expand(rules.get_all_shap_values.output.shap, iteration=config['iteration'], allow_missing=True),
+        sno_per_confusion_value = expand(rules.regroup_sno_confusion_value_iterations.output.sno_per_confusion_value, **config)
+    output:
+        concat_shap = os.path.join(config['path']['shap_10_iterations'], '{models2}_{confusion_value}_shap_values_concat.tsv')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/concat_all_shap_values.py"
+
+rule density_FP_vs_TN_host_expressed:
+    """ Compare the distribution of terminal_stem_mfe, combined_box_hamming and
+        sno_mfe between all real FP (which all have an expressed HG) and all TN
+        that have an expressed HG. """
+    input:
+        sno_per_confusion_value = expand(rules.regroup_sno_confusion_value_iterations.output.sno_per_confusion_value, **config),
+        all_features_df = config['path']['feature_df']
+    output:
+        density = os.path.join(config['figures']['density_confusion_value'],
+                                "host_expressed_FP_vs_TN_{top_10_numerical_features}.svg")
+    params:
+        color_dict = config['colors_complex']['confusion_value']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/density_FP_vs_TN_host_expressed.py"
+
+rule real_confusion_value_df:
+    """ For each confusion value, get only the real snoRNAs (those always
+        predicted as such) and their feature values."""
+    input:
+        sno_per_confusion_value = expand(rules.regroup_sno_confusion_value_iterations.output.sno_per_confusion_value, **config),
+        all_features_df = config['path']['feature_df']
+    output:
+        real_confusion_value_df = os.path.join(config['path']['real_confusion_value'], '{confusion_value}_w_features.tsv')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/real_confusion_value_df.py"
+
+rule violin_tpm_FN_TP:
+    """ Create a violin plot of the log2(TPM) for all real false negatives (FN)
+        vs all real true positives (TP) vs all TN vs all FP ("real" meaning that these snoRNAs are
+        always predicted as their confusion value across models and iterations)."""
+    input:
+        sno_per_confusion_value = expand(rules.real_confusion_value_df.output.real_confusion_value_df,
+                                            **config),
+        tpm_df = config['path']['sno_tpm_df_cutoff']
+    output:
+        violin = os.path.join(config['figures']['violin'], "FN_vs_TP_vs_TP_vs_FP_tpm.svg")
+    params:
+        color_dict = config['colors_complex']['confusion_value']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/violin_tpm_FN_TP.py"

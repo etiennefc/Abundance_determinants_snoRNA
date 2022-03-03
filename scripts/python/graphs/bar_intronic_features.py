@@ -29,7 +29,7 @@ haca = df[df['sno_type'] == 'H/ACA']
 counts_cd = ft.count_list_x_unsorted(cd, list(snakemake.params.hue_color.keys()),
                 'abundance_cutoff_2', labels, feature+'_range')
 
-ft.bar_from_lst_of_lst(counts_cd, [0.15, 0.45], list(snakemake.params.hue_color.values()), labels,
+ft.bar_from_lst_of_lst(counts_cd, [0.15, 0.45], list(snakemake.params.hue_color.values()), 0.3, labels,
                         feature+'_range', "Number of snoRNAs",
                         list(snakemake.params.hue_color.keys()), snakemake.output.bar_cd)
 
@@ -38,6 +38,6 @@ ft.bar_from_lst_of_lst(counts_cd, [0.15, 0.45], list(snakemake.params.hue_color.
 counts_haca = ft.count_list_x_unsorted(haca, list(snakemake.params.hue_color.keys()),
                 'abundance_cutoff_2', labels, feature+'_range')
 
-ft.bar_from_lst_of_lst(counts_haca, [0.15, 0.45], list(snakemake.params.hue_color.values()), labels,
+ft.bar_from_lst_of_lst(counts_haca, [0.15, 0.45], list(snakemake.params.hue_color.values()), 0.3, labels,
                         feature+'_range', "Number of snoRNAs",
                         list(snakemake.params.hue_color.keys()), snakemake.output.bar_haca)
