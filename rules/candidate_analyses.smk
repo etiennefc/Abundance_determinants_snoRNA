@@ -1,5 +1,6 @@
 import os
 include: "figures_model_output.smk"
+include: "cv_train_test_manual_split.smk"
 include: "downloads.smk"
 
 rule filter_bam:
@@ -61,16 +62,61 @@ rule bar_FP_vs_TN_multi_HG_different_labels:
     script:
         "../scripts/python/graphs/bar_FP_vs_TN_multi_HG_different_labels.py"
 
-rule decision_plot_snora77b:
-    """ Create a decision plot for all models and iterataions that SNORA77b is
-        present in."""
+rule decision_plot_interesting_snoRNAs:
+    """ Create a decision plot for intersting snoRNAs (ex: SNORA77B, SNORD86) (for all models)."""
     input:
-        shap_val = expand(rules.get_all_shap_values.output.shap, iteration=config['iteration'], models2=config['models3'])
+        X_test = expand(rules.fill_na_feature_scaling_after_manual_split.output.test, manual_iteration=config['manual_iteration']),
+        shap_values = expand(rules.get_all_shap_values_manual_split.output.shap, manual_iteration=config['manual_iteration'], allow_missing=True),
+        expected_values = expand(rules.get_all_shap_values_manual_split.output.expected_value, manual_iteration=config['manual_iteration'], allow_missing=True)
     output:
-        fake_log = 'log/fake_log_snora77b.log'
+        decision_plot = os.path.join(config['figures']['decision_plot_interesting_snoRNAs'], '{interesting_sno_ids}_{models2}.svg')
     params:
-        decision_plot_dir = config['figures']['decision_plot_snora77b']
+        colors_dict = config['colors_complex']['abundance_cutoff_2']
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/python/graphs/decision_plot_snora77b.py"
+        "../scripts/python/graphs/decision_plot_interesting_snoRNAs.py"
+
+rule decision_plot_multi_HG_snoRNAs:
+    """ Create a decision plot containing all snoRNAs in GAS5 and SNHG17 (multi HG with
+        snoRNAs with different labels)."""
+    input:
+        shap_values = expand(rules.get_all_shap_values_manual_split.output.shap,
+                        manual_iteration=config['manual_iteration'], allow_missing=True),
+        expected_values = expand(rules.get_all_shap_values_manual_split.output.expected_value,
+                        manual_iteration=config['manual_iteration'], allow_missing=True)
+    output:
+        decision_plot = os.path.join(config['figures']['decision_plot'], '{multi_HG_diff_label}_snoRNAs_{models2}.svg')
+    params:
+        sno_ids = lambda wildcards: config['multi_HG_sno_ids'][wildcards.multi_HG_diff_label],
+        colors_dict = config['colors_complex']['abundance_cutoff_2']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/decision_plot_multi_HG_snoRNAs.py"
+
+rule pie_donut_multi_HG_snoRNAs:
+    """ Create different pie chart showing mono vs multi_HG, multi-HG with same
+        vs different snoRNA labels and a donut chart showing multi_hg with
+        different labels that are 50/50 expressed-not_expressed vs debalanced
+        (outer donut) and the confusion_value proportions (inner_value)."""
+    input:
+        df = rules.merge_feature_df.output.feature_df,
+        host_df = config['path']['host_gene_df'],
+        multi_HG_different_label_snoRNAs = rules.multi_HG_different_label_snoRNAs.output.multi_HG_different_label_snoRNAs,
+        fake_dependency = expand(rules.confusion_matrix_f1_scale_after_manual_split.output.info_df,
+                                manual_iteration=config['manual_iteration'], models2='log_reg', allow_missing=True)
+    output:
+        pie = os.path.join(config['figures']['pie'], 'mono_vs_multi_HG.svg'),
+        donut = os.path.join(config['figures']['donut'], 'multi_HG_diff_sno_labels_proportion_and_confusion_value.svg')
+    params:
+        merged_confusion_values = expand("results/tables/confusion_matrix_f1/merged_confusion_matrix_{manual_iteration}.tsv",
+                                manual_iteration=config['manual_iteration']),
+        mono_vs_multi_HG_colors = config['colors_complex']['mono_vs_multi_HG'],
+        multi_HG_labels_colors = config['colors_complex']['multi_HG_labels'],
+        multi_HG_same_labels_proportion_colors = config['colors_complex']['multi_HG_same_labels_proportion'],
+        multi_HG_diff_labels_proportion_colors = config['colors_complex']['multi_HG_diff_labels_proportion']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/pie_donut_multi_HG_snoRNAs.py"

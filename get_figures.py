@@ -34,6 +34,21 @@ def get_figures_path(config):
     files.extend(expand(os.path.join(config['figures']['upset'],
                     '{confusion_value}_all_models_scale_after_manual_split.svg'), **config))
 
+    # SHAP summary plot of all 10 manual split iterations per sno type (dot plot and bar plot)
+    files.extend(expand(os.path.join(config['figures']['summary_shap_snotype'],
+                                '{models2}_{sno_type}_test_set_scale_after_manual_split.svg'), **config))
+    files.extend(expand(os.path.join(config['figures']['bar'],
+                    '{models2}_{sno_type}_test_set_scale_after_manual_split.svg'), **config))
+
+    # Multi Decision plot of snoRNAs in GAS5 or SNHG17
+    files.extend(expand(os.path.join(config['figures']['decision_plot'], '{multi_HG_diff_label}_snoRNAs_{models2}.svg'), **config))
+
+    # Pie and donut charts for mono vs multi HG with different snoRNA labels within the same HG
+    files.append(os.path.join(config['figures']['pie'], 'mono_vs_multi_HG.svg'))
+
+    # Decision plots for potential interesting snoRNAS (ex: SNORA77B, SNORD86)
+    files.extend(expand(os.path.join(config['figures']['decision_plot_interesting_snoRNAs'], '{interesting_sno_ids}_{models2}.svg'), **config))
+    
     # Connected scatter plot of average accuracies of all models in CV, train and test sets across 20 iterations
     #files.append(os.path.join(config['figures']['scatter'], 'all_model_accuracies_cv_train_test_20_iterations.svg'))
 

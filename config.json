@@ -72,6 +72,13 @@
   "models3": ["log_reg", "svc", "rf"],
   "sno_type": ["CD", "HACA"],
   "hg_biotype": ["intronic", "intergenic"],
+  "multi_HG_diff_label": ["GAS5", "SNHG17"],
+  "multi_HG_sno_ids":
+  {
+    "GAS5": ["NR_002579", "NR_002746", "NR_002750", "NR_003938", "NR_003939", "NR_003940", "NR_003941", "NR_003942", "NR_003943", "NR_003944", "NR_132783"],
+    "SNHG17": ["ENSG00000200354", "ENSG00000201512", "ENSG00000225091", "ENSG00000235408", "ENSG00000277034"]
+  },
+  "interesting_sno_ids": ["ENSG00000264346", "ENSG00000212498"],
   "confusion_value": ["TN", "FP", "FN", "TP"],
   "FN": ["ENSG00000201240", "ENSG00000221102", "cluster_672",
         "ENSG00000221164", "ENSG00000201247", "ENSG00000199666",
@@ -319,6 +326,7 @@
     "decision_plot_TN_scale_after_split": "results/figures/decision_plot/scale_after_split/true_negatives/",
     "decision_plot_10_iterations": "results/figures/decision_plot/10_iterations/",
     "decision_plot_snora77b": "results/figures/decision_plot_snora77b/",
+    "decision_plot_interesting_snoRNAs": "results/figures/decision_plot_interesting_snoRNAs/",
     "upset": "results/figures/upset/",
     "scatter": "results/figures/scatter/",
     "violin": "results/figures/violin",
@@ -441,10 +449,26 @@
       "True": "#000000",
       "False": "#525252"
     },
+    "mono_vs_multi_HG":
+    {
+      "mono_HG": "#1f78b4",
+      "multi_HG": "#a6cee3"
+    },
     "multi_HG_labels":
     {
-      "HG_different_snoRNA_labels": "#1f78b4",
-      "HG_same_snoRNA_labels": "#a6cee3"
+      "HG_same_snoRNA_labels": "#525252",
+      "HG_different_snoRNA_labels": "#d9d9d9"
+    },
+    "multi_HG_same_labels_proportion":
+    {
+      "all_expressed": "#ae017e",
+      "all_not_expressed": "#fa9fb5"
+    },
+    "multi_HG_diff_labels_proportion":
+    {
+      "half_expressed_not_expressed": "#4a1486",
+      "more_expressed": "#807dba",
+      "more_not_expressed": "#bcbddc"
     },
     "found_motif":
     {

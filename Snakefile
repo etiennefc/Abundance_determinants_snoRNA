@@ -20,7 +20,8 @@ wildcard_constraints:
     manual_iteration = "({})".format("|".join(config["manual_iteration"])),
     top_10_numerical_features = "({})".format("|".join(config["top_10_numerical_features"])),
     top_10_categorical_features = "({})".format("|".join(config["top_10_categorical_features"])),
-    comparison_confusion_val = "({})".format("|".join(config["comparison_confusion_val"]))
+    comparison_confusion_val = "({})".format("|".join(config["comparison_confusion_val"])),
+    interesting_sno_ids = "({})".format("|".join(config["interesting_sno_ids"]))
 
 #Include data processing rules to generate the dataset
 include: "rules/data_processing.smk"

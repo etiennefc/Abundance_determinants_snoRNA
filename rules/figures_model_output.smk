@@ -367,26 +367,6 @@ rule shap_global_snotype_scale_after_split:
     script:
         "../scripts/python/graphs/summary_shap_snotype_scale_after_split.py"
 
-rule shap_global_snotype_scale_after_split_10_iterations:
-    """ Generate a summary plot based on SHAP values (Shapley additive
-        explanations) for each model explaining the effect of all features on
-        the prediction of either C/D or H/ACA snoRNA abundance status in the
-        test set across 10 iterations combined."""
-    input:
-        fake_log = rules.modify_shap.output.fake_log,
-        X_train = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.train, **config),
-        X_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.test, **config),
-        df = rules.merge_feature_df.output.feature_df,
-        pickled_trained_model = expand(rules.train_models_scale_after_split_10_iterations.output.pickled_trained_model,
-                                    iteration=config['iteration'], models2=config['models3'], allow_missing=True)
-    output:
-        summary_plot = os.path.join(config['figures']['summary_shap_snotype'],
-                        '{models3}_{sno_type}_test_set_100_background_scale_after_split_10_iterations.svg')
-    conda:
-        "../envs/python.yaml"
-    script:
-        "../scripts/python/graphs/summary_shap_snotype_scale_after_split_10_iterations.py"
-
 rule shap_global_hg_biotype:
     """ Generate a summary plot based on SHAP values (Shapley additive
         explanations) for each model explaining the effect of all features on
@@ -458,27 +438,6 @@ rule global_bar_plot_scale_after_split:
                         '{models2}_global_feature_importance_scale_after_split.svg')
     script:
         "../scripts/python/graphs/global_shap_bar_plot_scale_after_split.py"
-
-rule bar_shap_global_snotype_scale_after_split_10_iterations:
-    """ Generate a summary plot based on SHAP values (Shapley additive
-        explanations) for each model explaining the effect of all features on
-        the prediction of either C/D or H/ACA snoRNA abundance status in the
-        test set across 10 iterations combined."""
-    input:
-        fake_log = rules.modify_shap.output.fake_log,
-        X_train = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.train, **config),
-        X_test = expand(rules.fill_na_feature_scaling_after_split_10_iterations.output.test, **config),
-        df = rules.merge_feature_df.output.feature_df,
-        pickled_trained_model = expand(rules.train_models_scale_after_split_10_iterations.output.pickled_trained_model,
-                                    iteration=config['iteration'], models2=config['models3'], allow_missing=True)
-    output:
-        summary_plot = os.path.join(config['figures']['bar'],
-                        '{models3}_{sno_type}_test_set_100_background_scale_after_split_10_iterations.svg')
-    conda:
-        "../envs/python.yaml"
-    script:
-        "../scripts/python/graphs/bar_summary_shap_snotype_scale_after_split_10_iterations.py"
-
 
 rule upset_models_confusion:
     """ Create an upset plot per confusion matrix value (TN, FN, FP and TP) to
@@ -1214,6 +1173,44 @@ rule violin_feature_rank_manual_split:
         "../envs/python.yaml"
     script:
         "../scripts/python/graphs/violin_feature_rank_manual_split.py"
+
+rule shap_global_snotype_scale_after_manual_split:
+    """ Generate a summary plot based on SHAP values (Shapley additive
+        explanations) for each model explaining the effect of all features on
+        the prediction of either C/D or H/ACA snoRNA abundance status in the
+        test set across 10 iterations combined."""
+    input:
+        fake_log = rules.modify_shap.output.fake_log,
+        X_test = expand(rules.fill_na_feature_scaling_after_manual_split.output.test, **config),
+        shap_values = expand(rules.get_all_shap_values_manual_split.output.shap,
+                        manual_iteration=config['manual_iteration'], allow_missing=True),
+        df = rules.merge_feature_df.output.feature_df
+    output:
+        summary_plot = os.path.join(config['figures']['summary_shap_snotype'],
+                        '{models2}_{sno_type}_test_set_scale_after_manual_split.svg')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/summary_shap_snotype_scale_after_manual_split.py"
+
+rule bar_shap_global_snotype_scale_after_split_10_iterations:
+    """ Generate a bar plot based on SHAP values (Shapley additive
+        explanations) for each model explaining the effect of all features on
+        the prediction of either C/D or H/ACA snoRNA abundance status in the
+        test set across 10 iterations combined."""
+    input:
+        fake_log = rules.modify_shap.output.fake_log,
+        X_test = expand(rules.fill_na_feature_scaling_after_manual_split.output.test, **config),
+        shap_values = expand(rules.get_all_shap_values_manual_split.output.shap,
+                        manual_iteration=config['manual_iteration'], allow_missing=True),
+        df = rules.merge_feature_df.output.feature_df
+    output:
+        summary_plot = os.path.join(config['figures']['bar'],
+                        '{models2}_{sno_type}_test_set_scale_after_manual_split.svg')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/bar_summary_shap_snotype_scale_after_manual_split.py"
 
 rule decision_plot_scale_after_split_10_iterations_per_confusion_value:
     """ Explain locally (per snoRNA) the decision taken by the 3 classifiers
