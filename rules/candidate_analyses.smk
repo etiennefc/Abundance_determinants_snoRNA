@@ -120,3 +120,22 @@ rule pie_donut_multi_HG_snoRNAs:
         "../envs/python.yaml"
     script:
         "../scripts/python/graphs/pie_donut_multi_HG_snoRNAs.py"
+
+rule hbar_nb_sno_per_confusion_val_HG:
+    """ Create a stacked horizontal bar chart where each bar corresponds to the
+        stacked number of snoRNAs in each confusion value. Sort the bars
+        according to if the snoRNAs have the same or different labels among the
+        HG and according to the expression categories (see pie_donut_multi_HG_snoRNAs)"""
+    input:
+        sno_per_confusion_value = rules.regroup_sno_confusion_value_manual_split.output.sno_per_confusion_value,
+        host_df = config['path']['host_gene_df'],
+        multi_HG_different_label_snoRNAs = rules.multi_HG_different_label_snoRNAs.output.multi_HG_different_label_snoRNAs,
+        feature_df = rules.merge_feature_df.output.feature_df
+    output:
+        hbar = os.path.join(config['figures']['hbar'], 'nb_sno_per_confusion_val_multi_HG.svg')
+    params:
+        color_dict = config['colors_complex']['confusion_value']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/hbar_nb_sno_per_confusion_val_HG.py"

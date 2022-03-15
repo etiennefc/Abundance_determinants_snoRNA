@@ -34,6 +34,9 @@ def get_figures_path(config):
     files.extend(expand(os.path.join(config['figures']['upset'],
                     '{confusion_value}_all_models_scale_after_manual_split.svg'), **config))
 
+    # Pie chart of the number of snoRNAs per confusion value (TP, TN, FP, FN)
+    files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value.svg'))
+
     # SHAP summary plot of all 10 manual split iterations per sno type (dot plot and bar plot)
     files.extend(expand(os.path.join(config['figures']['summary_shap_snotype'],
                                 '{models2}_{sno_type}_test_set_scale_after_manual_split.svg'), **config))
@@ -48,9 +51,32 @@ def get_figures_path(config):
 
     # Decision plots for potential interesting snoRNAS (ex: SNORA77B, SNORD86)
     files.extend(expand(os.path.join(config['figures']['decision_plot_interesting_snoRNAs'], '{interesting_sno_ids}_{models2}.svg'), **config))
-    
-    # Connected scatter plot of average accuracies of all models in CV, train and test sets across 20 iterations
-    #files.append(os.path.join(config['figures']['scatter'], 'all_model_accuracies_cv_train_test_20_iterations.svg'))
+
+    # Density plots to compare per confusion_value the top 10 numerical features distributions
+    files.extend(expand(os.path.join(config['figures']['density_confusion_value'],
+                                "confusion_value_comparison_{top_10_numerical_features}.svg"), **config))
+
+    # Bar plots to compare per confusion_value the top 10 categorical features distributions
+    files.extend(expand(os.path.join(config['figures']['bar_confusion_value'],
+                                "confusion_value_comparison_{top_10_categorical_features}.svg"), **config))
+
+    # Violin plot to show the log2(avg TPM) per confusion value
+    files.append(os.path.join(config['figures']['violin'], "avg_tpm_per_confusion_value.svg"))
+
+    # Horizontal stacked bar chart to show the number of sno per HG (per confusion value)
+    files.append(os.path.join(config['figures']['hbar'], 'nb_sno_per_confusion_val_multi_HG.svg'))
+
+    # ROC curve of models trained with top3 or top4 features
+    files.append(os.path.join(config['figures']['roc'],
+                        'roc_curves_test_set_5_models_scale_after_manual_split_top3.svg'))
+    files.append(os.path.join(config['figures']['roc'],
+                        'roc_curves_test_set_5_models_scale_after_manual_split_top4.svg'))
+
+    # Connected scatter plot of average accuracies of all models in CV, train and test sets across 10 iterations of models trained on top3 of top4 features
+    files.append(os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_manual_split_iterations_top3.svg'))
+    files.append(os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_manual_split_iterations_top4.svg'))
 
     # Violin plot showing the rank distribution in the 10 iterations across different features on the x-axis
     #files.append(os.path.join(config['figures']['violin'], 'ranks_per_feature_10_iterations.svg'))

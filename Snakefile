@@ -45,6 +45,8 @@ include: "rules/other_figures.smk"
 include: "rules/cv_train_test_10_iterations.smk"
 include: "rules/cv_train_test_10_iterations_only_hamming.smk"
 include: "rules/cv_train_test_manual_split.smk"
+include: "rules/cv_train_test_manual_split_top3.smk"
+include: "rules/cv_train_test_manual_split_top4.smk"
 #include: "rules/cv_train_test_20_iterations.smk"
 include: "rules/clip_seq.smk"
 include: "rules/candidate_analyses.smk"
@@ -90,6 +92,19 @@ rule all:
                                             '{models2}_training_accuracy_scale_after_split_only_hamming_{manual_iteration}.tsv'), **config),
         test_accuracy_only_hamming = expand(os.path.join(config['path']['test_accuracy'],
                                             '{models2}_test_accuracy_scale_after_split_only_hamming_{manual_iteration}.tsv'), **config),
+
+        # Train with only combined_box_hamming, sno_mfe and terminal_stem_mfe as features
+        training_accuracy_top3 = expand(os.path.join(config['path']['training_accuracy'],
+                                            '{models2}_training_accuracy_scale_after_split_top3_{manual_iteration}.tsv'), **config),
+        test_accuracy_top3 = expand(os.path.join(config['path']['test_accuracy'],
+                                            '{models2}_test_accuracy_scale_after_split_top3_{manual_iteration}.tsv'), **config),
+
+        # Train with only combined_box_hamming, sno_mfe, terminal_stem_mfe and host_expressed as features
+        training_accuracy_top4 = expand(os.path.join(config['path']['training_accuracy'],
+                                            '{models2}_training_accuracy_scale_after_split_top4_{manual_iteration}.tsv'), **config),
+        test_accuracy_top4 = expand(os.path.join(config['path']['test_accuracy'],
+                                            '{models2}_test_accuracy_scale_after_split_top4_{manual_iteration}.tsv'), **config),
+
         #sno_presence_test_sets = config['path']['sno_presence_test_sets'],
         #sno_per_confusion_value = expand(os.path.join(config['path']['sno_per_confusion_value'], '{confusion_value}_snoRNAs_10_iterations.tsv'), **config),
         #concat_shap = expand(os.path.join(config['path']['shap_10_iterations'], '{models2}_{confusion_value}_shap_values_concat.tsv'), **config),
@@ -100,6 +115,7 @@ rule all:
         mapped_snoRNA_bed = expand(os.path.join(config['path']['par_clip'], '{rbp}_mapped_to_snoRNAs.bed'),
                             rbp=['NOP58_repA', 'NOP58_repB', 'NOP56', 'FBL', 'FBL_mnase', 'DKC1']),
         multi_HG_different_label_snoRNAs = config['path']['multi_HG_different_label_snoRNAs'],
+        sno_per_confusion_value = config['path']['sno_per_confusion_value_manual_split']
         #fake_log2 = 'log/fake_log_snora77b.log'
         #hamming_distance_box_df = config['path']['hamming_distance_box_df'],
         #h_aca_box_location_expressed = config['path']['h_aca_box_location_expressed'],

@@ -10,6 +10,8 @@ include: "structure.smk"
 include: "cv_train_test_10_iterations.smk"
 include: "cv_train_test_10_iterations_only_hamming.smk"
 include: "cv_train_test_manual_split.smk"
+include: "cv_train_test_manual_split_top3.smk"
+include: "cv_train_test_manual_split_top4.smk"
 
 rule modify_shap:
     """ Modify SHAP summary plot script (within _beewswarm.py) so that it sorts
@@ -144,6 +146,44 @@ rule scatter_accuracies_manual_split_iterations:
         output:
             scatter = os.path.join(config['figures']['scatter'],
                         'all_model_accuracies_cv_train_test_manual_split_iterations.svg')
+        conda:
+            "../envs/python.yaml"
+        params:
+            colors = config['colors_complex']['model_colors']
+        script:
+            "../scripts/python/graphs/scatter_accuracies_10_iterations.py"
+
+rule scatter_accuracies_manual_split_iterations_top3:
+    """ Generate a connected scatter plot for each model to show their accuracy
+        of prediction on the CV, training and test sets to highlight possible
+        overfitting. Show the average accuracy plus std deviation across all 10
+        manual split iterations."""
+        input:
+            cv_accuracy = expand(rules.hyperparameter_tuning_cv_scale_after_manual_split_top3.output.best_hyperparameters, **config),
+            training_accuracy = expand(rules.train_models_scale_after_manual_split_top3.output.training_accuracy, **config),
+            test_accuracy = expand(rules.test_models_scale_after_manual_split_top3.output.test_accuracy, **config)
+        output:
+            scatter = os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_manual_split_iterations_top3.svg')
+        conda:
+            "../envs/python.yaml"
+        params:
+            colors = config['colors_complex']['model_colors']
+        script:
+            "../scripts/python/graphs/scatter_accuracies_10_iterations.py"
+
+rule scatter_accuracies_manual_split_iterations_top4:
+    """ Generate a connected scatter plot for each model to show their accuracy
+        of prediction on the CV, training and test sets to highlight possible
+        overfitting. Show the average accuracy plus std deviation across all 10
+        manual split iterations."""
+        input:
+            cv_accuracy = expand(rules.hyperparameter_tuning_cv_scale_after_manual_split_top4.output.best_hyperparameters, **config),
+            training_accuracy = expand(rules.train_models_scale_after_manual_split_top4.output.training_accuracy, **config),
+            test_accuracy = expand(rules.test_models_scale_after_manual_split_top4.output.test_accuracy, **config)
+        output:
+            scatter = os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_manual_split_iterations_top4.svg')
         conda:
             "../envs/python.yaml"
         params:
@@ -292,6 +332,44 @@ rule roc_curve_scale_after_manual_split:
     output:
         roc_curve = os.path.join(config['figures']['roc'],
                         'roc_curves_test_set_5_models_scale_after_manual_split.svg')
+    params:
+        model_colors_dict = config['colors_complex']['model_colors']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/roc_curve_scale_after_split_10_iterations.py"
+
+rule roc_curve_scale_after_manual_split_top3:
+    """ Generate a roc curve for each trained model based on their performance
+        on the test dataset based on the CV, train, test sets scaled after they
+        were generated. Add a shadow of +/- 1 stdev around each model roc curve."""
+    input:
+        X_test = expand(rules.fill_na_feature_scaling_after_manual_split_top3.output.test, **config),
+        y_test = expand(rules.fill_na_feature_scaling_after_manual_split_top3.output.y_test, **config),
+        pickled_trained_model = expand(rules.train_models_scale_after_manual_split_top3.output.pickled_trained_model,
+                                    manual_iteration=config['manual_iteration'], models2=config['models2'])
+    output:
+        roc_curve = os.path.join(config['figures']['roc'],
+                        'roc_curves_test_set_5_models_scale_after_manual_split_top3.svg')
+    params:
+        model_colors_dict = config['colors_complex']['model_colors']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/roc_curve_scale_after_split_10_iterations.py"
+
+rule roc_curve_scale_after_manual_split_top4:
+    """ Generate a roc curve for each trained model based on their performance
+        on the test dataset based on the CV, train, test sets scaled after they
+        were generated. Add a shadow of +/- 1 stdev around each model roc curve."""
+    input:
+        X_test = expand(rules.fill_na_feature_scaling_after_manual_split_top4.output.test, **config),
+        y_test = expand(rules.fill_na_feature_scaling_after_manual_split_top4.output.y_test, **config),
+        pickled_trained_model = expand(rules.train_models_scale_after_manual_split_top4.output.pickled_trained_model,
+                                    manual_iteration=config['manual_iteration'], models2=config['models2'])
+    output:
+        roc_curve = os.path.join(config['figures']['roc'],
+                        'roc_curves_test_set_5_models_scale_after_manual_split_top4.svg')
     params:
         model_colors_dict = config['colors_complex']['model_colors']
     conda:
@@ -516,7 +594,8 @@ rule upset_models_confusion_scale_after_manual_split:
                         manual_iteration=config['manual_iteration'], models2='rf', allow_missing=True)
     params:
         df_output_path = expand("results/tables/confusion_matrix_f1/merged_confusion_matrix_{manual_iteration}.tsv",
-                                manual_iteration=config['manual_iteration'])
+                                manual_iteration=config['manual_iteration']),
+        color_dict = config['colors_complex']['confusion_value']
     output:
         upset = os.path.join(config['figures']['upset'],
                         '{confusion_value}_all_models_scale_after_manual_split.svg')
@@ -1032,16 +1111,29 @@ rule regroup_sno_confusion_value_iterations:
     script:
         "../scripts/python/regroup_sno_confusion_value_iterations.py"
 
+rule regroup_sno_confusion_value_manual_split:
+    """ Regroup all snoRNAs by confusion value (TP, TN, FP, FN) (at least 2 of
+        the 3 chosen models must call it as the confusion_value)."""
+    input:
+        confusion_value_df = expand(rules.confusion_matrix_f1_scale_after_manual_split.output.info_df,
+                                models2=config['models3'], manual_iteration=config['manual_iteration'])
+    output:
+        sno_per_confusion_value = config['path']['sno_per_confusion_value_manual_split']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/regroup_sno_confusion_value_manual_split.py"
+
 rule num_feature_distribution_comparison_confusion_value_top10:
     """ Create feature distribution (density plot) to compare the numerical
-        features contained in the top 10 most predictive features. """
+        features contained in the top 10 most predictive features between all
+        confusion values. """
     input:
         feature_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df,
-        sno_per_confusion_value = expand(rules.regroup_sno_confusion_value_iterations.output.sno_per_confusion_value,
-                                            **config)
+        sno_per_confusion_value = rules.regroup_sno_confusion_value_manual_split.output.sno_per_confusion_value
     output:
         density = os.path.join(config['figures']['density_confusion_value'],
-                                "{comparison_confusion_val}_{top_10_numerical_features}.svg")
+                                "confusion_value_comparison_{top_10_numerical_features}.svg")
     params:
         color_dict = config['colors_complex']['confusion_value']
     conda:
@@ -1068,14 +1160,14 @@ rule num_feature_distribution_comparison_confusion_value_top10_snotype:
 
 rule cat_feature_distribution_comparison_confusion_value_top10:
     """ Create feature distribution (bar chart) to compare the categorical
-        features contained in the top 10 most predictive features. """
+        features contained in the top 10 most predictive features between all
+        confusion_values. """
     input:
         feature_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df,
-        sno_per_confusion_value = expand(rules.regroup_sno_confusion_value_iterations.output.sno_per_confusion_value,
-                                            **config)
+        sno_per_confusion_value = rules.regroup_sno_confusion_value_manual_split.output.sno_per_confusion_value
     output:
         bar = os.path.join(config['figures']['bar_confusion_value'],
-                                "{comparison_confusion_val}_{top_10_categorical_features}.svg")
+                                "confusion_value_comparison_{top_10_categorical_features}.svg")
     params:
         color_dict = config['colors_complex']['top_10_categorical_features']
     conda:
@@ -1272,19 +1364,29 @@ rule real_confusion_value_df:
     script:
         "../scripts/python/real_confusion_value_df.py"
 
-rule violin_tpm_FN_TP:
-    """ Create a violin plot of the log2(TPM) for all real false negatives (FN)
-        vs all real true positives (TP) vs all TN vs all FP ("real" meaning that these snoRNAs are
-        always predicted as their confusion value across models and iterations)."""
+rule violin_tpm_confusion_value:
+    """ Create a violin plot of the log2(TPM) for all confusion value snoRNAs."""
     input:
-        sno_per_confusion_value = expand(rules.real_confusion_value_df.output.real_confusion_value_df,
-                                            **config),
+        sno_per_confusion_value = rules.regroup_sno_confusion_value_manual_split.output.sno_per_confusion_value,
         tpm_df = config['path']['sno_tpm_df_cutoff']
     output:
-        violin = os.path.join(config['figures']['violin'], "FN_vs_TP_vs_TP_vs_FP_tpm.svg")
+        violin = os.path.join(config['figures']['violin'], "avg_tpm_per_confusion_value.svg")
     params:
         color_dict = config['colors_complex']['confusion_value']
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/python/graphs/violin_tpm_FN_TP.py"
+        "../scripts/python/graphs/violin_tpm_confusion_value.py"
+
+rule pie_confusion_values:
+    """ Create a pie chart of the number of snoRNAs per confusion value"""
+    input:
+        sno_per_confusion_value = rules.regroup_sno_confusion_value_manual_split.output.sno_per_confusion_value
+    output:
+        pie = os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value.svg')
+    params:
+        color_dict = config['colors_complex']['confusion_value']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/pie_confusion_values.py"

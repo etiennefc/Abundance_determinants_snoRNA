@@ -12,6 +12,8 @@ import statistics as sts
     The upset plot shows the average intersection (+/-stdev) across 10 iterations
     for all models."""
 df_output_path = snakemake.params.df_output_path
+color_dict = snakemake.params.color_dict
+color = color_dict[snakemake.wildcards.confusion_value]
 
 # Sort alphabetically all confusion matrix df (one per iteration) per model
 log_reg_conf = snakemake.input.log_reg
@@ -146,4 +148,4 @@ ft.upset_avg_3_cat(sorted_average, sorted_stdev, avg_nb, stdev_nb, names, values
                     vlines_pos, ymins, ymaxs, 'Average intersection size\nacross iterations',
                     'Average number\nper model\nacross iterations',
                     ["RandomForest", "SupportVector", "LogisticRegression"],
-                    snakemake.wildcards.confusion_value, snakemake.output.upset)
+                    snakemake.wildcards.confusion_value, color, snakemake.output.upset)

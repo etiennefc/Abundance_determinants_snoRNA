@@ -522,10 +522,28 @@ def simple_bar(values, x_tick_labels, title, xlabel, ylabel, path, **kwargs):
     plt.savefig(path, bbox_inches='tight', dpi=600)
 
 
+def barh(df, figsize_x, figsize_y, title, xlabel, ylabel, path, **kwargs):
+    """
+    Creates a stacked horizontal bar chart from a given dataframe.
+    """
+    rc = {'ytick.labelsize': 15, 'xtick.labelsize': 20}
+    plt.rcParams.update(**rc)
+    plt.rcParams['svg.fonttype'] = 'none'
+    fig, ax = plt.subplots(1, 1, figsize=(figsize_x, figsize_y))
+    df.plot.barh(ax=ax, **kwargs)
+    plt.legend(fontsize=25, loc=5, bbox_to_anchor=(1, 0.1))
+    plt.title(title)
+    plt.xlabel(xlabel, fontsize=25)
+    plt.ylabel(ylabel, fontsize=25)
+
+    plt.savefig(path, bbox_inches='tight', dpi=600)
+
+
+
 def upset_avg_3_cat(sorted_val_vertical_bars, sorted_stdev_vertical_bars,
                     avg_nb, stdev_nb, names, values, vlines_pos, ymins, ymaxs,
                     ylabel_vertical_bars, xlabel_horizontal_bars,
-                    ytick_labels_scatter, optional_annot, path, **kwargs):
+                    ytick_labels_scatter, optional_annot, bar_color, path, **kwargs):
     """
     Create an upset plot with 3 different categories (ex: 3 models) of average
     values (+- stdev) across iterations of these models (not a real upset plot
@@ -565,7 +583,7 @@ def upset_avg_3_cat(sorted_val_vertical_bars, sorted_stdev_vertical_bars,
     ax[0, 1].bar([x for x in range(len(sorted_val_vertical_bars))],
                 [val[1] for val in sorted_val_vertical_bars],
                 yerr=[val[1] for val in sorted_stdev_vertical_bars], capsize=10,
-                color='black')
+                color=bar_color)
     ax[0, 1].set_ylabel(ylabel_vertical_bars)
 
     ## Create scatter with vertical lines linking between vertical dots
@@ -596,7 +614,7 @@ def upset_avg_3_cat(sorted_val_vertical_bars, sorted_stdev_vertical_bars,
 
     # Create horizontal bar chart
     ax[1, 0].barh(np.arange(len(avg_nb)), avg_nb, xerr=stdev_nb, capsize=5,
-                    color="black", height=0.5)
+                    color=bar_color, height=0.5)
     ax[1, 0].set_xlabel(xlabel_horizontal_bars)
     ax[1, 0].invert_xaxis()
     ax[1, 0].sharey(ax[1, 1])

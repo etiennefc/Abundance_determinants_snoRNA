@@ -2,66 +2,30 @@
 import pandas as pd
 import functions as ft
 
-""" Create a bar plot per confusion value comparison (e.g. FP vs TP) for all
-    categorical features in the top 10 predictive features. Each comparison counts
-    only one time a snoRNA (ex: it considers a TP snoRNA once even if it is
-    predicted multiple time as a TP across iterations)."""
+""" Create a bar plot to compare confusion values for all
+    categorical features in the top 10 predictive features."""
 
 color_dict = snakemake.params.color_dict
 output = snakemake.output.bar
 categorical_feature = snakemake.wildcards.top_10_categorical_features
-comparison = snakemake.wildcards.comparison_confusion_val
 feature_df = pd.read_csv(snakemake.input.feature_df, sep='\t')
 feature_df = feature_df[['gene_id_sno', categorical_feature]]
+confusion_value_df = pd.read_csv(snakemake.input.sno_per_confusion_value, sep='\t')
 
-# Get the list of all snoRNAs of a given confusion_value inside dict
-sno_per_confusion_value_paths = snakemake.input.sno_per_confusion_value
+# Get df of all snoRNAs of a given confusion_value inside dict
 sno_per_confusion_value = {}
-for path in sno_per_confusion_value_paths:
-    confusion_value = path.split('/')[-1]
-    confusion_value = confusion_value.split('_')[0]
-    df = pd.read_csv(path, sep='\t')
-    sno_list = df['gene_id_sno'].to_list()
-    sno_per_confusion_value[confusion_value] = sno_list
+for conf_val in ['TN', 'TP', 'FN', 'FP']:
+    df_temp = confusion_value_df[confusion_value_df['confusion_matrix'] == conf_val]
+    sno_list = df_temp['gene_id_sno'].to_list()
+    df = feature_df[feature_df['gene_id_sno'].isin(sno_list)]
+    sno_per_confusion_value[conf_val] = df
 
-
-# Get the snoRNA feature value for each confusion value in the comparison
-confusion_val1, confusion_val2_3 = comparison.split('_vs_')
-confusion_val2, confusion_val3 = confusion_val2_3.split('_')  # this is respectively TN and TP
-df1 = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value[confusion_val1])]  # this removes duplicates (snoRNA is counted only once per confusion value)
-df2 = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value[confusion_val2])]
-df3 = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value[confusion_val3])]
-
-# Get only snoRNAs that are always predicted as their confusion value
-# (i.e. remove snoRNAs that are for example predicted in an iteration as FP and in another as TN)
-if confusion_val1 == 'FP':
-    all_fp = df1['gene_id_sno'].to_list()
-    all_tn = df2['gene_id_sno'].to_list()
-    all_tp = df3['gene_id_sno'].to_list()
-    all_fn = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value['FN'])]
-    all_fn = list(pd.unique(all_fn['gene_id_sno']))
-    real_fp = list(set(all_fp) - set(all_tn))
-    real_tn = list(set(all_tn) - set(all_fp))
-    real_tp = list(set(all_tp) - set(all_fn))
-    df1 = df1[df1['gene_id_sno'].isin(real_fp)]
-    df2 = df2[df2['gene_id_sno'].isin(real_tn)]
-    df3 = df3[df3['gene_id_sno'].isin(real_tp)]
-elif confusion_val1 == 'FN':
-    all_fn = df1['gene_id_sno'].to_list()
-    all_tn = df2['gene_id_sno'].to_list()
-    all_tp = df3['gene_id_sno'].to_list()
-    all_fp = feature_df[feature_df['gene_id_sno'].isin(sno_per_confusion_value['FP'])]
-    all_fp = list(pd.unique(all_fp['gene_id_sno']))
-    real_fn = list(set(all_fn) - set(all_tp))
-    real_tn = list(set(all_tn) - set(all_fp))
-    real_tp = list(set(all_tp) - set(all_fn))
-    df1 = df1[df1['gene_id_sno'].isin(real_fn)]
-    df2 = df2[df2['gene_id_sno'].isin(real_tn)]
-    df3 = df3[df3['gene_id_sno'].isin(real_tp)]
+dfs = [sno_per_confusion_value['TN'], sno_per_confusion_value['TP'],
+        sno_per_confusion_value['FN'], sno_per_confusion_value['FP']]
 
 # Count feature values to create the bar chart in the order (TN, FP/FN, TP)
 count_list = []
-for conf_val_df in [df2, df1, df3]:
+for conf_val_df in dfs:
     true_condition = conf_val_df[conf_val_df[categorical_feature] == 1.0]  # ex: "host is expressed" is true
     false_condition = conf_val_df[conf_val_df[categorical_feature] == 0.0]  # ex: "host is expressed" is false
     temp = [len(true_condition), len(false_condition)]
@@ -71,6 +35,6 @@ percent_count = ft.percent_count(count_list)
 
 # Create bar plot
 colors = [color_dict['True'], color_dict['False']]
-ft.stacked_bar(percent_count, [confusion_val2, confusion_val1, confusion_val3],
+ft.stacked_bar(percent_count, ['TN', 'TP', 'FN', 'FP'],
                 ["True", "False"], f'{categorical_feature}',
                 'Confusion value snoRNA group', 'Proportion of snoRNAs (%)', colors, output)
