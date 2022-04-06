@@ -3,6 +3,11 @@ from get_figures import get_figures_path
 
 configfile: "config.json"
 
+simple_untreated_id = list(config['mouse_untreated_fastq_ids'].keys())
+simple_RA_treated_id = list(config['mouse_RA_treated_fastq_ids'].keys())
+all_sample_ids = simple_untreated_id + simple_RA_treated_id
+organism_name="Mus musculus"
+
 wildcard_constraints:
     feature_hue = "({})".format("|".join(config["feature_hue"])),
     numerical_features = "({})".format("|".join(config["numerical_features"])),
@@ -21,7 +26,9 @@ wildcard_constraints:
     top_10_numerical_features = "({})".format("|".join(config["top_10_numerical_features"])),
     top_10_categorical_features = "({})".format("|".join(config["top_10_categorical_features"])),
     comparison_confusion_val = "({})".format("|".join(config["comparison_confusion_val"])),
-    interesting_sno_ids = "({})".format("|".join(config["interesting_sno_ids"]))
+    interesting_sno_ids = "({})".format("|".join(config["interesting_sno_ids"])),
+    id_untreated = "({})".format("|".join(list(config['mouse_untreated_fastq_ids'].keys()))),
+    id_RA_treated = "({})".format("|".join(list(config['mouse_RA_treated_fastq_ids'].keys())))
 
 #Include data processing rules to generate the dataset
 include: "rules/data_processing.smk"
@@ -52,6 +59,13 @@ include: "rules/clip_seq.smk"
 include: "rules/candidate_analyses.smk"
 #include: "rules/kallisto.smk"
 include: "rules/shap_subgroups.smk"
+include: "rules/tgirt_seq_mouse.smk"
+include: "rules/mouse_prediction.smk"
+include: "rules/mouse_prediction_figures.smk"
+
+include: "rules/snora81_overexpression_analyses.smk"
+
+
 
 rule all:
     input:
@@ -104,6 +118,8 @@ rule all:
                                             '{models2}_training_accuracy_scale_after_split_top4_{manual_iteration}.tsv'), **config),
         test_accuracy_top4 = expand(os.path.join(config['path']['test_accuracy'],
                                             '{models2}_test_accuracy_scale_after_split_top4_{manual_iteration}.tsv'), **config),
+        confusion_matrix_top4 = expand(os.path.join(config['path']['confusion_matrix_f1'],
+                                            '{models2}_confusion_matrix_w_f1_score_scale_after_split_top4_{manual_iteration}.tsv'), **config),
 
         #sno_presence_test_sets = config['path']['sno_presence_test_sets'],
         #sno_per_confusion_value = expand(os.path.join(config['path']['sno_per_confusion_value'], '{confusion_value}_snoRNAs_10_iterations.tsv'), **config),
@@ -115,7 +131,20 @@ rule all:
         mapped_snoRNA_bed = expand(os.path.join(config['path']['par_clip'], '{rbp}_mapped_to_snoRNAs.bed'),
                             rbp=['NOP58_repA', 'NOP58_repB', 'NOP56', 'FBL', 'FBL_mnase', 'DKC1']),
         multi_HG_different_label_snoRNAs = config['path']['multi_HG_different_label_snoRNAs'],
-        sno_per_confusion_value = config['path']['sno_per_confusion_value_manual_split']
+        sno_per_confusion_value = config['path']['sno_per_confusion_value_manual_split'],
+
+        # Mouse snoRNA quantification
+        qc_before_trim = expand("data/FastQC/Before_trim/{id}_1_fastqc.html", id=all_sample_ids),
+        qc_after_trim = expand("data/FastQC/After_trim/{id}_R1_fastqc.html", id=all_sample_ids),
+        #coco_cc_mouse = os.path.join(config['path']['coco_merge_mouse'], "merged_tpm.tsv"),
+
+	feature_df_mouse = config['path']['feature_df_mouse'],
+        test_accuracy_mouse = expand(os.path.join(config['path']['test_accuracy_mouse'],'{models2}_test_accuracy_{manual_iteration}.tsv'), **config),
+        confusion_value_mouse = os.path.join(config['path']['confusion_matrix_f1_mouse'], 'consensus_confusion_value_per_sno.tsv')
+
+        # SNORA81 overexpression analyses
+        #predicted_label = expand('results/tables/snora81_overexpression/{models2}_SNORA81_label_{manual_iteration}.tsv', **config)
+
         #fake_log2 = 'log/fake_log_snora77b.log'
         #hamming_distance_box_df = config['path']['hamming_distance_box_df'],
         #h_aca_box_location_expressed = config['path']['h_aca_box_location_expressed'],
@@ -191,9 +220,15 @@ rule all_downloads:
         snhg14_bed = config['path']['snhg14_bed'],
         lnctard = config['path']['lnctard'],
         eclip_bed = config['path']['TARDBP_rep1_eclip_bed'],
-        bed_dkc1 = config['path']['DKC1_par_clip']
-        #forgi_log = "log/forgi.log"
-
+        bed_dkc1 = config['path']['DKC1_par_clip'],
+        mouse_untreated_fastq_1_gz = expand("data/references/mouse_fastq/{id_untreated}_1.fastq.gz", id_untreated=simple_untreated_id),
+        mouse_RA_treated_fastq_1_gz = expand("data/references/mouse_fastq/{id_RA_treated}_1.fastq.gz", id_RA_treated=simple_RA_treated_id),
+        genome = config['path']['mouse_genome'],
+        gtf = config['path']['mouse_gtf'],
+        coco_git = 'git_repos/coco',  # don't forget to create the git env required for this download
+        conversion_table = config['path']['rna_central_to_ensembl_id'],
+        RNA_central_snoRNAs = 'data/references/rna_central_all_mouse_snoRNAs.tsv',
+        recounts = 'data/recount_datasets.csv'
 
 rule all_figures:
     input:

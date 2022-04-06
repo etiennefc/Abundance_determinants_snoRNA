@@ -33,7 +33,7 @@ rule sno_conservation:
         "../scripts/python/sno_conservation.py"
 
 rule fasta_per_sno_type:
-    """ Create a fasta per snoRNA type out of foasta containing all snoRNAs."""
+    """ Create a fasta per snoRNA type out of a fasta containing all snoRNAs."""
     input:
         sno_fasta = rules.format_snoRNA_sequences.output.sno_sequences,
         snodb = rules.format_snodb.output.snodb_formatted

@@ -148,3 +148,140 @@ rule sashimi_script_download:
         link = config['download']['sashimi_script']
     shell:
         "wget {params.link} -O {output.sashimi_script} && chmod u+x {output.sashimi_script}"
+
+rule mouse_tgirt_seq_untreated_fastq_downloads:
+    """ Download the 6 fastq from the small RNA-Seq (with TGIRT) experiment done
+        in McCann et al. 2020 (NAR). These are mouse untreated embryonic stem
+        cells (n=3)."""
+    output:
+        mouse_fastq_1_gz = "data/references/mouse_fastq/{id_untreated}_1.fastq.gz",
+        mouse_fastq_2_gz = "data/references/mouse_fastq/{id_untreated}_2.fastq.gz",
+    params:
+        link = lambda wildcards: config['mouse_untreated_fastq_ids'][wildcards.id_untreated]
+    shell:
+        "wget {params.link}.1.fastq.gz.1 -O {output.mouse_fastq_1_gz} && "
+        "wget {params.link}.2.fastq.gz.1 -O {output.mouse_fastq_2_gz}"
+
+rule mouse_tgirt_seq_RA_treated_fastq_downloads:
+    """ Download the 6 fastq from the small RNA-Seq (with TGIRT) experiment done
+        in McCann et al. 2020 (NAR). These are mouse embryonic stem cells
+        treated with retinoic acid (RA) (n=3)."""
+    output:
+        mouse_fastq_1_gz = "data/references/mouse_fastq/{id_RA_treated}_1.fastq.gz",
+        mouse_fastq_2_gz = "data/references/mouse_fastq/{id_RA_treated}_2.fastq.gz",
+    params:
+        link = lambda wildcards: config['mouse_RA_treated_fastq_ids'][wildcards.id_RA_treated]
+    shell:
+        "wget {params.link}.1.fastq.gz.1 -O {output.mouse_fastq_1_gz} && "
+        "wget {params.link}.2.fastq.gz.1 -O {output.mouse_fastq_2_gz}"
+
+rule ensembl_mouse_genome:
+    """ Download mouse genome in FASTA file (.fa) from Ensembl ftp servers and
+        remove scaffolds (starting with JH584299.1) at the end of the file."""
+    output:
+        genome = config['path']['mouse_genome']
+    params:
+        link = config['download']['ensembl_mouse_genome']
+    shell:
+        "wget -O temp.gz {params.link} && "
+        "gunzip temp.gz && "
+        "sed '/>JH584299.1/,$d; s/>/>chr/' temp > {output.genome} && "
+        "rm temp"
+
+rule ensembl_mouse_gtf:
+    """ Download mouse genome annotation in gtf file (.gtf) from Ensembl ftp
+        servers."""
+    output:
+        gtf = config['path']['mouse_gtf']
+    params:
+        link = config['download']['ensembl_mouse_gtf']
+    shell:
+        "wget -O temp2.gz {params.link} && "
+        "gunzip temp2.gz && "
+        "mv temp2 {output.gtf}"
+
+rule download_coco_git:
+    """ Download git repository of CoCo."""
+    output:
+        git_coco_folder = directory('git_repos/coco')
+    params:
+        git_coco_link = config['download']['coco_git_link']
+    conda:
+        '../envs/git.yaml'
+    shell:
+        'mkdir -p {output.git_coco_folder} '
+        '&& git clone {params.git_coco_link} {output.git_coco_folder}'
+
+rule rna_central_to_ensembl_id:
+    """ Download the table to convert RNACentral ids to Ensembl ids."""
+    output:
+        conversion_table = config['path']['rna_central_to_ensembl_id']
+    params:
+        link = config['download']['rna_central_to_ensembl_id']
+    shell:
+        "wget -O tempfile {params.link} && "
+        "grep --color=never ENSMUSG tempfile | grep --color=never snoRNA > {output.conversion_table} && "
+        "rm tempfile"
+
+rule get_taxid:
+    """ Get the taxid (taxon ID) for a given organism using the tool taxoniq.
+        You must give the organism scientific name."""
+    output:
+        taxid = 'data/references/taxid.tsv'
+    shell:
+        """pip3 install 'taxoniq==0.6.0' && """
+        """taxoniq --scientific-name '{organism_name}' url > temp_id && """
+        """IN=$(cat temp_id) && arr=(${{IN//id=/ }}) && """
+        """echo ${{arr[1]}} | sed s'/\"//' > {output.taxid} && """
+        """rm temp_id"""
+
+rule dowload_mouse_HG_RNA_seq_datasets:
+    """ Download RNA-Seq datasets of mouse tissues (including mESC) using recount3"""
+    output:
+        dataset = 'data/recount_datasets.csv'
+    conda:
+        "../envs/recount3.yaml"
+    script:
+        "../scripts/r/download_mouse_HG_RNA_seq_datasets.R"
+
+rule get_RNA_central_snoRNAs:
+    """ Get all entries in RNA central marked as snoRNA for a given taxid"""
+    input:
+        taxid = rules.get_taxid.output.taxid
+    output:
+        RNA_central_snoRNAs = 'data/references/rna_central_all_mouse_snoRNAs.tsv'
+    conda:
+        "../envs/psql.yaml"
+    shell:
+        """
+        taxid_var=$(cat {input.taxid}) &&
+        psql postgres://reader:NWDMCE5xdipIjRrp@hh-pgsql-public.ebi.ac.uk:5432/pfmegrnargs \
+        -c "\copy
+         (
+            SELECT DISTINCT ON (upi, region_start, region_stop, database)
+                r.upi,
+                p.short_description,
+                p.taxid, a.database,
+                a.external_id,
+                a.optional_id,
+                a.gene,
+                a.gene_synonym,
+                a.description,
+                r.len,
+                r.seq_short,
+                rfam.rfam_model_id
+            FROM rna r
+            LEFT JOIN
+                rnc_rna_precomputed p ON p.upi = r.upi
+            LEFT JOIN rnc_sequence_regions s
+                ON s.urs_taxid = p.id
+            LEFT JOIN xref x
+                ON x.upi = r.upi
+            LEFT JOIN rnc_accessions a
+                ON a.accession = x.ac
+            LEFT JOIN rfam_model_hits rfam
+                ON rfam.upi = r.upi
+            WHERE p.taxid = $taxid_var
+                AND a.ncrna_class IN ('snoRNA', 'scaRNA')
+         )  TO '{output.RNA_central_snoRNAs}' WITH (FORMAT CSV, DELIMITER E'\t', HEADER)"
+        """

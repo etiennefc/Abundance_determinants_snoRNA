@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import pandas as pd
 
-""" Find C, D, C' and D' boxes of each snoRNA (if they exist) and their position"""
 sno_fasta = snakemake.input.sno_fasta
 snodb = pd.read_csv(snakemake.input.snodb, sep='\t')
 cd_output, haca_output = snakemake.output.cd_fasta, snakemake.output.haca_fasta

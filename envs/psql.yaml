@@ -1,0 +1,5 @@
+channels:
+  - defaults
+  - anaconda
+dependencies:
+  - postgresql=12.9

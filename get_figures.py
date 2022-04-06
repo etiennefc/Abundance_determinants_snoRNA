@@ -123,6 +123,15 @@ def get_figures_path(config):
     files.append(os.path.join(config['figures']['donut'], 'abundance_status_intron_subgroup.svg'))
 
 
+
+    # Mouse figures
+    files.append(os.path.join(config['figures']['violin'], 'models_accuracies_iterations_mouse.svg'))
+    files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_mouse.svg'))
+    files.append(os.path.join(config['figures']['donut'], 'abundance_status_sno_type_mouse.svg'))
+    files.append(os.path.join(config['figures']['donut'], 'abundance_status_host_biotype_mouse.svg'))
+
+
+
     # Confusion value comparisons of predictive features
     #files.extend(expand(os.path.join(config['figures']['density_confusion_value'],
     #                        "{comparison_confusion_val}_{top_10_numerical_features}.svg"), **config))
