@@ -37,6 +37,10 @@ def get_figures_path(config):
     # Pie chart of the number of snoRNAs per confusion value (TP, TN, FP, FN)
     files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value.svg'))
 
+    # Donut chart of the number of snoRNAs per confusion value (TP, TN, FP, FN) (outer donut) and their host biotype (inner donut)
+    files.append(os.path.join(config['figures']['donut'],
+                        'confusion_value_host_biotype.svg'))
+
     # SHAP summary plot of all 10 manual split iterations per sno type (dot plot and bar plot)
     files.extend(expand(os.path.join(config['figures']['summary_shap_snotype'],
                                 '{models2}_{sno_type}_test_set_scale_after_manual_split.svg'), **config))
@@ -127,10 +131,25 @@ def get_figures_path(config):
     # Mouse figures
     files.append(os.path.join(config['figures']['violin'], 'models_accuracies_iterations_mouse.svg'))
     files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_mouse.svg'))
+    files.extend(expand(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_mouse_{models2}.svg'), **config))
     files.append(os.path.join(config['figures']['donut'], 'abundance_status_sno_type_mouse.svg'))
     files.append(os.path.join(config['figures']['donut'], 'abundance_status_host_biotype_mouse.svg'))
-
-
+    files.append(os.path.join(config['figures']['violin'], "avg_tpm_per_confusion_value_mouse.svg"))
+    files.extend(expand(os.path.join(config['figures']['violin'], "avg_tpm_per_confusion_value_mouse_{models2}.svg"), **config))
+    files.extend(expand(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_species_prediction_{models2}_{rs}.svg'), **config))
+    files.append(os.path.join(config['figures']['scatter'],
+                'all_model_accuracies_cv_train_test_species_prediction.svg'))
+    files.append(os.path.join(config['figures']['scatter'],
+                'all_model_accuracies_cv_train_test_species_prediction_rs.svg'))
+    files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_species_prediction_log_reg_thresh.svg'))
+    files.append(os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_species_prediction_w_log_reg_thresh.svg'))
+    files.append(os.path.join(config['figures']['donut'],
+                            'confusion_value_host_biotype_mouse.svg'))
+    files.append(os.path.join(config['figures']['violin'],
+                    "avg_tpm_per_confusion_value_mouse_log_reg_thresh.svg"))
+    files.append(os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_species_prediction_rs_w_log_reg_thresh.svg'))
 
     # Confusion value comparisons of predictive features
     #files.extend(expand(os.path.join(config['figures']['density_confusion_value'],

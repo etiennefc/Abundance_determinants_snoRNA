@@ -28,7 +28,8 @@ wildcard_constraints:
     comparison_confusion_val = "({})".format("|".join(config["comparison_confusion_val"])),
     interesting_sno_ids = "({})".format("|".join(config["interesting_sno_ids"])),
     id_untreated = "({})".format("|".join(list(config['mouse_untreated_fastq_ids'].keys()))),
-    id_RA_treated = "({})".format("|".join(list(config['mouse_RA_treated_fastq_ids'].keys())))
+    id_RA_treated = "({})".format("|".join(list(config['mouse_RA_treated_fastq_ids'].keys()))),
+    rs = "({})".format("|".join([str(rs_) for rs_ in config['rs']]))
 
 #Include data processing rules to generate the dataset
 include: "rules/data_processing.smk"
@@ -62,7 +63,9 @@ include: "rules/shap_subgroups.smk"
 include: "rules/tgirt_seq_mouse.smk"
 include: "rules/mouse_prediction.smk"
 include: "rules/mouse_prediction_figures.smk"
-
+include: "rules/cv_train_test_for_species_prediction_top4.smk"
+include: "rules/cv_train_test_for_species_prediction_top4_random_state.smk"
+include: "rules/cv_train_test_for_species_prediction_top4_log_reg_thresh.smk"
 include: "rules/snora81_overexpression_analyses.smk"
 
 
@@ -133,14 +136,32 @@ rule all:
         multi_HG_different_label_snoRNAs = config['path']['multi_HG_different_label_snoRNAs'],
         sno_per_confusion_value = config['path']['sno_per_confusion_value_manual_split'],
 
+
         # Mouse snoRNA quantification
         qc_before_trim = expand("data/FastQC/Before_trim/{id}_1_fastqc.html", id=all_sample_ids),
         qc_after_trim = expand("data/FastQC/After_trim/{id}_R1_fastqc.html", id=all_sample_ids),
         #coco_cc_mouse = os.path.join(config['path']['coco_merge_mouse'], "merged_tpm.tsv"),
 
-	feature_df_mouse = config['path']['feature_df_mouse'],
+        feature_df_mouse = config['path']['feature_df_mouse'],
         test_accuracy_mouse = expand(os.path.join(config['path']['test_accuracy_mouse'],'{models2}_test_accuracy_{manual_iteration}.tsv'), **config),
-        confusion_value_mouse = os.path.join(config['path']['confusion_matrix_f1_mouse'], 'consensus_confusion_value_per_sno.tsv')
+        confusion_value_mouse = os.path.join(config['path']['confusion_matrix_f1_mouse'], 'consensus_confusion_value_per_sno.tsv'),
+        consensus_conf_val_df_per_model = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'], 'consensus_confusion_value_per_sno_{models2}.tsv'), **config),
+
+        # Species prediction
+        test_accuracy_species_prediction = expand(os.path.join(config['path']['test_accuracy_mouse'],
+                                                '{models2}_test_accuracy_top4_species_prediction.tsv'), **config),
+        confusion_matrix_species_prediction = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
+                                    '{models2}_confusion_matrix_w_f1_score_top4_species_prediction.tsv'), **config),
+
+        # Species prediction 5 random_state datasets split
+        training_accuracy_rs = expand(os.path.join(config['path']['training_accuracy'],
+                                    '{models2}_training_accuracy_top4_species_prediction_{rs}.tsv'), **config),
+        #test_accuracy_rs = expand(os.path.join(config['path']['test_accuracy_mouse'],
+        #                            '{models2}_test_accuracy_top4_species_prediction_{rs}.tsv'), **config),
+
+        # Log reg thresh species prediction
+        confusion_matrix_log_reg_thresh = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
+                        'log_reg_confusion_matrix_w_f1_score_top4_species_prediction_thresh_{rs}.tsv'), **config),
 
         # SNORA81 overexpression analyses
         #predicted_label = expand('results/tables/snora81_overexpression/{models2}_SNORA81_label_{manual_iteration}.tsv', **config)

@@ -1390,3 +1390,20 @@ rule pie_confusion_values:
         "../envs/python.yaml"
     script:
         "../scripts/python/graphs/pie_confusion_values.py"
+
+rule donut_confusion_values_host_biotype:
+    """ Generate a donut chart of the number and % of confusion value
+        snoRNAs (outer donut) and per host biotype (inner donut)."""
+    input:
+        host_biotype_df = rules.merge_feature_df.output.feature_df,
+        confusion_value_per_sno = rules.regroup_sno_confusion_value_manual_split.output.sno_per_confusion_value
+    output:
+        donut = os.path.join(config['figures']['donut'],
+                            'confusion_value_host_biotype.svg')
+    params:
+        conf_val_colors = config['colors_complex']['confusion_value'],
+        host_biotype_colors = config['colors_complex']['host_biotype2']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/donut_confusion_values_host_biotype.py"
