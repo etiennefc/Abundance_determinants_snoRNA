@@ -129,6 +129,8 @@ def get_figures_path(config):
 
 
     # Mouse figures
+    files.extend(expand(config['figures']['density'] + '{mouse_numerical_features}_abundance_status_mouse_{sno_type}.svg', **config))
+    files.extend(expand(os.path.join(config['figures']['bar_split_sno_type'] + 'host_abundance_cutoff_{sno_type}.svg'), **config))
     files.append(os.path.join(config['figures']['violin'], 'models_accuracies_iterations_mouse.svg'))
     files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_mouse.svg'))
     files.extend(expand(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_mouse_{models2}.svg'), **config))
@@ -150,6 +152,22 @@ def get_figures_path(config):
                     "avg_tpm_per_confusion_value_mouse_log_reg_thresh.svg"))
     files.append(os.path.join(config['figures']['scatter'],
                         'all_model_accuracies_cv_train_test_species_prediction_rs_w_log_reg_thresh.svg'))
+    files.append(os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_species_prediction_rs_w_log_reg_thresh_top3.svg'))
+    files.append(os.path.join(config['figures']['donut'],
+                            'confusion_value_host_biotype_mouse_top3.svg'))
+
+
+    # GTEx comparison vs TGIRT host abundance cutoff
+    files.append(os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_manual_split_iterations_gtex_HG.svg'))
+    files.append(os.path.join(config['figures']['roc'],
+                        'roc_curves_test_set_5_models_scale_after_manual_split_gtex_HG.svg'))
+    files.append(os.path.join(config['figures']['violin'], 'ranks_per_feature_manual_split_iterations_HG.svg'))
+    files.append(os.path.join(config['figures']['venn'],
+                        'gtex_tgirt_host_expressed_intersection.svg')),
+    files.append(os.path.join(config['figures']['venn'],
+                        'gtex_unpaired_tgirt_host_expressed_intersection.svg')),
 
     # Confusion value comparisons of predictive features
     #files.extend(expand(os.path.join(config['figures']['density_confusion_value'],

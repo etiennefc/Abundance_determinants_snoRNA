@@ -3,6 +3,41 @@ import os
 include: "cv_train_test_for_species_prediction_top4.smk"
 include: "cv_train_test_for_species_prediction_top4_random_state.smk"
 include: "cv_train_test_for_species_prediction_top4_log_reg_thresh.smk"
+include: "cv_train_test_for_species_prediction_top3_random_state.smk"
+include: "cv_train_test_for_species_prediction_top3_log_reg_thresh.smk"
+
+rule density_features_mouse:
+    """ Generate a density plot of the distribution for all numerical input
+        features. The separation is based on the abundance status. """
+    input:
+        df = rules.merge_features_label_mouse.output.feature_df,
+        snoRNA_type_df = rules.find_mouse_snoRNA_type.output.snoRNA_type_df
+    output:
+        density_features = os.path.join(config['figures']['density'],
+                            '{mouse_numerical_features}_abundance_status_mouse_{sno_type}.svg')
+    params:
+        hue_color = config['colors_complex']['label']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/density_features_mouse.py"
+
+rule bar_host_expressed_mouse:
+    """ Generate a bar chart of all expressed vs non_expressed snoRNAs
+        according to the host_abundance_cutoff feature (separately for C/D and
+        H/ACA snoRNAs)."""
+    input:
+        df = rules.merge_features_label_mouse.output.feature_df,
+        snoRNA_type_df = rules.find_mouse_snoRNA_type.output.snoRNA_type_df
+    output:
+        bar = os.path.join(config['figures']['bar_split_sno_type'],
+                            'host_abundance_cutoff_{sno_type}.svg')
+    params:
+        hue_color = config['colors_complex']['abundance_cutoff_host']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/bar_categorical_mouse.py"
 
 rule violin_models_accuracies_iterations_mouse:
     """ For each model (log_reg, svc and rf), represent a violin plot of the
@@ -110,7 +145,7 @@ rule pie_confusion_values_species_prediction_log_reg_thresh:
 rule donut_confusion_values_host_biotype_species_prediction_log_reg_thresh:
     """ Generate a donut chart of the number and % of confusion value
         snoRNAs (outer donut) and per host biotype (inner donut) for mouse
-        snoRNAs using the log_reg_thresh model."""
+        snoRNAs using the log_reg_thresh model (trained with top4 features)."""
     input:
         host_biotype_df = rules.find_mouse_snoRNA_HG.output.mouse_snoRNA_HG,
         confusion_value_per_sno = expand(rules.confusion_matrix_f1_species_prediction_top4_log_reg_thresh.output.info_df, rs="42")
@@ -125,6 +160,23 @@ rule donut_confusion_values_host_biotype_species_prediction_log_reg_thresh:
     script:
         "../scripts/python/graphs/donut_confusion_values_host_biotype_species_prediction_log_reg_thresh.py"
 
+rule donut_confusion_values_host_biotype_species_prediction_log_reg_thresh_top3:
+    """ Generate a donut chart of the number and % of confusion value
+        snoRNAs (outer donut) and per host biotype (inner donut) for mouse
+        snoRNAs using the log_reg_thresh model trained with top3 features."""
+    input:
+        host_biotype_df = rules.find_mouse_snoRNA_HG.output.mouse_snoRNA_HG,
+        confusion_value_per_sno = expand(rules.confusion_matrix_f1_species_prediction_top3_log_reg_thresh.output.info_df, rs="42")
+    output:
+        donut = os.path.join(config['figures']['donut'],
+                            'confusion_value_host_biotype_mouse_top3.svg')
+    params:
+        conf_val_colors = config['colors_complex']['confusion_value'],
+        host_biotype_colors = config['colors_complex']['host_biotype2']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/donut_confusion_values_host_biotype_species_prediction_log_reg_thresh.py"
 
 rule donut_label_sno_type_mouse:
     """ Generate a donut chart of the number and % of expressed vs not expressed
@@ -300,3 +352,29 @@ rule scatter_accuracies_species_prediction_top4_w_log_reg_thresh:
             "../envs/python.yaml"
         script:
             "../scripts/python/graphs/scatter_accuracies_species_prediction_top4_w_log_reg_thresh.py"
+
+rule scatter_accuracies_species_prediction_top3_random_state_w_log_reg_thresh:
+    """ Generate a connected scatter plot for each model to show their accuracy
+        of prediction on the CV, training and test sets to highlight possible
+        overfitting."""
+        input:
+            cv_accuracy = expand(os.path.join(config['path']['hyperparameter_tuning'],
+                                    '{models2}_best_params_top3_species_prediction_{rs}.tsv'),
+                                    **config),
+            training_accuracy = expand(os.path.join(config['path']['training_accuracy'],
+                                    '{models2}_training_accuracy_top3_species_prediction_{rs}.tsv'),
+                                    models2=["svc", "rf", "gbm", "knn"], rs=config['rs']),
+            training_accuracy_log_reg_thresh = expand(rules.train_test_accuracy_species_prediction_top3_log_reg_thresh.output.training_accuracy, **config),
+            test_accuracy = expand(os.path.join(config['path']['test_accuracy_mouse'],
+                                    '{models2}_test_accuracy_top3_species_prediction_{rs}.tsv'),
+                                    models2=["svc", "rf", "gbm", "knn"], rs=config['rs']),
+            test_accuracy_log_reg_thresh = expand(rules.train_test_accuracy_species_prediction_top3_log_reg_thresh.output.test_accuracy, **config)
+        output:
+            scatter = os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_species_prediction_rs_w_log_reg_thresh_top3.svg')
+        params:
+            colors = config['colors_complex']['model_colors']
+        conda:
+            "../envs/python.yaml"
+        script:
+            "../scripts/python/graphs/scatter_accuracies_species_prediction_top3_random_state_w_log_reg_thresh.py"

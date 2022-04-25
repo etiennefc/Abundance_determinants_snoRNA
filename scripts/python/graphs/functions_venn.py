@@ -5,6 +5,7 @@ import seaborn as sns
 import matplotlib.patches as mpatches
 import numpy as np
 from sklearn import metrics
+from matplotlib_venn import venn2
 
 """Functions to create various graphs"""
 
@@ -349,6 +350,9 @@ def connected_scatter_errbars(df, df_hue, hue_col, color_dict, col_name_for_x_ax
     transposed_df = df.transpose()
     transposed_df[col_name_for_x_axis] = transposed_df.index
 
+
+
+
     print(transposed_df)
     print(stdev)
     # Create one line at the time by enumerating across columns
@@ -375,51 +379,6 @@ def connected_scatter_errbars(df, df_hue, hue_col, color_dict, col_name_for_x_ax
     ax.legend(handles=legend_list, loc='upper right', bbox_to_anchor=(0.3, 1), fontsize=25)
 
     plt.savefig(path, bbox_inches='tight', dpi=600)
-
-
-def connected_scatter_errbars2(df, df_hue, hue_col, color_dict, col_name_for_x_axis, stdev,
-                        xticklabels, xlabel, ylabel, ylim_min, ylim_max, path, **kwargs):
-    """
-    Creates a connected scatter plot with multiple lines and error bars. The input
-    df must be of the following form: a number of lines that correspond to the
-    number of gene/model; each line is composed of multiple columns where each column
-    corresponds to a categorical value on the x axis (ex: type of dataset (cv,
-    train, test)); each line must have a different index (ex: one line per model).
-    To create a graph without a hue, you must also create a hue_col but with the
-    same value for each line and report only one color.
-    """
-    # Format the input df so that it is in the good orientation
-    # Add also a 'col_name_for_x_axis' column which will correspond to the x axis values
-    transposed_df = df.transpose()
-    transposed_df[col_name_for_x_axis] = transposed_df.index
-
-    print(transposed_df)
-    print(stdev)
-    # Create one line at the time by enumerating across columns
-    rc = {'ytick.labelsize': 30, 'xtick.labelsize': 30}
-    plt.rcParams.update(**rc)
-    plt.rcParams['svg.fonttype'] = 'none'
-
-    fig, ax = plt.subplots(1, 1, figsize=(12, 8))
-    ax.set_xticklabels(xticklabels)
-
-    for i, id in enumerate(transposed_df.iloc[:, :-1].columns):
-        sns.lineplot(data=transposed_df, x=col_name_for_x_axis, y=id, marker='o',
-                    markeredgecolor=color_dict[id], markerfacecolor=color_dict[id],
-                    color=color_dict[id], sort=False, markersize=10, **kwargs)
-        ax.errorbar(transposed_df[col_name_for_x_axis], transposed_df[id],
-                    [dictio[id] for dictio in stdev], capsize=20, color=color_dict[id])
-    ax.set_xlabel(xlabel, fontsize=35)
-    ax.set_ylabel(ylabel, fontsize=35)
-    ax.set_ylim(ylim_min, ylim_max)
-    legend_list = []
-    for i, crit in enumerate(color_dict.keys()):
-        legend_element = mpatches.Patch(color=color_dict[crit], label=crit)
-        legend_list.append(legend_element)
-    ax.legend(handles=legend_list, loc='upper right', bbox_to_anchor=(0.3, 1), fontsize=25)
-
-    plt.savefig(path, bbox_inches='tight', dpi=600)
-
 
 
 def violin(df, x_col, y_col, hue_violin, hue_swarm, xlabel, ylabel, title, violin_colors, swarm_colors, path, **kwargs):
@@ -716,6 +675,20 @@ def roc_curve_error_fill(model_name_list, mean_aucs, mean_fpr, mean_tprs, std_tp
     ax.legend(loc="lower right", fontsize=30)
     plt.savefig(output_path, dpi=600, bbox_inches='tight')
 
+def venn_2(list_of_values, colors, labels, title, path):
+    """
+    Create a Venn diagram from two datasets intersection given as a list where
+    the first item is the number of items only in A, the second item is the
+    number only in B, and the third is the intersection number of A and B.
+    """
+    plt.rcParams['svg.fonttype'] = 'none'
+    ax = venn2(list_of_values, set_colors=colors, set_labels=labels)
+    ax.get_label_by_id('A').set_x(-0.7)
+    ax.get_label_by_id('A').set_y(0)
+    ax.get_label_by_id('B').set_x(0.7)
+    ax.get_label_by_id('B').set_y(0)
+    plt.title(title)
+    plt.savefig(path, dpi=600, bbox_inches='tight')
 
 def count_list_x(initial_df, global_col, criteria, specific_col):
     """

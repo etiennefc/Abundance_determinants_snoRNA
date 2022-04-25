@@ -343,5 +343,3 @@ rule confusion_matrix_f1_mouse:
         "../envs/python.yaml"
     script:
         "../scripts/python/confusion_matrix_f1_scale_after_split.py"
-
-#rule accuracy?_f1_score?

@@ -244,6 +244,33 @@ rule dowload_mouse_HG_RNA_seq_datasets:
     script:
         "../scripts/r/download_mouse_HG_RNA_seq_datasets.R"
 
+rule download_gtex_host_data:
+    """ Download TPM table from GTEx to compare the host gene abundance to that
+        computed in our TGIRT-Seq datasets (paired triplicates for the seven
+        tissues i.e. brain, liver, skletal_muscle, ovary, breast, testis and
+        prostate). We define the gtex_var only for this bash script."""
+    output:
+        gtex_data = 'data/references/gtex_tpm_df.tsv'
+    params:
+        link = config['download']['gtex_data'],
+        ids = config['gtex_id']
+    shell:
+        "gtex_var=$(echo {params.ids}) ./scripts/bash/gtex_download.sh {params.link} {output.gtex_data}"
+
+rule download_gtex_host_data_unpaired:
+    """ Download TPM table from GTEx to compare the host gene abundance to that
+        computed in our TGIRT-Seq datasets. Use this time 7 unpaired tissues (i.e.
+        not present in our TGIRT-Seq datasets: adrenal gland, colon, spleen,
+        heart, kidney, thyroid and nerve). We define the gtex_var only for this
+        bash script."""
+    output:
+        gtex_data = 'data/references/gtex_unpaired_tpm_df.tsv'
+    params:
+        link = config['download']['gtex_data'],
+        ids = config['gtex_id_unpaired']
+    shell:
+        "gtex_var=$(echo {params.ids}) ./scripts/bash/gtex_download.sh {params.link} {output.gtex_data}"
+
 rule get_RNA_central_snoRNAs:
     """ Get all entries in RNA central marked as snoRNA for a given taxid"""
     input:

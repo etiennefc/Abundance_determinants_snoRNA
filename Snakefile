@@ -12,6 +12,7 @@ wildcard_constraints:
     feature_hue = "({})".format("|".join(config["feature_hue"])),
     numerical_features = "({})".format("|".join(config["numerical_features"])),
     numerical_features_scaled = "({})".format("|".join(config["numerical_features_scaled"])),
+    mouse_numerical_features = "({})".format("|".join(config["mouse_numerical_features"])),
     categorical_features = "({})".format("|".join(config["categorical_features"])),
     intronic_features = "({})".format("|".join(config["intronic_features"])),
     sno_type = "({})".format("|".join(config["sno_type"])),
@@ -66,6 +67,10 @@ include: "rules/mouse_prediction_figures.smk"
 include: "rules/cv_train_test_for_species_prediction_top4.smk"
 include: "rules/cv_train_test_for_species_prediction_top4_random_state.smk"
 include: "rules/cv_train_test_for_species_prediction_top4_log_reg_thresh.smk"
+include: "rules/cv_train_test_for_species_prediction_top3_random_state.smk"
+include: "rules/cv_train_test_for_species_prediction_top3_log_reg_thresh.smk"
+include: "rules/gtex_HG_cutoff.smk"
+include: "rules/cv_train_test_manual_split_gtex_HG.smk"
 include: "rules/snora81_overexpression_analyses.smk"
 
 
@@ -153,15 +158,30 @@ rule all:
         confusion_matrix_species_prediction = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
                                     '{models2}_confusion_matrix_w_f1_score_top4_species_prediction.tsv'), **config),
 
-        # Species prediction 5 random_state datasets split
-        training_accuracy_rs = expand(os.path.join(config['path']['training_accuracy'],
-                                    '{models2}_training_accuracy_top4_species_prediction_{rs}.tsv'), **config),
-        #test_accuracy_rs = expand(os.path.join(config['path']['test_accuracy_mouse'],
-        #                            '{models2}_test_accuracy_top4_species_prediction_{rs}.tsv'), **config),
+        # Species prediction 5 random_state datasets split for top 4 features
+        test_accuracy_rs_top4 = expand(os.path.join(config['path']['test_accuracy_mouse'],
+                                    '{models2}_test_accuracy_top4_species_prediction_{rs}.tsv'), **config),
+        confusion_matrix_rs_top4 = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
+                                    '{models2}_confusion_matrix_w_f1_score_top4_species_prediction_{rs}.tsv'), **config),
 
-        # Log reg thresh species prediction
-        confusion_matrix_log_reg_thresh = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
+        # Species prediction 5 random_state datasets split for top 3 features
+        test_accuracy_rs_top3 = expand(os.path.join(config['path']['test_accuracy_mouse'],
+                                    '{models2}_test_accuracy_top3_species_prediction_{rs}.tsv'), **config),
+        confusion_matrix_rs_top3 = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
+                                    '{models2}_confusion_matrix_w_f1_score_top3_species_prediction_{rs}.tsv'), **config),
+
+        # Log reg thresh species prediction top4 and top3
+        confusion_matrix_log_reg_thresh_top4 = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
                         'log_reg_confusion_matrix_w_f1_score_top4_species_prediction_thresh_{rs}.tsv'), **config),
+        confusion_matrix_log_reg_thresh_top3 = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
+                        'log_reg_confusion_matrix_w_f1_score_top3_species_prediction_thresh_{rs}.tsv'), **config),
+
+        # GTEx host gene expression analyses
+        test_accuracy_gtex_HG = expand(os.path.join(config['path']['test_accuracy'],
+                                    '{models2}_test_accuracy_scale_after_split_gtex_HG_{manual_iteration}.tsv'), **config),
+        confusion_matrix_gtex_HG = expand(os.path.join(config['path']['confusion_matrix_f1'],
+                                    '{models2}_confusion_matrix_w_f1_score_scale_after_split_gtex_HG_{manual_iteration}.tsv'), **config),
+        concat_df = config['path']['all_feature_rank_df_manual_split_gtex_HG'],
 
         # SNORA81 overexpression analyses
         #predicted_label = expand('results/tables/snora81_overexpression/{models2}_SNORA81_label_{manual_iteration}.tsv', **config)
@@ -249,7 +269,9 @@ rule all_downloads:
         coco_git = 'git_repos/coco',  # don't forget to create the git env required for this download
         conversion_table = config['path']['rna_central_to_ensembl_id'],
         RNA_central_snoRNAs = 'data/references/rna_central_all_mouse_snoRNAs.tsv',
-        recounts = 'data/recount_datasets.csv'
+        recounts = 'data/recount_datasets.csv',
+        gtex_data = 'data/references/gtex_tpm_df.tsv',
+        gtex_data_unpaired = 'data/references/gtex_unpaired_tpm_df.tsv'
 
 rule all_figures:
     input:

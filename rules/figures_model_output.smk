@@ -12,6 +12,7 @@ include: "cv_train_test_10_iterations_only_hamming.smk"
 include: "cv_train_test_manual_split.smk"
 include: "cv_train_test_manual_split_top3.smk"
 include: "cv_train_test_manual_split_top4.smk"
+include: "cv_train_test_manual_split_gtex_HG.smk"
 
 rule modify_shap:
     """ Modify SHAP summary plot script (within _beewswarm.py) so that it sorts
@@ -184,6 +185,25 @@ rule scatter_accuracies_manual_split_iterations_top4:
         output:
             scatter = os.path.join(config['figures']['scatter'],
                         'all_model_accuracies_cv_train_test_manual_split_iterations_top4.svg')
+        conda:
+            "../envs/python.yaml"
+        params:
+            colors = config['colors_complex']['model_colors']
+        script:
+            "../scripts/python/graphs/scatter_accuracies_10_iterations.py"
+
+rule scatter_accuracies_manual_split_iterations_gtex_HG:
+    """ Generate a connected scatter plot for each model to show their accuracy
+        of prediction on the CV, training and test sets to highlight possible
+        overfitting. Show the average accuracy plus std deviation across all 10
+        manual split iterations."""
+        input:
+            cv_accuracy = expand(rules.hyperparameter_tuning_cv_scale_after_manual_split_gtex_HG.output.best_hyperparameters, **config),
+            training_accuracy = expand(rules.train_models_scale_after_manual_split_gtex_HG.output.training_accuracy, **config),
+            test_accuracy = expand(rules.test_models_scale_after_manual_split_gtex_HG.output.test_accuracy, **config)
+        output:
+            scatter = os.path.join(config['figures']['scatter'],
+                        'all_model_accuracies_cv_train_test_manual_split_iterations_gtex_HG.svg')
         conda:
             "../envs/python.yaml"
         params:
@@ -390,6 +410,25 @@ rule roc_curve_scale_after_split_10_iterations_only_hamming:
     output:
         roc_curve = os.path.join(config['figures']['roc'],
                         'roc_curves_test_set_5_models_scale_after_split_10_iterations_only_hamming.svg')
+    params:
+        model_colors_dict = config['colors_complex']['model_colors']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/roc_curve_scale_after_split_10_iterations.py"
+
+rule roc_curve_scale_after_manual_split_gtex_HG:
+    """ Generate a roc curve for each trained model based on their performance
+        on the test dataset based on the CV, train, test sets scaled after they
+        were generated. Add a shadow of +/- 1 stdev around each model roc curve."""
+    input:
+        X_test = expand(rules.fill_na_feature_scaling_after_manual_split_gtex_HG.output.test, **config),
+        y_test = expand(rules.fill_na_feature_scaling_after_manual_split_gtex_HG.output.y_test, **config),
+        pickled_trained_model = expand(rules.train_models_scale_after_manual_split_gtex_HG.output.pickled_trained_model,
+                                    manual_iteration=config['manual_iteration'], models2=config['models2'])
+    output:
+        roc_curve = os.path.join(config['figures']['roc'],
+                        'roc_curves_test_set_5_models_scale_after_manual_split_gtex_HG.svg')
     params:
         model_colors_dict = config['colors_complex']['model_colors']
     conda:
@@ -1259,6 +1298,64 @@ rule violin_feature_rank_manual_split:
         rank_features_df = rules.concat_feature_rank_manual_split_iterations_df.output.concat_df
     output:
         violin = os.path.join(config['figures']['violin'], 'ranks_per_feature_manual_split_iterations.svg')
+    params:
+        model_colors = config['colors_complex']['model_colors']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/violin_feature_rank_manual_split.py"
+
+rule get_all_shap_values_manual_split_gtex_HG:
+    """ Get the SHAP values of all features for each snoRNA across the 10 test
+        set manual split iterations and for each model (log_reg, svc and rf). Shap values are
+        given in the form of log(odds) not probability."""
+    input:
+        X_train = rules.fill_na_feature_scaling_after_manual_split_gtex_HG.output.train,
+        X_test = rules.fill_na_feature_scaling_after_manual_split_gtex_HG.output.test,
+        pickled_trained_model = rules.train_models_scale_after_manual_split_gtex_HG.output.pickled_trained_model
+    output:
+        shap = os.path.join(config['path']['shap_10_iterations'], '{models2}_{manual_iteration}_gtex_HG_shap_values.tsv'),
+        expected_value = os.path.join(config['path']['shap_10_iterations'], '{models2}_{manual_iteration}_gtex_HG_expected_value.tsv')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/get_all_shap_values_manual_split.py"
+
+rule all_feature_rank_df_manual_split_gtex_HG:
+    """ Create a dataframe containing the rank of importance for each feature
+        and per model for all 10 manual iterations."""
+    input:
+        shap_vals = expand(rules.get_all_shap_values_manual_split_gtex_HG.output.shap,
+                                    models2=config['models3'], allow_missing=True)
+    output:
+        rank_features_df = "results/tables/all_features_rank_across_models_gtex_HG_{manual_iteration}.tsv"
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/all_feature_rank_df_manual_split.py"
+
+
+rule concat_feature_rank_manual_split_iterations_df_gtex_HG:
+    """ Concat all dfs produced by the all_feature_rank_df_manual_split_gtex_HG rule
+        into one df containing all iterations."""
+    input:
+        dfs = expand(rules.all_feature_rank_df_manual_split_gtex_HG.output.rank_features_df,
+                    manual_iteration=config['manual_iteration'])
+    output:
+        concat_df = config['path']['all_feature_rank_df_manual_split_gtex_HG']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/concat_feature_rank_iterations_df.py"
+
+rule violin_feature_rank_manual_split_gtex_HG:
+    """ Create a violin plot where each violin on the x axis corresponds to one
+        feature and where the distribution of ranks (across 3 models and their
+        10 respective manual iterations) is represented on the y axis."""
+    input:
+        rank_features_df = rules.concat_feature_rank_manual_split_iterations_df_gtex_HG.output.concat_df
+    output:
+        violin = os.path.join(config['figures']['violin'], 'ranks_per_feature_manual_split_iterations_HG.svg')
     params:
         model_colors = config['colors_complex']['model_colors']
     conda:

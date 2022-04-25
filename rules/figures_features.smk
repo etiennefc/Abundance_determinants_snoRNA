@@ -1,4 +1,7 @@
 import os
+include: "cv_train_test_manual_split_gtex_HG.smk"
+include: "feature_normalization.smk"
+include: "gtex_HG_cutoff.smk"
 
 rule create_local_env:
     """ Import matplotlib and seaborn in local snakemake environment. Note that the log
@@ -23,7 +26,7 @@ rule pie_labels:
     params:
         colors = config['colors_complex']['abundance_cutoff_2']
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/pie.py"
 
@@ -39,7 +42,7 @@ rule donut_labels_sno_type:
         label_colors = config['colors_complex']['abundance_cutoff_2'],
         sno_type_colors = config['colors_complex']['sno_type']
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/donut_labels_sno_type.py"
 
@@ -55,7 +58,7 @@ rule donut_labels_host_biotype:
         label_colors = config['colors_complex']['abundance_cutoff_2'],
         host_biotype_colors = config['colors_complex']['host_biotype2']
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/donut_labels_host_biotype.py"
 
@@ -70,7 +73,7 @@ rule density_features_simple:
     params:
         simple_color = config['colors_complex']['simple']
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/density_features_simple.py"
 
@@ -86,7 +89,7 @@ rule density_features:
     params:
         hue_color = lambda wildcards: config['colors_complex'][wildcards.feature_hue]
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/density_features.py"
 
@@ -104,7 +107,7 @@ rule density_features_split:
     params:
         hue_color = config['colors_complex']['abundance_cutoff_2']
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/density_features_split.py"
 
@@ -122,7 +125,7 @@ rule density_normalized_mfe_split:
     params:
         hue_color = config['colors_complex']['abundance_cutoff_2']
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/density_normalized_mfe_split.py"
 
@@ -131,7 +134,7 @@ rule density_normalized_mfe_split:
 #        features by separating by sno_type and abundance_cutoff_2 (so 1 density
 #        plot for C/D and 1 for H/ACA per feature). """
 #    input:
-#        df = ****scaled_feature_df scale after split, but which iteration of cv-train-test split?**** 
+#        df = ****scaled_feature_df scale after split, but which iteration of cv-train-test split?****
 #    output:
 #        density_features_cd = os.path.join(config['figures']['density_split_sno_type'],
 #                            '{numerical_features_scaled}_cd.svg'),
@@ -140,7 +143,7 @@ rule density_normalized_mfe_split:
 #    params:
 #        hue_color = config['colors_complex']['abundance_cutoff_2']
 #    conda:
-#        "../envs/python.yaml"	
+#        "../envs/python.yaml"
 #    script:
 #        "../scripts/python/graphs/density_scaled_features_split.py"
 
@@ -159,7 +162,7 @@ rule density_intron_groups_sno_type_features:
     params:
         hue_color = config['colors_complex']['abundance_cutoff_2']
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/density_intron_groups_sno_type_features.py"
 
@@ -175,7 +178,7 @@ rule donut_labels_intron_subgroup:
         label_colors = config['colors_complex']['abundance_cutoff_2'],
         intron_subgroup_colors = config['colors_complex']['intron_subgroup']
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/donut_labels_intron_subgroup.py"
 
@@ -196,7 +199,7 @@ rule pairplot_features:
     params:
         hue_color = config['colors_complex']['abundance_cutoff_2']
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/pairplot_numerical.py"
 
@@ -216,7 +219,7 @@ rule bar_categorical_features:
     params:
         hue_color = lambda wildcards: config['colors_complex'][wildcards.categorical_features]
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/bar_categorical.py"
 
@@ -235,6 +238,40 @@ rule bar_large_scale_features:
     params:
         hue_color = config['colors_complex']['abundance_cutoff_2']
     conda:
-        "../envs/python.yaml"	
+        "../envs/python.yaml"
     script:
         "../scripts/python/graphs/bar_intronic_features.py"
+
+rule venn_host_abundance_cutoff_tgirt_gtex:
+    """ Generate a Venn diagram of all intronic snoRNAs based on the feature
+        host_expressed defined by TGIRT-Seq datasets or by GTEx datasets (one
+        for host_expressed and one for host_not_expressed)."""
+    input:
+        gtex_df = rules.one_hot_encode_before_split_gtex_HG.output.one_hot_encoded_df,
+        tgirt_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df
+    output:
+        venn_host_expressed = os.path.join(config['figures']['venn'],
+                        'gtex_tgirt_host_expressed_intersection.svg'),
+        venn_host_not_expressed = os.path.join(config['figures']['venn'],
+                            'gtex_tgirt_host_not_expressed_intersection.svg')
+    conda:
+        "../envs/venn_diagram.yaml"
+    script:
+        "../scripts/python/graphs/venn_host_abundance_cutoff_tgirt_gtex.py"
+
+rule venn_host_abundance_cutoff_tgirt_gtex_unpaired:
+    """ Generate a Venn diagram of all intronic snoRNAs based on the feature
+        host_expressed defined by TGIRT-Seq datasets or by unpaied tissue GTEx
+        datasets (one for host_expressed and one for host_not_expressed)."""
+    input:
+        gtex_df = rules.one_hot_encode_before_split_gtex_HG_unpaired.output.one_hot_encoded_df,
+        tgirt_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df
+    output:
+        venn_host_expressed = os.path.join(config['figures']['venn'],
+                        'gtex_unpaired_tgirt_host_expressed_intersection.svg'),
+        venn_host_not_expressed = os.path.join(config['figures']['venn'],
+                            'gtex_unpaired_tgirt_host_not_expressed_intersection.svg')
+    conda:
+        "../envs/venn_diagram.yaml"
+    script:
+        "../scripts/python/graphs/venn_host_abundance_cutoff_tgirt_gtex.py"

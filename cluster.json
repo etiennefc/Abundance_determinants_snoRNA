@@ -68,6 +68,16 @@
     "cpus-per-task": "1",
     "mem": "2G",
     "time": "0-7:00:00",
+    "mail-user": "etienne.fafard-couture@usherbrooke.ca",
+    "mail-type": "FAIL"
+  },
+  "all_feature_rank_df_manual_split_gtex_HG":
+  {
+    "cpus-per-task": "1",
+    "mem": "2G",
+    "time": "0-7:00:00",
+    "mail-user": "etienne.fafard-couture@usherbrooke.ca",
+    "mail-type": "FAIL"
   },
   "hyperparameter_tuning_cv_scale_after_split_10_iterations":
   {
@@ -125,6 +135,22 @@
     "mail-user": "etienne.fafard-couture@usherbrooke.ca",
     "mail-type": "FAIL"
   },
+  "hyperparameter_tuning_cv_species_prediction_top3_rs":
+  {
+    "cpus-per-task": "1",
+    "mem": "4G",
+    "time": "0-3:00:00",
+    "mail-user": "etienne.fafard-couture@usherbrooke.ca",
+    "mail-type": "FAIL"
+  },
+  "hyperparameter_tuning_cv_scale_after_manual_split_gtex_HG":
+  {
+    "cpus-per-task": "1",
+    "mem": "4G",
+    "time": "0-3:00:00",
+    "mail-user": "etienne.fafard-couture@usherbrooke.ca",
+    "mail-type": "FAIL"
+  },
   "train_models_scale_after_split_10_iterations":
   {
     "cpus-per-task": "1",
@@ -173,6 +199,22 @@
     "mail-user": "etienne.fafard-couture@usherbrooke.ca",
     "mail-type": "FAIL"
   },
+  "train_models_scale_after_manual_split_top3_rs":
+  {
+    "cpus-per-task": "1",
+    "mem": "4G",
+    "time": "0-3:00:00",
+    "mail-user": "etienne.fafard-couture@usherbrooke.ca",
+    "mail-type": "FAIL"
+  },
+  "train_models_scale_after_manual_split_gtex_HG":
+  {
+    "cpus-per-task": "1",
+    "mem": "4G",
+    "time": "0-3:00:00",
+    "mail-user": "etienne.fafard-couture@usherbrooke.ca",
+    "mail-type": "FAIL"
+  },
   "train_models_species_prediction_top4":
   {
     "cpus-per-task": "1",
@@ -206,6 +248,14 @@
     "mail-type": "FAIL"
   },
   "get_all_shap_values_manual_split":
+  {
+    "cpus-per-task": "1",
+    "mem": "2G",
+    "time": "0-5:00:00",
+    "mail-user": "etienne.fafard-couture@usherbrooke.ca",
+    "mail-type": "FAIL"
+  },
+  "get_all_shap_values_manual_split_gtex_HG":
   {
     "cpus-per-task": "1",
     "mem": "2G",

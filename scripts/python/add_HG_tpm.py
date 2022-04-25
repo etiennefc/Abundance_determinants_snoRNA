@@ -4,7 +4,6 @@ import pandas as pd
 """Add host gene (HG) abundance values in each tissue to each snoRNA in a dataframe using a reference table"""
 
 ref_table_HG = pd.read_csv(snakemake.input.ref_HG_table)
-#df = pd.read_csv('/home/etienne/Desktop/Étienne/Predictor/Maitrise/Fichiers_textes/tpm_w_biotype_v101_sno.csv')
 tpm_df = pd.read_csv(snakemake.input.tpm_biotype_df)
 df = tpm_df[tpm_df['gene_biotype2'] == 'snoRNA']
 
