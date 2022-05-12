@@ -9,6 +9,7 @@
                         "dist_to_bp_norm", "sno_mfe_norm", "terminal_stem_mfe_norm",
                         "terminal_stem_length_score_norm"],
   "mouse_numerical_features": ["combined_box_hamming", "sno_mfe", "terminal_stem_mfe"],
+  "species_numerical_features": ["combined_box_hamming", "sno_mfe", "terminal_stem_mfe"],
   "top_10_numerical_features": ["combined_box_hamming", "terminal_stem_mfe", "sno_mfe", "relative_intron_rank", "sno_length"],
   "top_10_categorical_features": ["host_expressed", "dual_initiation", "functional_ncRNA", "rRNA", "intergenic"],
   "categorical_features": ["sno_type", "sno_target", "host_biotype2", "host_function",

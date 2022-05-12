@@ -80,6 +80,7 @@ def donut_2(counts, labels, colors, title, legend_labels, legend_colors, path,
         legend_list.append(legend_element)
     plt.legend(handles=legend_list, loc='upper left', bbox_to_anchor=(-0.1, 1),
                 fontsize=10)
+    fig.suptitle(title, y=1, fontsize=18)
 
     plt.savefig(path, dpi=600)
 
@@ -431,7 +432,7 @@ def violin(df, x_col, y_col, hue_violin, hue_swarm, xlabel, ylabel, title, violi
     plt.rcParams['svg.fonttype'] = 'none'
     sns.set_context(rc=rc)
 
-    fig, ax = plt.subplots(figsize=(22, 8))
+    fig, ax = plt.subplots(figsize=(32, 8))
     ax = sns.violinplot(data=df, x=x_col, y=y_col, hue=hue_violin, palette=violin_colors, scale='count', cut=0, **kwargs)
     ax = sns.swarmplot(data=df, x=x_col, y=y_col, hue=hue_swarm, palette=swarm_colors, alpha=0.7, **kwargs)
     ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
@@ -538,6 +539,29 @@ def stacked_bar(lists, x_tick_labels, labels, title, xlabel, ylabel, colors, pat
 
     ax = df.plot.bar(stacked=True, figsize=(12,8), color=colors, **kwargs)
     ax.set_xticklabels(x_tick_labels, rotation=0)
+    plt.legend(fontsize=35, loc=5, bbox_to_anchor=(0.75, 1.25))
+    plt.title(title)
+    plt.xlabel(xlabel, fontsize=40)
+    plt.ylabel(ylabel, fontsize=40)
+    plt.autoscale()
+    plt.savefig(path, bbox_inches='tight', dpi=600)
+
+
+def stacked_bar2(lists, x_tick_labels, labels, title, xlabel, ylabel, colors, optional_annot, path, **kwargs):
+    """
+    Create a stacked bar chart from a list of lists ('lists').
+    """
+    rc = {'ytick.labelsize': 30, 'xtick.labelsize': 35}
+    plt.rcParams.update(**rc)
+    plt.rcParams['svg.fonttype'] = 'none'
+
+    df = pd.DataFrame(lists, index=x_tick_labels, columns=labels)
+    print(df)
+
+    ax = df.plot.bar(stacked=True, figsize=(20,8), color=colors, **kwargs)
+    ax.set_xticklabels(x_tick_labels, rotation=90)
+    # Add optional annotation above bars (ex: number of sno in each bar)
+    ax.text(0.5, 1.85, optional_annot, fontsize=25)
     plt.legend(fontsize=35, loc=5, bbox_to_anchor=(0.75, 1.25))
     plt.title(title)
     plt.xlabel(xlabel, fontsize=40)

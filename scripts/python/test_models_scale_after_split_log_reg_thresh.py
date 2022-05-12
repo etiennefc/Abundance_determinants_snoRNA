@@ -33,7 +33,7 @@ hyperparams = df_to_params(hyperparams_df)
 
 
 
-# Define a new class of of LogisticRegression in which we can choose the log_reg threshold used to predict
+# Define a new class of LogisticRegression in which we can choose the log_reg threshold used to predict
 class LogisticRegressionWithThreshold(LogisticRegression):
     def predict(self, X, threshold=None):
         if threshold == None: # If no threshold passed in, simply call the base class predict, effectively threshold=0.5
@@ -81,3 +81,9 @@ acc = {}
 acc['log_reg_thresh_test_accuracy'] = metrics.accuracy_score(y_test, y_pred_thresh)
 acc_df = pd.DataFrame(acc, index=[0])
 acc_df.to_csv(snakemake.output.test_accuracy, sep='\t', index=False)
+
+# Save threshold used for prediction in df
+t = {}
+t['log_reg_threshold'] = threshold
+thresh_df = pd.DataFrame(t, index=[0])
+thresh_df.to_csv(snakemake.output.threshold, sep='\t', index=False)

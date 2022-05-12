@@ -6,7 +6,24 @@ configfile: "config.json"
 simple_untreated_id = list(config['mouse_untreated_fastq_ids'].keys())
 simple_RA_treated_id = list(config['mouse_RA_treated_fastq_ids'].keys())
 all_sample_ids = simple_untreated_id + simple_RA_treated_id
-organism_name="Mus musculus"
+organism_name = "Mus musculus"
+species_original_name = ['Rattus norvegicus',  'Danio rerio',
+                         'Gallus gallus', 'Ornithorhynchus anatinus',
+                        'Xenopus tropicalis', 'Pan troglodytes', 'Bos taurus',
+                        'Oryctolagus cuniculus', 'Gorilla gorilla', 'Macaca mulatta']
+species = [name.replace(' ', '_').lower() for name in species_original_name]
+species_uppercase = [name.replace(' ', '_') for name in species_original_name]
+species_dict, species_uppercase_dict, ensembl_data_dict = {}, {}, {}
+for i, name in enumerate(species_original_name):
+    species_dict[species[i]] = name
+    species_uppercase_dict[species[i]] = species_uppercase[i]
+    if name  == 'Drosophila melanogaster':
+        ensembl_data_dict[species[i]] = 'flybase.tsv'
+    elif name  == 'Caenorhabditis elegans':
+        ensembl_data_dict[species[i]] = 'wormbase.tsv'
+    else:
+        ensembl_data_dict[species[i]] = 'ensembl.tsv'
+
 
 wildcard_constraints:
     feature_hue = "({})".format("|".join(config["feature_hue"])),
@@ -30,7 +47,8 @@ wildcard_constraints:
     interesting_sno_ids = "({})".format("|".join(config["interesting_sno_ids"])),
     id_untreated = "({})".format("|".join(list(config['mouse_untreated_fastq_ids'].keys()))),
     id_RA_treated = "({})".format("|".join(list(config['mouse_RA_treated_fastq_ids'].keys()))),
-    rs = "({})".format("|".join([str(rs_) for rs_ in config['rs']]))
+    rs = "({})".format("|".join([str(rs_) for rs_ in config['rs']])),
+    species = "({})".format("|".join(species))
 
 #Include data processing rules to generate the dataset
 include: "rules/data_processing.smk"
@@ -73,6 +91,9 @@ include: "rules/gtex_HG_cutoff.smk"
 include: "rules/cv_train_test_manual_split_gtex_HG.smk"
 include: "rules/snora81_overexpression_analyses.smk"
 
+include: "rules/downloads_species.smk"
+include: "rules/species_prediction.smk"
+include: "rules/species_prediction_figures.smk"
 
 
 rule all:
@@ -175,6 +196,8 @@ rule all:
                         'log_reg_confusion_matrix_w_f1_score_top4_species_prediction_thresh_{rs}.tsv'), **config),
         confusion_matrix_log_reg_thresh_top3 = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
                         'log_reg_confusion_matrix_w_f1_score_top3_species_prediction_thresh_{rs}.tsv'), **config),
+        threshold = expand(os.path.join(config['path']['test_accuracy_mouse'],
+                                    'log_reg_top4_species_prediction_threshold_value_{rs}.tsv'), **config),
 
         # GTEx host gene expression analyses
         test_accuracy_gtex_HG = expand(os.path.join(config['path']['test_accuracy'],
@@ -278,3 +301,31 @@ rule all_figures:
         # Modify SHAP _beeswarm script to sort by median and not by average or sum of SHAP values
         fake_log = "log/modify_shap.log",
         figures = get_figures_path(config)
+
+
+rule species_downloads:
+    input:
+        genome = expand('data/references/{species}_genome.fa', species=species),
+        gtf = expand("data/references/{species}.gtf", species=species),
+        conversion_table = expand("data/references/rna_central_to_ensembl_id_{species}.tsv", species=species),
+        RNA_central_species_snoRNAs = expand('data/references/rna_central_all_{species}_snoRNAs.tsv', species=species),
+        expression_dir = expand("data/references/{species}_Bgee_expression_datasets", species=species)
+
+rule species_predictions:
+    input:
+        predicted_snoRNA_labels = expand('results/tables/{species}_prediction/{species}_predicted_label.tsv', species=species),
+        #typee = expand("results/tables/{species}_snoRNA_type.tsv", species=species),
+        genome_chr_size = expand('data/references/{species}_genome_filtered_chr_sizes.genome', species=species),
+
+rule species_figures:
+    input:
+        density_features = expand(os.path.join(config['figures']['density'],
+                            '{species_numerical_features}_abundance_status_{species}_{sno_type}.svg'), species=species, **config),
+        host_abundance_cutoff_bar = expand(os.path.join(config['figures']['bar_split_sno_type'],
+                            'host_abundance_cutoff_{species}_{sno_type}.svg'), species=species, **config),
+        donut_sno_type_predicted_label = expand(os.path.join(config['figures']['donut'],
+                                            'predicted_abundance_status_sno_type_{species}.svg'), species=species),
+        donut_host_biotype_predicted_label = expand(os.path.join(config['figures']['donut'],
+                                                'predicted_abundance_status_host_biotype_{species}.svg'), species=species),
+        bar_ab_status_prediction_species = os.path.join(config['figures']['bar'],
+                                                'ab_status_prediction_all_species.svg')

@@ -22,7 +22,9 @@ rule train_test_accuracy_species_prediction_top4_log_reg_thresh:
         test_accuracy = os.path.join(config['path']['test_accuracy_mouse'],
                                     'log_reg_test_accuracy_top4_species_prediction_thresh_{rs}.tsv'),
         pickled_trained_model = os.path.join(config['path']['trained_models'],
-                                    'log_reg_trained_top4_species_prediction_thresh_{rs}.sav')
+                                    'log_reg_trained_top4_species_prediction_thresh_{rs}.sav'),
+        threshold = os.path.join(config['path']['test_accuracy_mouse'],
+                                    'log_reg_top4_species_prediction_threshold_value_{rs}.tsv')
 
     conda:
         "../envs/python.yaml"

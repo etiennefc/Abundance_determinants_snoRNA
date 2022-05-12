@@ -3,7 +3,7 @@ import pandas as pd
 import functions as ft
 import collections as coll
 
-df = pd.read_csv(snakemake.input.confusion_value_per_sno, sep='\t')
+df = pd.read_csv(snakemake.input.confusion_value_per_sno[0], sep='\t')
 colors = snakemake.params.color_dict
 output = snakemake.output.pie
 

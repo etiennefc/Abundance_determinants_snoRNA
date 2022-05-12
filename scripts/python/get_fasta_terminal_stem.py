@@ -18,6 +18,19 @@ cd_right = BedTool(snakemake.input.flanking_cd_right)
 haca_left = BedTool(snakemake.input.flanking_haca_left)
 haca_right = BedTool(snakemake.input.flanking_haca_right)
 
+# Verify if there is a left and right sequence for all snoRNAs (sometimes the
+# snoRNA is at the end of a chr, which makes it impossible to find a right sequence)
+cd_left_df = pd.read_table(cd_left.fn, names=col_names)
+cd_right_df = pd.read_table(cd_right.fn, names=col_names)
+if list(cd_left_df.gene_id) != list(cd_right_df.gene_id):
+    diff_id = list(set(list(cd_left_df.gene_id)) - set(list(cd_right_df.gene_id)))
+    diff_id2 = list(set(list(cd_right_df.gene_id)) - set(list(cd_left_df.gene_id)))
+    diff_ids = diff_id + diff_id2
+    print(diff_ids)
+    cd_left_df = cd_left_df[~cd_left_df['gene_id'].isin(diff_ids)]
+    cd_right_df = cd_right_df[~cd_right_df['gene_id'].isin(diff_ids)]
+    cd_left = BedTool.from_dataframe(cd_left_df)
+    cd_right = BedTool.from_dataframe(cd_right_df)
 
 # Get the sequences of the extended flanking regions of C/D snoRNAs
 fasta_cd_left = cd_left.sequence(fi=snakemake.input.genome_fasta)
@@ -38,7 +51,7 @@ with open(fasta_cd_left.seqfn, 'r') as file_left, open(fasta_cd_right.seqfn, 'r'
             co_seq = co_seq.replace('T', 'U')  # convert DNA to RNA
             co_seq = co_seq.replace('\n', '')  # remove new lines from string
             seqs_cd.append(co_seq)
-
+print(len(seqs_cd))
 # Create a dictionary of C/D snoRNAs id as keys and co_seq as values
 cd_dictio = {}
 cd_ids = pd.read_table(cd_left.fn, names=col_names)

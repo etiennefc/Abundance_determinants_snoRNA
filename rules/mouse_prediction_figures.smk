@@ -31,7 +31,7 @@ rule bar_host_expressed_mouse:
         snoRNA_type_df = rules.find_mouse_snoRNA_type.output.snoRNA_type_df
     output:
         bar = os.path.join(config['figures']['bar_split_sno_type'],
-                            'host_abundance_cutoff_{sno_type}.svg')
+                            'host_abundance_cutoff_mouse_{sno_type}.svg')
     params:
         hue_color = config['colors_complex']['abundance_cutoff_host']
     conda:

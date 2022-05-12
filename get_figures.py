@@ -130,7 +130,7 @@ def get_figures_path(config):
 
     # Mouse figures
     files.extend(expand(config['figures']['density'] + '{mouse_numerical_features}_abundance_status_mouse_{sno_type}.svg', **config))
-    files.extend(expand(os.path.join(config['figures']['bar_split_sno_type'] + 'host_abundance_cutoff_{sno_type}.svg'), **config))
+    files.extend(expand(os.path.join(config['figures']['bar_split_sno_type'] + 'host_abundance_cutoff_mouse_{sno_type}.svg'), **config))
     files.append(os.path.join(config['figures']['violin'], 'models_accuracies_iterations_mouse.svg'))
     files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_mouse.svg'))
     files.extend(expand(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_mouse_{models2}.svg'), **config))
