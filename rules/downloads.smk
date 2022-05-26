@@ -235,6 +235,18 @@ rule get_taxid:
         """echo ${{arr[1]}} | sed s'/\"//' > {output.taxid} && """
         """rm temp_id"""
 
+rule get_taxid_yeast:
+    """ Get the taxid (taxon ID) for S. cerevisiae using the tool taxoniq.
+        You must give the organism scientific name."""
+    output:
+        taxid = 'data/references/taxid_yeast.tsv'
+    shell:
+        """pip3 install 'taxoniq==0.6.0' && """
+        """taxoniq --scientific-name 'Saccharomyces cerevisiae' url > temp_id_sacch && """
+        """IN=$(cat temp_id_sacch) && arr=(${{IN//id=/ }}) && """
+        """echo ${{arr[1]}} | sed s'/\"//' > {output.taxid} && """
+        """rm temp_id_sacch"""
+
 rule dowload_mouse_HG_RNA_seq_datasets:
     """ Download RNA-Seq datasets of mouse tissues (including mESC) using recount3"""
     output:
@@ -243,6 +255,29 @@ rule dowload_mouse_HG_RNA_seq_datasets:
         "../envs/recount3.yaml"
     script:
         "../scripts/r/download_mouse_HG_RNA_seq_datasets.R"
+
+rule download_yeast_genome:
+    """Download the S. cerevisiae reference genome (fasta file) used for this analysis from
+        ENSEMBL ftp servers."""
+    output:
+        genome = config['path']['yeast_genome']
+    params:
+        link = config['download']['ensembl_yeast_genome']
+    shell:
+        "wget --quiet -O temp_yeast_genome.fa.gz {params.link} && "
+        "gunzip temp_yeast_genome.fa.gz && "
+        "sed 's/>/>chr/' temp_yeast_genome.fa > {output.genome} && "
+        "rm temp_yeast_genome.fa"
+
+rule download_yeast_annotation:
+    """Download the S. cerevisiae annotation (gtf file) used for this analysis."""
+    output:
+        std_gtf = config['path']['yeast_gtf']
+    params:
+        link_std_annotation = config['download']['ensembl_yeast_gtf']
+    shell:
+        "wget --quiet -O temp_yeast.gtf.gz {params.link_std_annotation} && "
+        "gunzip temp_yeast.gtf.gz && mv temp_yeast.gtf {output.std_gtf}"
 
 rule download_gtex_host_data:
     """ Download TPM table from GTEx to compare the host gene abundance to that
