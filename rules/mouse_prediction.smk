@@ -30,7 +30,7 @@ rule fasta_sno_sequence_mouse:
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/python/fasta_sno_sequence_mouse.py"
+        "../scripts/python/fasta_sno_sequence_species.py"
 
 
 rule find_mouse_snoRNA_type:

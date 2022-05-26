@@ -33,8 +33,8 @@ if list(cd_left_df.gene_id) != list(cd_right_df.gene_id):
     cd_right = BedTool.from_dataframe(cd_right_df)
 
 # Get the sequences of the extended flanking regions of C/D snoRNAs
-fasta_cd_left = cd_left.sequence(fi=snakemake.input.genome_fasta)
-fasta_cd_right = cd_right.sequence(fi=snakemake.input.genome_fasta)
+fasta_cd_left = cd_left.sequence(fi=snakemake.input.genome_fasta, s=True)
+fasta_cd_right = cd_right.sequence(fi=snakemake.input.genome_fasta, s=True)
 
 # For C/D snoRNAs, open both left and right flanking regions fasta file and append the right region
 # to the right of the left region as reverse order strings separated by a '&'; this combined sequence is used by RNAcofold.
@@ -67,8 +67,8 @@ with open(snakemake.output.sequences, "a+") as file:  # a+ for append in new fil
 
 
 # Get the sequences of the extended flanking regions of H/ACA snoRNAs
-fasta_haca_left = haca_left.sequence(fi=snakemake.input.genome_fasta)
-fasta_haca_right = haca_right.sequence(fi=snakemake.input.genome_fasta)
+fasta_haca_left = haca_left.sequence(fi=snakemake.input.genome_fasta, s=True)
+fasta_haca_right = haca_right.sequence(fi=snakemake.input.genome_fasta, s=True)
 
 # For H/ACA snoRNAs, open both left and right flanking regions fasta file and append the right region
 # to the right of the left region as reverse order strings separated by a '&'; this combined sequence is used by RNAcofold.

@@ -35,11 +35,24 @@ cd_flank_right = BedTool(line for i, line in enumerate(cd_flank) if i % 2 != 0).
 haca_flank_left = BedTool(line for i, line in enumerate(haca_flank) if i % 2 == 0).saveas()
 haca_flank_right = BedTool(line for i, line in enumerate(haca_flank) if i % 2 != 0).saveas()
 
+# For H/ACA snoRNAs, split by strand, since we don't extend (slop) the same number of nt (5 vs 3 nt respectively for the 5' and 3' end)
+# We don't need to that for C/D since we extend 5 nt from the 5' and 3'end, so it does not affect the terminal stem sequences
+haca_flank_left_plus = BedTool(line for line in haca_flank_left if line[5] == '+').saveas()  # where line[5] corresponds to the strand
+haca_flank_left_minus = BedTool(line for line in haca_flank_left if line[5] == '-').saveas()  # where line[5] corresponds to the strand
+haca_flank_right_plus = BedTool(line for line in haca_flank_right if line[5] == '+').saveas()  # where line[5] corresponds to the strand
+haca_flank_right_minus = BedTool(line for line in haca_flank_right if line[5] == '-').saveas()  # where line[5] corresponds to the strand
 
 # For C/D snoRNAs, extend the flanking region inside the snoRNA for 5 nt from the 5' and 3' of the snoRNA
 cd_extend_left = cd_flank_left.slop(r=5, l=0, g=chr_size_file).saveas(snakemake.output.flanking_cd_left)
 cd_extend_right = cd_flank_right.slop(l=5, r=0, g=chr_size_file).saveas(snakemake.output.flanking_cd_right)
 
 # For H/ACA snoRNAs, extend the flanking region inside the snoRNA for 5 nt from the 5' and 3 nt from the 3' of the snoRNA
-haca_extend_left = haca_flank_left.slop(r=5, l=0, g=chr_size_file).saveas(snakemake.output.flanking_haca_left)
-haca_extend_right = haca_flank_right.slop(l=3, r=0, g=chr_size_file).saveas(snakemake.output.flanking_haca_right)
+haca_extend_left_plus = haca_flank_left_plus.slop(r=5, l=0, g=chr_size_file, s=True).saveas('temp_haca_species_extend_left_plus.bed')
+haca_extend_right_plus = haca_flank_right_plus.slop(l=3, r=0, g=chr_size_file, s=True).saveas('temp_haca_species_extend_right_plus.bed')
+
+haca_extend_left_minus = haca_flank_left_minus.slop(l=3, r=0, g=chr_size_file, s=True).saveas('temp_haca_species_extend_left_minus.bed')
+haca_extend_right_minus = haca_flank_right_minus.slop(r=5, l=0, g=chr_size_file, s=True).saveas('temp_haca_species_extend_right_minus.bed')
+
+sp.call('cat temp_haca_species_extend_left_plus.bed temp_haca_species_extend_left_minus.bed > '+snakemake.output.flanking_haca_left, shell=True)
+sp.call('cat temp_haca_species_extend_right_plus.bed temp_haca_species_extend_right_minus.bed > '+snakemake.output.flanking_haca_right, shell=True)
+sp.call('rm temp_haca_species_extend*.bed', shell=True)
