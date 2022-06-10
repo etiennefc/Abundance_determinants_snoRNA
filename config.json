@@ -277,7 +277,7 @@
     "protein_coding_HG_functions": "data/references/protein_coding_functions.tsv",
     "sno_sequences": "data/structure/stability/sno_sequences.tsv",
     "sno_sequences_mouse": "data/mouse_bed_files/sno_sequences_mouse.fa",
-    "sno_sequences_yeast": "data/mouse_bed_files/sno_sequences_yeast.fa",
+    "sno_sequences_yeast": "data/yeast_bed_files/sno_sequences_yeast.fa",
     "structure_stability_fasta": "data/structure/stability/sno_mfe.fa",
     "structure_stability_tsv": "data/structure/stability/sno_mfe.tsv",
     "structure_stability_fasta_mouse": "data/structure/stability_mouse/sno_mfe_mouse.fa",

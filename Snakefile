@@ -200,6 +200,8 @@ rule all:
         #####                            '{models2}_confusion_matrix_w_f1_score_scale_after_split_gtex_HG_{manual_iteration}.tsv'), **config),
         #####concat_df = config['path']['all_feature_rank_df_manual_split_gtex_HG'],
 
+        # Yeast prediction
+        #yeast_predicted_label_df = 'results/tables/yeast_prediction/yeast_predicted_label_no_thresh.tsv',
         # SNORA81 overexpression analyses
         #predicted_label = expand('results/tables/snora81_overexpression/{models2}_SNORA81_label_{manual_iteration}.tsv', **config)
 
@@ -294,8 +296,7 @@ rule all_figures:
     input:
         # Modify SHAP _beeswarm script to sort by median and not by average or sum of SHAP values
         fake_log = "log/modify_shap.log",
-        #figures = get_figures_path(config)
-        terminal_stem_cd = expand(config['figures']['density_split_sno_type'] + '{numerical_features}_cd.svg', **config),
+        figures = get_figures_path(config)
 
 
 rule species_downloads:
@@ -314,13 +315,16 @@ rule species_predictions:
 
 rule species_figures:
     input:
-        density_features = expand(os.path.join(config['figures']['density'],
-                            '{species_numerical_features}_abundance_status_{species}_{sno_type}.svg'), species=species, **config),
-        host_abundance_cutoff_bar = expand(os.path.join(config['figures']['bar_split_sno_type'],
-                            'host_abundance_cutoff_{species}_{sno_type}.svg'), species=species, **config),
-        donut_sno_type_predicted_label = expand(os.path.join(config['figures']['donut'],
-                                            'predicted_abundance_status_sno_type_{species}.svg'), species=species),
-        donut_host_biotype_predicted_label = expand(os.path.join(config['figures']['donut'],
-                                                'predicted_abundance_status_host_biotype_{species}.svg'), species=species),
+        #density_features = expand(os.path.join(config['figures']['density'],
+        #                    '{species_numerical_features}_abundance_status_{species}_{sno_type}.svg'), species=species, **config),
+        #host_abundance_cutoff_bar = expand(os.path.join(config['figures']['bar_split_sno_type'],
+        #                    'host_abundance_cutoff_{species}_{sno_type}.svg'), species=species, **config),
+        #donut_sno_type_predicted_label = expand(os.path.join(config['figures']['donut'],
+        #                                    'predicted_abundance_status_sno_type_{species}.svg'), species=species),
+        #donut_host_biotype_predicted_label = expand(os.path.join(config['figures']['donut'],
+        #                                        'predicted_abundance_status_host_biotype_{species}.svg'), species=species),
         bar_ab_status_prediction_species = os.path.join(config['figures']['bar'],
-                                                'ab_status_prediction_all_species.svg')
+                                                'ab_status_prediction_all_species.svg'),
+        scatter_species_prediction_sno_nb = os.path.join(config['figures']['scatter'],
+                    'sno_nb_ab_status_prediction_all_species.svg'),
+        df = 'results/tables/summary_table_sno_type_host_biotype_species.tsv'

@@ -180,7 +180,7 @@ rule flank_extend_snoRNA_species:
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/python/flank_extend_snoRNA_species.py"
+        "../scripts/python/flank_extend_snoRNA_mouse.py"
 
 rule get_fasta_terminal_stem_species:
     """ Get the sequence of all the extended flanking regions into a fasta file
@@ -242,7 +242,7 @@ rule fasta_per_sno_type_species:
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/python/fasta_per_sno_type_species.py"
+        "../scripts/python/fasta_per_sno_type_mouse.py"
 
 
 rule c_d_box_location_all_species:
@@ -312,8 +312,7 @@ rule predict_species_snoRNA_label:
     input:
         feature_df = rules.merge_features_species.output.feature_df,
         human_snoRNA_feature_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df,
-        pickled_trained_model = expand(rules.train_test_accuracy_species_prediction_top4_log_reg_thresh.output.pickled_trained_model, rs=42),
-        threshold = expand(rules.train_test_accuracy_species_prediction_top4_log_reg_thresh.output.threshold, rs=42)
+        pickled_trained_model = expand(rules.train_models_species_prediction_top4_rs.output.pickled_trained_model, rs=42, models2='log_reg'),
     output:
         predicted_label_df = 'results/tables/{species}_prediction/{species}_predicted_label.tsv',
         scaled_feature_df = 'results/tables/{species}_prediction/{species}_scaled_features.tsv'
@@ -322,4 +321,4 @@ rule predict_species_snoRNA_label:
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/python/predict_species_snoRNA_label_final.py"
+        "../scripts/python/predict_yeast_snoRNA_label.py"

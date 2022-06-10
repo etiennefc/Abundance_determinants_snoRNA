@@ -35,7 +35,7 @@ def get_figures_path(config):
                     '{confusion_value}_all_models_scale_after_manual_split.svg'), **config))
 
     # Pie chart of the number of snoRNAs per confusion value (TP, TN, FP, FN)
-    files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value.svg'))
+    #files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value.svg'))
 
     # Donut chart of the number of snoRNAs per confusion value (TP, TN, FP, FN) (outer donut) and their host biotype (inner donut)
     files.append(os.path.join(config['figures']['donut'],
@@ -57,8 +57,8 @@ def get_figures_path(config):
     files.extend(expand(os.path.join(config['figures']['decision_plot_interesting_snoRNAs'], '{interesting_sno_ids}_{models2}.svg'), **config))
 
     # Density plots to compare per confusion_value the top 10 numerical features distributions
-    files.extend(expand(os.path.join(config['figures']['density_confusion_value'],
-                                "confusion_value_comparison_{top_10_numerical_features}.svg"), **config))
+    #files.extend(expand(os.path.join(config['figures']['density_confusion_value'],
+    #                            "confusion_value_comparison_{top_10_numerical_features}.svg"), **config))
 
     # Bar plots to compare per confusion_value the top 10 categorical features distributions
     files.extend(expand(os.path.join(config['figures']['bar_confusion_value'],
@@ -103,6 +103,7 @@ def get_figures_path(config):
     files.append(os.path.join(config['figures']['logo'], 'expressed_c_prime_box_wo_blank.svg'))
 
     # Feature distribution
+    '''
     files.extend(expand(config['figures']['density'] + '{numerical_features}.svg', **config))
     files.extend(expand(config['figures']['density'] + numerical, **config))
     #files.extend(expand(config['figures']['pairplot'] + cd_numerical, **config))
@@ -120,11 +121,11 @@ def get_figures_path(config):
     files.append(os.path.join(config['figures']['donut'], 'abundance_status_host_biotype.svg'))
     files.append(os.path.join(config['figures']['density_split_sno_type'], 'sno_mfe_length_normalized_haca.svg'))
     files.append(os.path.join(config['figures']['density_split_sno_type'], 'sno_mfe_length_normalized_cd.svg'))
-
+    '''
     # Intron subgroup snoRNA feature distribution (small vs long intron)
-    files.extend(expand(config['figures']['density_split_sno_type'] + '{sno_type}_small_intron_{intron_group_feature}.svg', **config))
-    files.extend(expand(config['figures']['density_split_sno_type'] + '{sno_type}_long_intron_{intron_group_feature}.svg', **config))
-    files.append(os.path.join(config['figures']['donut'], 'abundance_status_intron_subgroup.svg'))
+    #files.extend(expand(config['figures']['density_split_sno_type'] + '{sno_type}_small_intron_{intron_group_feature}.svg', **config))
+    #files.extend(expand(config['figures']['density_split_sno_type'] + '{sno_type}_long_intron_{intron_group_feature}.svg', **config))
+    #files.append(os.path.join(config['figures']['donut'], 'abundance_status_intron_subgroup.svg'))
 
 
 
@@ -136,26 +137,40 @@ def get_figures_path(config):
     files.extend(expand(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_mouse_{models2}.svg'), **config))
     files.append(os.path.join(config['figures']['donut'], 'abundance_status_sno_type_mouse.svg'))
     files.append(os.path.join(config['figures']['donut'], 'abundance_status_host_biotype_mouse.svg'))
+    files.append(os.path.join(config['figures']['donut'], 'abundance_status_sno_type_mouse_wo_dup.svg'))
+    files.append(os.path.join(config['figures']['donut'], 'abundance_status_host_biotype_mouse_wo_dup.svg'))
+    files.append(os.path.join(config['figures']['donut'], 'abundance_status_sno_type_mouse_no_dup.svg'))
+    files.append(os.path.join(config['figures']['donut'], 'abundance_status_host_biotype_mouse_no_dup.svg'))
     files.append(os.path.join(config['figures']['violin'], "avg_tpm_per_confusion_value_mouse.svg"))
     files.extend(expand(os.path.join(config['figures']['violin'], "avg_tpm_per_confusion_value_mouse_{models2}.svg"), **config))
     files.extend(expand(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_species_prediction_{models2}_{rs}.svg'), **config))
+    #files.append(os.path.join(config['figures']['scatter'],
+    #            'all_model_accuracies_cv_train_test_species_prediction.svg'))
+    #files.append(os.path.join(config['figures']['scatter'],
+    #            'all_model_accuracies_cv_train_test_species_prediction_rs.svg'))
     files.append(os.path.join(config['figures']['scatter'],
-                'all_model_accuracies_cv_train_test_species_prediction.svg'))
+                'all_model_accuracies_cv_train_test_species_prediction_wo_dup_rs.svg'))
     files.append(os.path.join(config['figures']['scatter'],
-                'all_model_accuracies_cv_train_test_species_prediction_rs.svg'))
-    files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_species_prediction_log_reg_thresh.svg'))
-    files.append(os.path.join(config['figures']['scatter'],
-                        'all_model_accuracies_cv_train_test_species_prediction_w_log_reg_thresh.svg'))
+                'all_model_accuracies_cv_train_test_species_prediction_no_dup_rs.svg'))
+    #files.append(os.path.join(config['figures']['pie'], 'sno_number_per_confusion_value_species_prediction_log_reg_thresh.svg'))
+    #files.append(os.path.join(config['figures']['scatter'],
+    #                    'all_model_accuracies_cv_train_test_species_prediction_w_log_reg_thresh.svg'))
     files.append(os.path.join(config['figures']['donut'],
                             'confusion_value_host_biotype_mouse.svg'))
-    files.append(os.path.join(config['figures']['violin'],
-                    "avg_tpm_per_confusion_value_mouse_log_reg_thresh.svg"))
+    files.extend(expand(os.path.join(config['figures']['donut'],
+                        'confusion_value_host_biotype_mouse_{models2}_wo_dup.svg'), **config))
+    files.extend(expand(os.path.join(config['figures']['donut'],
+                        'confusion_value_host_biotype_mouse_{models2}_no_dup.svg'), **config))
+    #files.append(os.path.join(config['figures']['violin'],
+    #                "avg_tpm_per_confusion_value_mouse_log_reg_thresh.svg"))
+    #files.append(os.path.join(config['figures']['scatter'],
+    #                    'all_model_accuracies_cv_train_test_species_prediction_rs_w_log_reg_thresh.svg'))
+    #files.append(os.path.join(config['figures']['scatter'],
+    #                    'all_model_accuracies_cv_train_test_species_prediction_rs_w_log_reg_thresh_top3.svg'))
     files.append(os.path.join(config['figures']['scatter'],
-                        'all_model_accuracies_cv_train_test_species_prediction_rs_w_log_reg_thresh.svg'))
-    files.append(os.path.join(config['figures']['scatter'],
-                        'all_model_accuracies_cv_train_test_species_prediction_rs_w_log_reg_thresh_top3.svg'))
+                'all_model_accuracies_cv_train_test_species_prediction_wo_dup_top3_rs.svg'))
     files.append(os.path.join(config['figures']['donut'],
-                            'confusion_value_host_biotype_mouse_top3.svg'))
+                        'confusion_value_host_biotype_mouse_top3_wo_dup_log_reg.svg'))  # this is not log_reg thresh
 
 
     # GTEx comparison vs TGIRT host abundance cutoff

@@ -115,3 +115,117 @@ rule confusion_matrix_f1_species_prediction_top4_rs:
         "../envs/python.yaml"
     script:
         "../scripts/python/confusion_matrix_f1_scale_after_split.py"
+
+rule predict_mouse_snoRNA_label_species_prediction_top4_wo_dup_rs:
+    """ Predict the abundance status of all mouse snoRNA based on the
+        top4 features (combined_box_hamming. sno_mfe, terminal_stem_mfe and
+        host_expressed). We scale the feature_df using the same parameters (mean
+        and stdev) used to scale each training set. We remove duplicate snoRNAs
+        (keeping only one snoRNA per duplicatas) that have identical feature
+        values from the test set to remove redundancy."""
+    input:
+        feature_df = rules.merge_features_label_mouse.output.feature_df,
+        human_snoRNA_feature_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df,
+        pickled_trained_model = rules.train_models_species_prediction_top4_rs.output.pickled_trained_model
+    output:
+        predicted_label_df = 'results/tables/mouse_prediction/{models2}_predicted_label_species_prediction_top4_wo_dup_{rs}.tsv',
+        scaled_feature_df = 'results/tables/mouse_prediction/{models2}_scaled_features_species_prediction_top4_wo_dup_{rs}.tsv',
+        label_df = 'results/tables/mouse_prediction/{models2}_label_species_prediction_top4_wo_dup_{rs}.tsv'
+    params:
+        random_state = 42
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/predict_species_snoRNA_label_wo_dup.py"
+
+rule test_accuracy_species_prediction_top4_wo_dup_rs:
+    """ Test model performance on mouse snoRNA data and return their accuracies.
+        We remove duplicate snoRNAs (keeping only one snoRNA per duplicatas)
+        that have identical feature values from the test set to remove
+        redundancy."""
+    input:
+        X_test = rules.predict_mouse_snoRNA_label_species_prediction_top4_wo_dup_rs.output.scaled_feature_df,
+        y_test = rules.predict_mouse_snoRNA_label_species_prediction_top4_wo_dup_rs.output.label_df,
+        pickled_trained_model = rules.train_models_species_prediction_top4_rs.output.pickled_trained_model
+    output:
+        test_accuracy = os.path.join(config['path']['test_accuracy_mouse'],
+                                    '{models2}_test_accuracy_top4_species_prediction_wo_dup_{rs}.tsv')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/test_models_scale_after_split.py"
+
+rule confusion_matrix_f1_species_prediction_top4_wo_dup_rs:
+    """ Create a confusion matrix (all True/False positives or negatives) for
+        each model in order to compare whether they misclassify the same snoRNAs
+        or not. Compute also the F1 score per model. Do this on mouse snoRNAs."""
+    input:
+        X_test = rules.predict_mouse_snoRNA_label_species_prediction_top4_wo_dup_rs.output.scaled_feature_df,
+        y_test = rules.predict_mouse_snoRNA_label_species_prediction_top4_wo_dup_rs.output.label_df,
+        pickled_trained_model = rules.train_models_species_prediction_top4_rs.output.pickled_trained_model
+    output:
+        confusion_matrix = os.path.join(config['path']['confusion_matrix_f1_mouse'],
+                        '{models2}_confusion_matrix_w_f1_score_top4_species_prediction_wo_dup_{rs}.tsv'),
+        info_df = os.path.join(config['path']['confusion_matrix_f1_mouse'],
+                        '{models2}_confusion_matrix_values_per_sno_top4_species_prediction_wo_dup_{rs}.tsv')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/confusion_matrix_f1_scale_after_split.py"
+
+rule predict_mouse_snoRNA_label_species_prediction_top4_no_dup_rs:
+    """ Predict the abundance status of all mouse snoRNA based on the
+        top4 features (combined_box_hamming. sno_mfe, terminal_stem_mfe and
+        host_expressed). We scale the feature_df using the same parameters (mean
+        and stdev) used to scale each training set. We remove all duplicate snoRNAs
+        (keeping NO snoRNAs if they have an identical copy, i.e drop all duplicates
+        including the first snoRNA) from the test set to remove redundancy."""
+    input:
+        feature_df = rules.merge_features_label_mouse.output.feature_df,
+        human_snoRNA_feature_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df,
+        pickled_trained_model = rules.train_models_species_prediction_top4_rs.output.pickled_trained_model
+    output:
+        predicted_label_df = 'results/tables/mouse_prediction/{models2}_predicted_label_species_prediction_top4_no_dup_{rs}.tsv',
+        scaled_feature_df = 'results/tables/mouse_prediction/{models2}_scaled_features_species_prediction_top4_no_dup_{rs}.tsv',
+        label_df = 'results/tables/mouse_prediction/{models2}_label_species_prediction_top4_no_dup_{rs}.tsv'
+    params:
+        random_state = 42
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/predict_species_snoRNA_label_no_dup.py"
+
+rule test_accuracy_species_prediction_top4_no_dup_rs:
+    """ Test model performance on mouse snoRNA data and return their accuracies.
+        We remove all duplicate snoRNAs (keeping NO snoRNAs if they have an
+        identical copy, i.e drop all duplicates including the first snoRNA) from
+        the test set to remove redundancy."""
+    input:
+        X_test = rules.predict_mouse_snoRNA_label_species_prediction_top4_no_dup_rs.output.scaled_feature_df,
+        y_test = rules.predict_mouse_snoRNA_label_species_prediction_top4_no_dup_rs.output.label_df,
+        pickled_trained_model = rules.train_models_species_prediction_top4_rs.output.pickled_trained_model
+    output:
+        test_accuracy = os.path.join(config['path']['test_accuracy_mouse'],
+                                    '{models2}_test_accuracy_top4_species_prediction_no_dup_{rs}.tsv')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/test_models_scale_after_split.py"
+
+rule confusion_matrix_f1_species_prediction_top4_no_dup_rs:
+    """ Create a confusion matrix (all True/False positives or negatives) for
+        each model in order to compare whether they misclassify the same snoRNAs
+        or not. Compute also the F1 score per model. Do this on mouse snoRNAs."""
+    input:
+        X_test = rules.predict_mouse_snoRNA_label_species_prediction_top4_no_dup_rs.output.scaled_feature_df,
+        y_test = rules.predict_mouse_snoRNA_label_species_prediction_top4_no_dup_rs.output.label_df,
+        pickled_trained_model = rules.train_models_species_prediction_top4_rs.output.pickled_trained_model
+    output:
+        confusion_matrix = os.path.join(config['path']['confusion_matrix_f1_mouse'],
+                        '{models2}_confusion_matrix_w_f1_score_top4_species_prediction_no_dup_{rs}.tsv'),
+        info_df = os.path.join(config['path']['confusion_matrix_f1_mouse'],
+                        '{models2}_confusion_matrix_values_per_sno_top4_species_prediction_no_dup_{rs}.tsv')
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/confusion_matrix_f1_scale_after_split.py"

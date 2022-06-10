@@ -308,3 +308,25 @@ rule predict_yeast_snoRNA_label:
         "../envs/python.yaml"
     script:
         "../scripts/python/predict_species_snoRNA_label_final.py"
+
+rule predict_yeast_snoRNA_label_no_thresh:
+    """ Predict the abundance status of yeast snoRNA based on the
+        top4 features (combined_box_hamming, sno_mfe, terminal_stem_mfe and
+        host_expressed). We scale the feature_df using the same parameters (mean
+        and stdev) used to scale each training set in human. We use the
+        LogisticRegression model (hyperparameter_tuning and training on 10% and
+        90% of human snoRNAs respectively). Return the predicted
+        label and all features columns."""
+    input:
+        feature_df = rules.merge_features_label_yeast.output.feature_df,
+        human_snoRNA_feature_df = rules.one_hot_encode_before_split.output.one_hot_encoded_df,
+        pickled_trained_model = expand(rules.train_models_species_prediction_top4_rs.output.pickled_trained_model, rs=42, models2='log_reg')
+    output:
+        predicted_label_df = 'results/tables/yeast_prediction/yeast_predicted_label_no_thresh.tsv',
+        scaled_feature_df = 'results/tables/yeast_prediction/yeast_scaled_features_no_thresh.tsv'
+    params:
+        random_state = 42
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/predict_yeast_snoRNA_label.py"

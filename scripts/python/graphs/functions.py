@@ -213,7 +213,7 @@ def pairplot(df, hue, hue_color_dict, path, **kwargs):
     plt.savefig(path, bbox_inches='tight', dpi=500)
 
 
-def scatter(df, x_col, y_col, hue_col, xlabel, ylabel, title, color_dict, path,
+def scatter(df, x_col, y_col, hue_col, xlabel, ylabel, title, color_dict, optional_annot, path,
             **kwargs):
     """
     Creates a scatter plot (using a x, y and hue column).
@@ -221,14 +221,14 @@ def scatter(df, x_col, y_col, hue_col, xlabel, ylabel, title, color_dict, path,
 
     plt.rcParams['svg.fonttype'] = 'none'
     fig, ax = plt.subplots(1,1, figsize=(10,9))
-    ax.set_xscale('symlog')
+    # ax.set_xscale('symlog')
     #ax.set_yscale('symlog')
-    ax.set_xlim(-0.1, 10000)
-    #ax.set_ylim(-0.1, 10000)
-    #ax.set_xlabel(xlabel, fontsize=20)
-    #ax.set_ylabel(ylabel, fontsize=20)
+    # ax.set_xlim(-0.1, 10000)
+    ax.set_ylim(0, 70)
+    ax.set_xlabel(xlabel, fontsize=20)
+    ax.set_ylabel(ylabel, fontsize=20)
     ax.set_title(title, fontsize=10)
-
+    ax.text(3500, 50, optional_annot, fontsize=25)
     sns.scatterplot(data=df, x=x_col, y=y_col, hue=hue_col,
                     palette=color_dict, edgecolor='face',
                     s=25, **kwargs)
@@ -368,7 +368,7 @@ def connected_scatter_errbars(df, df_hue, hue_col, color_dict, col_name_for_x_ax
                     [dictio[id] for dictio in stdev], capsize=20, color=color_dict[id])
     ax.set_xlabel(xlabel, fontsize=35)
     ax.set_ylabel(ylabel, fontsize=35)
-    ax.set_ylim(0.75, 1.025)
+    ax.set_ylim(0.65, 1.025)
     legend_list = []
     for i, crit in enumerate(color_dict.keys()):
         legend_element = mpatches.Patch(color=color_dict[crit], label=crit)
@@ -557,16 +557,16 @@ def stacked_bar2(lists, x_tick_labels, labels, title, xlabel, ylabel, colors, op
 
     df = pd.DataFrame(lists, index=x_tick_labels, columns=labels)
     print(df)
-
-    ax = df.plot.bar(stacked=True, figsize=(20,8), color=colors, **kwargs)
+    ax = df.plot.bar(stacked=True, figsize=(35,8), color=colors, **kwargs)
     ax.set_xticklabels(x_tick_labels, rotation=90)
     # Add optional annotation above bars (ex: number of sno in each bar)
-    ax.text(0.5, 1.85, optional_annot, fontsize=25)
+    ax.text(0.5, 105, optional_annot, fontsize=25)
     plt.legend(fontsize=35, loc=5, bbox_to_anchor=(0.75, 1.25))
     plt.title(title)
     plt.xlabel(xlabel, fontsize=40)
     plt.ylabel(ylabel, fontsize=40)
     plt.autoscale()
+    plt.margins(0.02)
     plt.savefig(path, bbox_inches='tight', dpi=600)
 
 

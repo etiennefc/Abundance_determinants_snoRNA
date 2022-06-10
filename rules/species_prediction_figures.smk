@@ -16,6 +16,21 @@ rule density_features_species:
     script:
         "../scripts/python/graphs/density_features_species.py"
 
+rule summary_table_sno_type_host_biotype_species:
+    """ Create a table containing the number (and %) of snoRNAs per predicted
+        species with regards to the snoRNA type and host gene biotype, separated
+        by predicted abundance status."""
+    input:
+        df = expand(rules.predict_species_snoRNA_label.output.predicted_label_df, species=species),
+        snoRNA_type_df = expand(rules.find_species_snoRNA_type.output.snoRNA_type_df, species=species),
+        host_biotype_df = expand(rules.find_species_snoRNA_HG.output.species_snoRNA_HG, species=species)
+    output:
+        df = 'results/tables/summary_table_sno_type_host_biotype_species.tsv'
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/summary_table_sno_type_host_biotype_species.py"
+
 rule bar_host_expressed_species:
     """ Generate a bar chart of all predicted expressed vs non_expressed snoRNAs
         according to the host_abundance_cutoff feature (separately for C/D and
@@ -87,3 +102,20 @@ rule bar_ab_status_prediction_species:
         "../envs/python.yaml"
     script:
         "../scripts/python/graphs/bar_ab_status_prediction_species.py"
+
+rule scatter_ab_status_prediction_species:
+    """ Generate a scatter plot to show the correlation between the number of
+        snoRNAs per species and the number of expressed snoRNAs."""
+    input:
+        dfs = expand(rules.predict_species_snoRNA_label.output.predicted_label_df, species=species),
+        mouse_labels = rules.merge_features_label_mouse.output.feature_df,
+        human_labels = rules.merge_feature_df.output.feature_df
+    output:
+        scatter = os.path.join(config['figures']['scatter'],
+                            'sno_nb_ab_status_prediction_all_species.svg')
+    params:
+        hue_color = config['colors_complex']['abundance_cutoff_2']
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/python/graphs/scatter_ab_status_prediction_species.py"

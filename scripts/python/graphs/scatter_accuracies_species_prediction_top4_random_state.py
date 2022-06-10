@@ -5,12 +5,12 @@ import functions as ft
 import re
 import statistics as st
 
-# Define function to return the average and standard deviation of accuracies of the 10 iterations per model in a respective dict each
+# Define function to return the average and standard deviation of accuracies of the 5 iterations per model in a respective dict each
 def get_avg_stdev(dict_of_all_models_accuracies):
     avg, stdev = {}, {}
-    for i in range(0, len(sorted(dict_of_all_models_accuracies.keys())), 10):  # sort to regroup in order all 10 iterations per model
-        iterations_per_model = sorted(dict_of_all_models_accuracies.keys())[i:i+10]  # select the 10 iterations names per model
-        accuracies_per_model = [dict_of_all_models_accuracies[iteration] for iteration in iterations_per_model]  # select corresponding accuracies of these 10 iterations
+    for i in range(0, len(sorted(dict_of_all_models_accuracies.keys())), 5):  # sort to regroup in order all 5 iterations per model
+        iterations_per_model = sorted(dict_of_all_models_accuracies.keys())[i:i+5]  # select the 5 iterations names per model
+        accuracies_per_model = [dict_of_all_models_accuracies[iteration] for iteration in iterations_per_model]  # select corresponding accuracies of these 5 iterations
         model_name = iterations_per_model[0].split('_')[0]  # Get the model name
         avg_acc, stdev_acc = st.mean(accuracies_per_model), st.stdev(accuracies_per_model)
         avg[model_name], stdev[model_name] = avg_acc, stdev_acc
@@ -48,6 +48,12 @@ for i, model in enumerate(snakemake.input.test_accuracy):
 cv_avg, cv_stdev = get_avg_stdev(cv_accuracy)
 train_avg, train_stdev = get_avg_stdev(train_accuracy)
 test_avg, test_stdev = get_avg_stdev(test_accuracy)
+print(cv_avg)
+print(cv_stdev)
+print(train_avg)
+print(train_stdev)
+print(test_avg)
+print(test_stdev)
 
 # Create the df of all accuracies
 all_accuracies = pd.DataFrame.from_dict([cv_avg, train_avg, test_avg])

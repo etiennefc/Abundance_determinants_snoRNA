@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 import pandas as pd
 import functions as ft
+from scipy import stats as st
 
-""" Stacked bar chart of all predicted expressed/not_expressed snoRNAs per species"""
 species_ordered = ['pan_troglodytes', 'gorilla_gorilla', 'macaca_mulatta',
                     'oryctolagus_cuniculus', 'rattus_norvegicus', 'bos_taurus',
                     'ornithorhynchus_anatinus', 'gallus_gallus', 'xenopus_tropicalis',
@@ -66,12 +66,26 @@ percent = ft.percent_count(counts_per_feature)
 
 
 # Get the total number of snoRNAs (for which we found snoRNA type) per species
-total_nb_sno = str([sum(l) for l in counts_per_feature])
+total_nb_sno = [sum(l) for l in counts_per_feature]
 xtick_labels = ['homo_sapiens', 'mus_musculus'] + species_ordered
-xtick_labels = [label.capitalize().replace('_', ' ') for label in xtick_labels]
+sno_nb_dict = dict(zip(xtick_labels, total_nb_sno))
 
+# Create df
+df = pd.DataFrame(percent, index=xtick_labels, columns=list(snakemake.params.hue_color.keys()))
+df = df.reset_index()
+df = df.rename(columns={'index': 'species'})
 
-ft.stacked_bar2(percent, xtick_labels,
-                list(snakemake.params.hue_color.keys()), '', '',
-                'Proportion of snoRNAs (%)', snakemake.params.hue_color, total_nb_sno,
-                snakemake.output.bar)
+# Create sno_nb and predicted_vs_actual_ab_status cols
+df['sno_nb'] = df['species'].map(sno_nb_dict)
+df.loc[(df.species == 'homo_sapiens') | (df.species == 'mus_musculus'), 'predicted_vs_actual_ab_status'] = 'Actual abundance status'
+df.predicted_vs_actual_ab_status = df.predicted_vs_actual_ab_status.fillna('Predicted abundance status')
+print(df)
+
+# Create scatter plot
+color_dictio = {'Actual abundance status': '#000000',
+                'Predicted abundance status': '#bdbdbd'}
+pearson_r, pval = st.pearsonr(list(df.sno_nb), list(df.expressed))
+print(pearson_r, pval)
+ft.scatter(df, 'sno_nb', 'expressed', 'predicted_vs_actual_ab_status',
+            'Number of snoRNAs per species', 'Proportion of expressed snoRNAs (%)',
+            '', color_dictio, f"Pearson's r: {pearson_r}\np-value: {pval}", snakemake.output.scatter)
