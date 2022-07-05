@@ -83,8 +83,8 @@ rule snodb_nmd_di_promoters_download:
         link_di_promoter = config['download']['di_promoter_nepal']
     shell:
         "wget -O {output.snodb} {params.link_snodb} && "
-        "wget -O {output.snodb} {params.link_nmd} && "
-        "wget -O {output.snodb} {params.link_di_promoter}"
+        "wget -O {output.nmd} {params.link_nmd} && "
+        "wget -O {output.di_promoter} {params.link_di_promoter}"
 
 rule host_gene_list_download:
     """ Download the host genes (and functions) of human snoRNAs from 
