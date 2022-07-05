@@ -257,6 +257,8 @@ rule install_pairedBamToBed12:
 
 rule download_coco_git:
     """ Download git repository of CoCo."""
+    input:
+        paired_bam_to_bed12_dependency = rules.install_pairedBamToBed12.output
     output:
         git_coco_folder = directory('git_repos/coco')
     params:
