@@ -475,7 +475,7 @@
     "protein_coding_HG_functions": "https://zenodo.org/record/6799536/files/protein_coding_functions.tsv",
     "nmd_lykke_andersen_corrigendum": "https://zenodo.org/record/6799536/files/NMD_substrates_HG_Lykke_andersen_2016_relaxed_CORRIGENDUM.csv",
     "di_promoter_nepal": "https://zenodo.org/record/6799536/files/di_promoters_nepal.csv",
-    "lnctard": "http://bio-bigdata.hrbmu.edu.cn/LncTarD/download/lncTarD.txt",
+    "lnctard": "https://zenodo.org/record/6800196/files/lncRNA_functions.tsv",
     "forgi": "https://github.com/ViennaRNA/forgi.git",
     "TARDBP_rep1_eclip": "https://www.encodeproject.org/files/ENCFF022DCK/@@download/ENCFF022DCK.bigBed",
     "TARDBP_rep2_eclip": "https://www.encodeproject.org/files/ENCFF118WWO/@@download/ENCFF118WWO.bigBed",

@@ -107,9 +107,7 @@ rule lncTarD_download:
     params:
         link_lnctard = config['download']['lnctard']
     shell:
-        "wget -O temp.txt {params.link_lnctard} && "
-        "cut -f 21 temp.txt | sort -r | uniq > {output.lnctard} && "
-        "rm temp.txt"
+        "wget -O {output.lnctard} {params.link_lnctard}"
 
 rule forgi_viennrna_download:
     """ Download the folding tool called forgi from the ViennRNA package."""
