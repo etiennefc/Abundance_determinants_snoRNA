@@ -281,7 +281,7 @@ rule all_downloads:
         tpm_df = os.path.join(config['path']['merge_coco_output'], 'tpm_v101.csv'),
         human_gtf = config['path']['gtf'],
         human_gtf_df = config['path']['gtf_tsv_table'],
-        human_genome_fa = genome = config['path']['genome_v101'],
+        human_genome_fa config['path']['genome_v101'],
         snodb = config['path']['snodb'],
         lnctard = config['path']['lnctard'],
         hg_df = config['path']['host_gene_df'],
