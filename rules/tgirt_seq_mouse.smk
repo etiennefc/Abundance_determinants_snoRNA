@@ -8,12 +8,17 @@ include: "downloads.smk"
 rule coco_ca:
     """ Generate corrected annotation from the gtf."""
     input:
-        gtf = rules.ensembl_mouse_gtf.output.gtf
+        gtf = rules.ensembl_mouse_gtf.output.gtf,
+        paired_bam_to_bed12_dependency = rules.install_pairedBamToBed12.output,
+        coco_dir = rules.download_coco_git.output.git_coco_folder
     output:
         gtf_corrected = config['path']['corrected_mouse_gtf']
+    params:
+        rules.install_pairedBamToBed12.params.pairedBamToBed12_bin
     conda:
         "../envs/coco.yaml"
     shell:
+        "export PATH=$PWD/{params}:$PATH && "
         "python3 git_repos/coco/bin/coco.py ca {input.gtf} -o {output.gtf_corrected}"
 
 

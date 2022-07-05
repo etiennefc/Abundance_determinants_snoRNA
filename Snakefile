@@ -278,13 +278,17 @@ rule all:
 rule all_downloads:
     input:
         snhg14_bed = config['path']['snhg14_bed'],
+        tpm_df = os.path.join(config['path']['merge_coco_output'], 'tpm_v101.csv'),
+        human_gtf = config['path']['gtf'],
+        human_gtf_df = config['path']['gtf_tsv_table'],
+        human_genome_fa = genome = config['path']['genome_v101'],
+        snodb = config['path']['snodb'],
         lnctard = config['path']['lnctard'],
-        eclip_bed = config['path']['TARDBP_rep1_eclip_bed'],
-        bed_dkc1 = config['path']['DKC1_par_clip'],
+        hg_df = config['path']['host_gene_df'],
         mouse_untreated_fastq_1_gz = expand("data/references/mouse_fastq/{id_untreated}_1.fastq.gz", id_untreated=simple_untreated_id),
         mouse_RA_treated_fastq_1_gz = expand("data/references/mouse_fastq/{id_RA_treated}_1.fastq.gz", id_RA_treated=simple_RA_treated_id),
-        genome = config['path']['mouse_genome'],
-        gtf = config['path']['mouse_gtf'],
+        mouse_genome = config['path']['mouse_genome'],
+        mouse_gtf = config['path']['mouse_gtf'],
         coco_git = 'git_repos/coco',  # don't forget to create the git env required for this download
         conversion_table = config['path']['rna_central_to_ensembl_id'],
         RNA_central_snoRNAs = 'data/references/rna_central_all_mouse_snoRNAs.tsv',

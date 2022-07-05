@@ -1,5 +1,34 @@
 import os
 
+rule coco_human_tpm_df:
+    """ Download TGIRT-Seq abundance dataset of all human genes quantified by CoCo."""
+    output:
+        tpm_df = os.path.join(
+                    config['path']['merge_coco_output'],
+                    'tpm_v101.csv')
+    params:
+        link = config['download']['coco_human_tpm_df']
+    shell:
+        "wget -O {output.tpm_df} {params.link}"
+
+rule human_gtf_download:
+    """ Download the annotation (gtf file) of all human genes."""
+    output:
+        gtf = config['path']['gtf']
+    params:
+        link = config['download']['gtf_human']
+    shell:
+        "wget -O {output.gtf} {params.link}"
+
+rule gtf_tsv_table_download:
+    """ Download the tsv table (gtf converted to tsv) of all human genes."""
+    output:
+        gtf_df = config['path']['gtf_tsv_table']
+    params:
+        link = config['download']['gtf_tsv_table']
+    shell:
+        "wget -O {output.gtf_df} {params.link}"
+
 rule refseq_gtf:
     """ Download Refseq annotation from ftp server and generate a gtf of only the
         SNHG14 gene. Generate also a bed file out of this SNHG14 gtf. The "15"
@@ -56,6 +85,19 @@ rule snodb_nmd_di_promoters_download:
         "wget -O {output.snodb} {params.link_snodb} && "
         "wget -O {output.snodb} {params.link_nmd} && "
         "wget -O {output.snodb} {params.link_di_promoter}"
+
+rule host_gene_list_download:
+    """ Download the host genes (and functions) of human snoRNAs from 
+        reference table in Zenodo."""
+    output:
+        hg_df = config['path']['host_gene_df'],
+        hg_pc_function = config['path']['protein_coding_HG_functions']
+    params:
+        link_hg = config['download']['final_host_gene_list_v101'],
+        link_pc_functions = config['download']['protein_coding_HG_functions']
+    shell:
+        "wget -O {output.hg_df} {params.link_hg} && "
+        "wget -O {output.hg_pc_function} {params.link_pc_functions}"
 
 rule lncTarD_download:
     """ Download the table of lncRNA (non-coding host genes) validated functions
@@ -199,6 +241,19 @@ rule ensembl_mouse_gtf:
         "wget -O temp2.gz {params.link} && "
         "gunzip temp2.gz && "
         "mv temp2 {output.gtf}"
+
+rule install_pairedBamToBed12:
+    output:
+        directory("scripts/pairedBamToBed12/")
+    params:
+        pairedBamToBed12_bin = 'scripts/pairedBamToBed12/bin'
+    conda:
+        "../envs/coco.yaml"
+    shell:
+        'cd scripts && pwd && '
+        'git clone https://github.com/Population-Transcriptomics/pairedBamToBed12 && '
+        'cd pairedBamToBed12 && '
+        'make '
 
 rule download_coco_git:
     """ Download git repository of CoCo."""
