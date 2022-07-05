@@ -17,7 +17,7 @@ import pandas as pd
 
 bp_total_df = pd.read_csv(snakemake.input.bp_distance_total_df)
 sno_location_df = pd.read_csv(snakemake.input.sno_location_df, sep='\t')
-sno_overlap_df = pd.read_csv(snakemake.input.sno_overlap_df, sep='\t')
+sno_overlap_df = pd.read_csv(snakemake.params.sno_overlap_df, sep='\t')
 
 #Split bp_total_df into a SNHG14 df and a 'all other host genes' (HG) df
 snhg14_bp = bp_total_df[bp_total_df['transcript_id'] == "NR_146177.1"]

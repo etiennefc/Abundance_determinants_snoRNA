@@ -44,13 +44,14 @@ rule get_best_bp:
         intron."""
     input:
         bp_distance_total_df = rules.branch_point.output.bp_distance,
-        sno_location_df = rules.sno_exon_location.output.output_table,
-        sno_overlap_df = os.path.join(
-                            config['path']['sno_location_exon'],
-                            "sno_overlap_hg.tsv")
+        sno_location_df = rules.sno_exon_location.output.output_table
     output:
         bp_distance_simple = config['path']['bp_distance_simple'],
         sno_distance_bp = config['path']['sno_distance_bp']
+    params:
+        sno_overlap_df = os.path.join(
+                            config['path']['sno_location_exon'],
+                            "sno_overlap_hg.tsv")
     conda:
         "../envs/python.yaml"
     script:
