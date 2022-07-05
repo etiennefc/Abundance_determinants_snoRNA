@@ -2,21 +2,6 @@ import os
 
 include: "downloads.smk"
 
-'''
-rule merge_coco_output:
-    """ Merge CoCo correct count outputs into one count, cpm or tpm file (all
-        tissues merged inside one dataframe). This rule takes in input the
-        output result directory of CoCo within the TGIRT-Seq pipeline."""
-    input:
-        input_dir = config['path']['coco_output_dir']
-    output:
-        output_dir = config['path']['merge_coco_output']
-    conda:
-        "../envs/python.yaml"
-    script:
-        "../scripts/python/merge_coco_cc_output.py"
-'''
-
 rule add_gene_biotype:
     """ Add gene biotype column to tpm file using reference table."""
     input:

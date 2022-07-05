@@ -212,7 +212,6 @@
   },
   "path":
   {
-    "coco_output_dir": "/home/etienne/Graham/scratch/new_gtf_tgirt_seq/tgirt_seq_pipeline/results/coco/",
     "coco_merge_mouse": "results/coco_merge_mouse/",
     "merge_coco_output": "data/coco_output/",
     "r_env_dir": ".snakemake/conda/*/bin/R",
@@ -224,7 +223,7 @@
     "host_gene_df": "data/references/final_host_gene_list_v101.csv",
     "host_functions": "data/references/host_functions.tsv",
     "refseq_gtf": "data/references/refseq.gtf",
-    "gtf_tsv_table": "/home/etienne/Graham/projects/def-scottmic/scottmic_group/annotation_and_sequence/Ensembl_V101_Scottlab_2020/hg38_Ensembl_V101_Scottlab_2020_genes.tsv",
+    "gtf_tsv_table": "data/references/hg38_Ensembl_V101_Scottlab_2020_genes.tsv",
     "gtf": "data/references/hg38_Ensembl_V101_Scottlab_2020.gtf",
     "mouse_gtf": "data/references/Mus_musculus.GRCm39.105.gtf",
     "corrected_mouse_gtf": "data/references/Mus_musculus.GRCm39.105.correct_annotation.gtf",
@@ -258,10 +257,8 @@
     "sno_tpm_df_cutoff_gtex_HG_unpaired": "data/coco_output/tpm_w_biotype_v101_sno_HG_gtex_unpaired_cutoff.tsv",
     "all_RNA_biotypes_tpm_df_cutoff": "data/coco_output/tpm_w_biotype_v101_all_RNAs_cutoff.tsv",
     "variable_sno_label_same_host": "results/tables/variable_sno_label_same_host.tsv",
-    "sno_bed_wo_snhg14": "/home/etienne/Desktop/Étienne/Predictor/Maitrise/Fichiers_textes/bed_files/all_intronic_snoRNA_wo_snhg14.bed",
     "snhg14_bed": "data/references/snhg14.bed",
     "snhg14_gtf": "data/references/snhg14.gtf",
-    "sno_snhg14_bed": "/home/etienne/Desktop/Étienne/Predictor/Maitrise/Fichiers_textes/bed_files/snhg14_snoRNA.bed",
     "sno_location_exon": "data/sno_location_exon",
     "sno_location_table": "results/tables/intron_nb_exon_distance_sno_HG.tsv",
     "sno_length": "data/sno_length/sno_length.tsv",
