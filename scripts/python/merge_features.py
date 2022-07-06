@@ -31,8 +31,8 @@ terminal_stem_mfe = pd.read_csv(snakemake.input.terminal_stem_mfe, sep='\t',
                     names=['gene_id_sno', 'terminal_stem_mfe'])
 terminal_stem_length_score = pd.read_csv(snakemake.input.terminal_stem_length_score,
                             sep='\t')
-conservation = pd.read_csv(snakemake.input.sno_conservation, sep='\t')
-conservation.columns = ['gene_id_sno', 'conservation_score']
+#conservation = pd.read_csv(snakemake.input.sno_conservation, sep='\t')
+#conservation.columns = ['gene_id_sno', 'conservation_score']
 
 hamming = pd.read_csv(snakemake.input.hamming_distance_box, sep='\t')
 #hamming = hamming[['gene_id', 'C_hamming', 'D_hamming', 'C_prime_hamming', 'D_prime_hamming', 'H_hamming', 'ACA_hamming']]  # get hamming distance per box only (not combined)

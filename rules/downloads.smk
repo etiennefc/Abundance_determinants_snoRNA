@@ -60,15 +60,15 @@ rule ensembl_genome:
         "sed '/>KI270728.1/Q' temp > {output.genome} && "
         "rm temp"
 
-rule phastcons_download:
-    """ Download phastCons conservation score across 100 vertebrates for all
-        nucleotides in the human genome (hg38) in a bigwig format."""
-    output:
-        phastcons = config['path']['phastcons_bw']
-    params:
-        link = config['download']['phastcons']
-    shell:
-        "wget -O {output.phastcons} {params.link}"
+#rule phastcons_download:
+#    """ Download phastCons conservation score across 100 vertebrates for all
+#        nucleotides in the human genome (hg38) in a bigwig format."""
+#    output:
+#        phastcons = config['path']['phastcons_bw']
+#    params:
+#        link = config['download']['phastcons']
+#    shell:
+#        "wget -O {output.phastcons} {params.link}"
 
 rule snodb_nmd_di_promoters_download:
     """ Download the snodb table used for this analysis, and the NMD substrates

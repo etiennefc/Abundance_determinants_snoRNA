@@ -4,33 +4,33 @@ include: "downloads.smk"
 include: "data_processing.smk"
 include: "structure.smk"
 
-rule bw_to_bg:
-    """ Convert phastCons bigwig file into bedgraph file and sort that bedgraph
-        in place by chromosome and start."""
-    input:
-        phastcons_bigwig = rules.phastcons_download.output.phastcons
-    output:
-        phastcons_bedgraph = config['path']['phastcons_bg']
-    conda:
-        "../envs/conservation.yaml"
-    shell:
-        """bigWigToBedGraph {input.phastcons_bigwig} {output.phastcons_bedgraph} """
-
-rule sno_conservation:
-    """ For each snoRNA, get the conservation score (phastCons) across a 100
-        vertebrates for every nt composing a snoRNA (0 being not conserved and
-        1 being conserved in all vertebrates). Then take the average score
-        across all nt to generate a conservation score for each snoRNA."""
-    input:
-        phastcons_bg = rules.bw_to_bg.output.phastcons_bedgraph,
-        sno_bed = rules.gtf_to_bed.output.all_sno_bed
-    output:
-        intersection_sno_conservation = config['path']['intersection_sno_conservation'],
-        sno_conservation = config['path']['sno_conservation']
-    conda:
-        "../envs/python.yaml"
-    script:
-        "../scripts/python/sno_conservation.py"
+#rule bw_to_bg:
+#    """ Convert phastCons bigwig file into bedgraph file and sort that bedgraph
+#        in place by chromosome and start."""
+#    input:
+#        phastcons_bigwig = rules.phastcons_download.output.phastcons
+#    output:
+#        phastcons_bedgraph = config['path']['phastcons_bg']
+#    conda:
+#        "../envs/conservation.yaml"
+#    shell:
+#        """bigWigToBedGraph {input.phastcons_bigwig} {output.phastcons_bedgraph} """
+#
+#rule sno_conservation:
+#    """ For each snoRNA, get the conservation score (phastCons) across a 100
+#        vertebrates for every nt composing a snoRNA (0 being not conserved and
+#        1 being conserved in all vertebrates). Then take the average score
+#        across all nt to generate a conservation score for each snoRNA."""
+#    input:
+#        phastcons_bg = rules.bw_to_bg.output.phastcons_bedgraph,
+#        sno_bed = rules.gtf_to_bed.output.all_sno_bed
+#    output:
+#        intersection_sno_conservation = config['path']['intersection_sno_conservation'],
+#        sno_conservation = config['path']['sno_conservation']
+#    conda:
+#        "../envs/python.yaml"
+#    script:
+#        "../scripts/python/sno_conservation.py"
 
 rule fasta_per_sno_type:
     """ Create a fasta per snoRNA type out of a fasta containing all snoRNAs."""

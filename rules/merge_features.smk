@@ -7,7 +7,6 @@ rule merge_feature_df:
         dataframe."""
     input:
         abundance_cutoff = rules.abundance_cutoff.output.abundance_cutoff_df,
-        sno_conservation = rules.sno_conservation.output.sno_conservation,
         sno_length = rules.sno_length.output.sno_length,
         snodb_nmd_di_promoters = rules.format_snodb.output.snodb_formatted,
         location_and_branchpoint = rules.get_best_bp.output.sno_distance_bp,
@@ -27,7 +26,6 @@ rule merge_feature_df_gtex_HG:
         dataframe. Use the host_abundance_cutoff from GTEx data."""
     input:
         abundance_cutoff = rules.abundance_cutoff_gtex_HG.output.abundance_cutoff_df,
-        sno_conservation = rules.sno_conservation.output.sno_conservation,
         sno_length = rules.sno_length.output.sno_length,
         snodb_nmd_di_promoters = rules.format_snodb.output.snodb_formatted,
         location_and_branchpoint = rules.get_best_bp.output.sno_distance_bp,
@@ -47,7 +45,6 @@ rule merge_feature_df_gtex_HG_unpaired:
         dataframe. Use the host_abundance_cutoff from GTEx data unpaired tissues."""
     input:
         abundance_cutoff = rules.abundance_cutoff_gtex_HG_unpaired.output.abundance_cutoff_df,
-        sno_conservation = rules.sno_conservation.output.sno_conservation,
         sno_length = rules.sno_length.output.sno_length,
         snodb_nmd_di_promoters = rules.format_snodb.output.snodb_formatted,
         location_and_branchpoint = rules.get_best_bp.output.sno_distance_bp,
