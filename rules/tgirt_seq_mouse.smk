@@ -106,10 +106,19 @@ rule qc_after_trim:
         "&> {log}"
 
 
+rule remove_chr_to_mouse_genome:
+    """ Remove chr in front of each chromosome in mouse genome fasta file."""
+    input:
+        fasta = config['path']['mouse_genome']
+    output:
+        mod_fasta = 'data/references/Mus_musculus.GRCm39.105.w_chr.fa'
+    shell:
+        "sed 's/^>chr/>/g' {input.fasta} > {output.mod_fasta}"
+
 rule star_index:
     """Generate the genome index needed for STAR alignment"""
     input:
-        fasta = config['path']['mouse_genome'],
+        fasta = rules.remove_chr_to_mouse_genome.output.mod_fasta,
         standard_gtf = config['path']['mouse_gtf']
     output:
         chrNameLength = "data/star_index/chrNameLength.txt"

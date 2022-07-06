@@ -44,7 +44,7 @@ rule refseq_gtf:
         """zcat refseq_temp.gtf.gz | grep SNHG14 | """
         """awk -v OFS='\t' 'NR>1 {{print "chr15", $4, $5, "ENSG00000224078", """
         """$6, $7, $2, $3, $8, $1, $12, "TEST"$0"TEST2", $10, $16, "transcript_name", $16}}' | """
-        """sed -E 's/;//g; s/TEST.*exon_number..//g; s/..TEST2//g' > {output.snhg14_bed} && """
+        """sed -E 's/;//g; s/TEST.*exon_number..//g; s/..TEST2//g' | awk -v OFS='\t' 'NR>1' > {output.snhg14_bed} && """
         """rm refseq_temp.gtf.gz"""
 
 rule ensembl_genome:

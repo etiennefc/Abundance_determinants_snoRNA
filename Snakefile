@@ -158,7 +158,7 @@ rule all:
         #                    rbp=['NOP58_repA', 'NOP58_repB', 'NOP56', 'FBL', 'FBL_mnase', 'DKC1']),
         multi_HG_different_label_snoRNAs = config['path']['multi_HG_different_label_snoRNAs'],
         sno_per_confusion_value_manual_split = config['path']['sno_per_confusion_value_manual_split'],
-	# Mouse snoRNA quantification
+	    # Mouse snoRNA quantification
         #qc_before_trim = expand("data/FastQC/Before_trim/{id}_1_fastqc.html", id=all_sample_ids),
         #qc_after_trim = expand("data/FastQC/After_trim/{id}_R1_fastqc.html", id=all_sample_ids),
         #coco_cc_mouse = os.path.join(config['path']['coco_merge_mouse'], "merged_tpm.tsv"),
@@ -274,6 +274,7 @@ rule all:
 
 
         ##variable_sno_labels_df = config['path']['variable_sno_label_same_host']
+
 
 rule all_downloads:
     input:
