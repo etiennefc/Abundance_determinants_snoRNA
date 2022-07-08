@@ -1,3 +1,5 @@
+library(rlang)
+sessionInfo()
 library(branchpointer)
 library(data.table)
 library(tidyverse)
