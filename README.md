@@ -60,7 +60,7 @@ snakemake all_figures -j 999 --use-conda --immediate-submit --notemp --cluster-c
 ```
 #### or locally (of note: mouse figures might differ slightly from those in the paper since RNAcentral data is updated frequently):
 ```bash
-snakemake all_figures --use-conda --cores 1'
+snakemake all_figures --use-conda --cores 1
 ```
 
 
@@ -76,7 +76,7 @@ snakemake species_predictions -j 999 --use-conda --immediate-submit --notemp --c
 ```
 #### Finally, generating figures for the vertebrate species snoRNAs is done as follows locally (of note: figures might differ slightly from those in the paper since RNAcentral data is updated frequently):
 ```bash
-snakemake species_figures --use-conda --cores 1'
+snakemake species_figures --use-conda --cores 1
 ```
 
 
