@@ -119,10 +119,10 @@ rule structure_mouse:
     conda:
         "../envs/rna_fold.yaml"
     shell:
-        "sed -E '/^[^>]/ s/T/U/g' {input.sequences} > temp_structure && "
-        "RNAfold --infile=temp_structure --outfile={params.temp_name} && "
-        "mv {params.temp_name} {output.mfe} && "
-        "mv *.ps data/structure/stability_mouse/ && rm temp_structure"
+        "sed -E '/^[^>]/ s/T/U/g' {input.sequences} | sed 's/>/>MOUSE_/g' > temp_structure && "
+        "RNAfold --infile=temp_structure --outfile={params.temp_name} && sed -i 's/MOUSE_//g' {params.temp_name} && "
+        "mv {params.temp_name} {output.mfe} && mkdir -p data/structure/stability_mouse/ && "
+        "mv MOUSE*.ps data/structure/stability_mouse/ && rm temp_structure"
 
 rule fasta_to_tsv_mouse:
     """ Convert the fasta output of RNA fold into a tsv table with a snoRNA id
@@ -200,8 +200,9 @@ rule rna_cofold_mouse:
     conda:
         "../envs/rna_fold.yaml"
     shell:
-        "RNAcofold < {input.fasta} > {output.mfe_stem} && "
-        "mv *.ps data/terminal_stem_mouse/"
+        "sed 's/>/>Mouse_/g' {input.fasta} > Mouse_cofold.fa && "
+        "RNAcofold < Mouse_cofold.fa > {output.mfe_stem} && sed -i 's/Mouse_//g' {output.mfe_stem} && "
+        "mkdir -p data/terminal_stem_mouse/ && mv Mouse*.ps data/terminal_stem_mouse/ && rm Mouse_cofold.fa"
 
 
 rule fasta_to_tsv_terminal_stem_mfe_mouse:

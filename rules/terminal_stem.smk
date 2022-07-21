@@ -61,8 +61,9 @@ rule rna_cofold:
     conda:
         "../envs/rna_fold.yaml"
     shell:
-        "RNAcofold < {input.fasta} > {output.mfe_stem} && "
-        "mv *.ps data/terminal_stem/"
+        "sed 's/>/>Human_cofold/g' {input.fasta} > Human_cofold.fa && "
+        "RNAcofold < Human_cofold.fa > {output.mfe_stem} && sed -i 's/Human_cofold//g' {output.mfe_stem} && "
+        "mv Human_cofold*.ps data/terminal_stem/ && rm Human_cofold.fa"
 
 
 rule fasta_to_tsv_terminal_stem_mfe:

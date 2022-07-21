@@ -141,10 +141,11 @@ rule structure_species:
     conda:
         "../envs/rna_fold.yaml"
     shell:
-        "sed -E '/^[^>]/ s/T/U/g' {input.sequences} > {params.mfe_dir}/temp_structure_species && "
+        "sed -E '/^[^>]/ s/T/U/g; s/>/>{wildcards.species}_fold/g' {input.sequences} > {params.mfe_dir}/temp_structure_species && "
         "RNAfold --infile={params.mfe_dir}/temp_structure_species --outfile={params.temp_name} && "
         "mkdir -p {params.mfe_dir} && mv {params.temp_name} {output.mfe} && "
-        "mv *.ps {params.mfe_dir} && rm {params.mfe_dir}/temp_structure_species"
+        "mv {wildcards.species}_fold*.ps {params.mfe_dir} && rm {params.mfe_dir}/temp_structure_species && "
+        "sed -i 's/{wildcards.species}_fold//g' {output.mfe}"
 
 rule fasta_to_tsv_species:
     """ Convert the fasta output of RNA fold into a tsv table with a snoRNA id
@@ -180,7 +181,7 @@ rule flank_extend_snoRNA_species:
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/python/flank_extend_snoRNA_mouse.py"
+        "../scripts/python/flank_extend_snoRNA_species.py"
 
 rule get_fasta_terminal_stem_species:
     """ Get the sequence of all the extended flanking regions into a fasta file
@@ -210,8 +211,10 @@ rule rna_cofold_species:
     conda:
         "../envs/rna_fold.yaml"
     shell:
-        "RNAcofold < {input.fasta} > {output.mfe_stem} && "
-        "mv *.ps {params.mfe_dir}"
+        "sed 's/>/>{wildcards.species}_cofold/g' {input.fasta} > {wildcards.species}_cofold.fa && "
+        "RNAcofold < {wildcards.species}_cofold.fa > {output.mfe_stem} && "
+        "mv {wildcards.species}_cofold*.ps {params.mfe_dir} && rm {wildcards.species}_cofold.fa && "
+        "sed -i 's/{wildcards.species}_cofold//g' {output.mfe_stem}"
 
 
 rule fasta_to_tsv_terminal_stem_mfe_species:

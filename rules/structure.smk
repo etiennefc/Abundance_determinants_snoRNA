@@ -25,10 +25,12 @@ rule rna_fold:
     conda:
         "../envs/rna_fold.yaml"
     shell:
-        "RNAfold --infile={input.sequences} --outfile={params.temp_name} && "
+        "sed 's/>/>HUMAN_/g' {input.sequences} > HUMAN_rna_fold.tsv && "
+        "RNAfold --infile=HUMAN_rna_fold.tsv --outfile={params.temp_name} && "
+        "sed -i 's/HUMAN_//g' {params.temp_name} && "
         "mv {params.temp_name} {output.mfe} && "
-        "mv *.ps data/structure/stability/ && "
-        "rm -f data_structure_stability_mfe.tsv"
+        "mv HUMAN_*.ps data/structure/stability/ && "
+        "rm -f data_structure_stability_mfe.tsv HUMAN_rna_fold.tsv"
 
 rule fasta_to_tsv:
     """ Convert the fasta output of RNA fold into a tsv table with a snoRNA id

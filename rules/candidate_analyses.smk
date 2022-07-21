@@ -105,7 +105,8 @@ rule pie_donut_multi_HG_snoRNAs:
         host_df = config['path']['host_gene_df'],
         multi_HG_different_label_snoRNAs = rules.multi_HG_different_label_snoRNAs.output.multi_HG_different_label_snoRNAs,
         fake_dependency = expand(rules.confusion_matrix_f1_scale_after_manual_split.output.info_df,
-                                manual_iteration=config['manual_iteration'], models2='log_reg', allow_missing=True)
+                                manual_iteration=config['manual_iteration'], models2='log_reg', allow_missing=True),
+        fake_dependency2 = expand(rules.upset_models_confusion_scale_after_manual_split.output.upset, **config) 
     output:
         pie = os.path.join(config['figures']['pie'], 'mono_vs_multi_HG.svg'),
         donut = os.path.join(config['figures']['donut'], 'multi_HG_diff_sno_labels_proportion_and_confusion_value.svg')

@@ -14,8 +14,8 @@ rule find_bedtools_dir:
     output:
         bedtools_dir = "data/bedtools_dir.txt"
     shell:
-        "find .snakemake/conda/*/bin/ -name R > {output.bedtools_dir} && "
-        "sed -i 's/R/bedtools/g' {output.bedtools_dir}"
+        "find .snakemake/conda/*/bin/ -name .bioconductor-bsgenome*-link.sh > {output.bedtools_dir} && "
+        "sed -i 's/\.bioconductor-bsgenome.*-link\.sh/bedtools/g' {output.bedtools_dir}"
 
 rule branch_point:
     """ Calculate the distance between intronic snoRNAs and predicted

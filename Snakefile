@@ -61,23 +61,15 @@ include: "rules/chip_seq.smk"
 include: "rules/merge_features.smk"
 include: "rules/figures_features.smk"
 include: "rules/feature_normalization.smk"
-#include: "rules/cv_train_test.smk"
 include: "rules/figures_model_output.smk"
 include: "rules/other_figures.smk"
-#include: "rules/cv_train_test_wo_clusters.smk"
-#include: "rules/cv_train_test_wo_feature.smk"
-#include: "rules/cv_train_test_one_feature.smk"
-#include: "rules/cv_train_test_scale_after_split.smk"
-#include: "rules/shap_retest.smk"
 include: "rules/cv_train_test_10_iterations.smk"
 include: "rules/cv_train_test_10_iterations_only_hamming.smk"
 include: "rules/cv_train_test_manual_split.smk"
 include: "rules/cv_train_test_manual_split_top3.smk"
 include: "rules/cv_train_test_manual_split_top4.smk"
-#include: "rules/cv_train_test_20_iterations.smk"
 include: "rules/clip_seq.smk"
 include: "rules/candidate_analyses.smk"
-#include: "rules/kallisto.smk"
 include: "rules/shap_subgroups.smk"
 include: "rules/tgirt_seq_mouse.smk"
 include: "rules/mouse_prediction.smk"
@@ -90,8 +82,6 @@ include: "rules/cv_train_test_for_species_prediction_top3_random_state.smk"
 include: "rules/cv_train_test_for_species_prediction_top3_log_reg_thresh.smk"
 include: "rules/gtex_HG_cutoff.smk"
 include: "rules/cv_train_test_manual_split_gtex_HG.smk"
-include: "rules/snora81_overexpression_analyses.smk"
-
 include: "rules/downloads_species.smk"
 include: "rules/species_prediction.smk"
 include: "rules/species_prediction_figures.smk"
@@ -99,29 +89,6 @@ include: "rules/species_prediction_figures.smk"
 
 rule all:
     input:
-        #### Do 10 different iterations of the cv-train-test
-        #test_accuracy_scale_after_split = expand(os.path.join(config['path']['test_accuracy'],
-        #                            '{models2}_test_accuracy_scale_after_split_{iteration}.tsv'),
-        #                            models2=config['models2'], iteration=config['iteration']),
-        #confusion_matrix_f1_scale_after_split = expand(os.path.join(config['path']['confusion_matrix_f1'],
-        #                '{models2}_confusion_matrix_w_f1_score_scale_after_split_{iteration}.tsv'),
-        #                models2=config['models2'], iteration=config['iteration']),
-        # Modify SHAP _beeswarm script to sort by median and not by average or sum of SHAP values
-        #fake_log = "log/modify_shap.log",
-        #concat_df = config['path']['all_feature_rank_df_10_iterations'],
-        #
-        # Do 20 different iterations of the cv-train-test
-        #test_accuracy_scale_after_split_20 = expand(os.path.join(config['path']['test_accuracy'],
-        #                            '{models2}_test_accuracy_scale_after_split_{iteration_20}.tsv'),
-        #                            models2=config['models2'], iteration_20=config['iteration_20']),
-        #confusion_matrix_f1_scale_after_split_20 = expand(os.path.join(config['path']['confusion_matrix_f1'],
-        #                '{models2}_confusion_matrix_w_f1_score_scale_after_split_{iteration_20}.tsv'),
-        #                models2=config['models2'], iteration_20=config['iteration_20']),
-        #not_expressed_haca = config['path']['not_expressed_haca_fa'],
-        #small_expressed_cd = config['path']['small_expressed_cd_fa'],
-        #features_df = config['path']['feature_df'],
-        ##abundance_cutoff_df = config['path']['all_RNA_biotypes_tpm_df_cutoff'],
-        ##mfe_stem_final = config['path']['terminal_stem_mfe_tsv'],
         # Do manual split of 10 test sets
         confusion_matrix = expand(os.path.join(config['path']['confusion_matrix_f1'],
                                 '{models2}_confusion_matrix_w_f1_score_scale_after_split_{manual_iteration}.tsv'), **config),
@@ -150,15 +117,9 @@ rule all:
                                             '{models2}_test_accuracy_scale_after_split_top4_{manual_iteration}.tsv'), **config),
         confusion_matrix_top4 = expand(os.path.join(config['path']['confusion_matrix_f1'],
                                             '{models2}_confusion_matrix_w_f1_score_scale_after_split_top4_{manual_iteration}.tsv'), **config),
-        ##merge_beds = expand(os.path.join(config['path']['par_clip'], '{rbp}_merged.bed'),
-        ##                    rbp=['DKC1', 'FBL', 'FBL_mnase', 'NOP56', 'NOP58_repA', 'NOP58_repB']),
-        ##real_confusion_value_df = expand(os.path.join(config['path']['real_confusion_value'], '{confusion_value}_w_features.tsv'), **config),
-        ##transcript_tpm = "results/kallisto/transcript_tpm.tsv",
-        #mapped_snoRNA_bed = expand(os.path.join(config['path']['par_clip'], '{rbp}_mapped_to_snoRNAs.bed'),
-        #                    rbp=['NOP58_repA', 'NOP58_repB', 'NOP56', 'FBL', 'FBL_mnase', 'DKC1']),
         multi_HG_different_label_snoRNAs = config['path']['multi_HG_different_label_snoRNAs'],
         sno_per_confusion_value_manual_split = config['path']['sno_per_confusion_value_manual_split'],
-	    # Mouse snoRNA quantification
+	# Mouse snoRNA quantification
         #qc_before_trim = expand("data/FastQC/Before_trim/{id}_1_fastqc.html", id=all_sample_ids),
         #qc_after_trim = expand("data/FastQC/After_trim/{id}_R1_fastqc.html", id=all_sample_ids),
         #coco_cc_mouse = os.path.join(config['path']['coco_merge_mouse'], "merged_tpm.tsv"),
@@ -199,11 +160,6 @@ rule all:
         #####confusion_matrix_gtex_HG = expand(os.path.join(config['path']['confusion_matrix_f1'],
         #####                            '{models2}_confusion_matrix_w_f1_score_scale_after_split_gtex_HG_{manual_iteration}.tsv'), **config),
         #####concat_df = config['path']['all_feature_rank_df_manual_split_gtex_HG'],
-
-        # Yeast prediction
-        #yeast_predicted_label_df = 'results/tables/yeast_prediction/yeast_predicted_label_no_thresh.tsv',
-        # SNORA81 overexpression analyses
-        #predicted_label = expand('results/tables/snora81_overexpression/{models2}_SNORA81_label_{manual_iteration}.tsv', **config)
 
         #fake_log2 = 'log/fake_log_snora77b.log'
         #hamming_distance_box_df = config['path']['hamming_distance_box_df'],
@@ -314,20 +270,10 @@ rule species_downloads:
 
 rule species_predictions:
     input:
-        predicted_snoRNA_labels = expand('results/tables/{species}_prediction/{species}_predicted_label.tsv', species=species),
-        #typee = expand("results/tables/{species}_snoRNA_type.tsv", species=species),
-        genome_chr_size = expand('data/references/{species}_genome_filtered_chr_sizes.genome', species=species),
+        predicted_snoRNA_labels = expand('results/tables/{species}_prediction/{species}_predicted_label.tsv', species=species)
 
 rule species_figures:
     input:
-        #density_features = expand(os.path.join(config['figures']['density'],
-        #                    '{species_numerical_features}_abundance_status_{species}_{sno_type}.svg'), species=species, **config),
-        #host_abundance_cutoff_bar = expand(os.path.join(config['figures']['bar_split_sno_type'],
-        #                    'host_abundance_cutoff_{species}_{sno_type}.svg'), species=species, **config),
-        #donut_sno_type_predicted_label = expand(os.path.join(config['figures']['donut'],
-        #                                    'predicted_abundance_status_sno_type_{species}.svg'), species=species),
-        #donut_host_biotype_predicted_label = expand(os.path.join(config['figures']['donut'],
-        #                                        'predicted_abundance_status_host_biotype_{species}.svg'), species=species),
         bar_ab_status_prediction_species = os.path.join(config['figures']['bar'],
                                                 'ab_status_prediction_all_species.svg'),
         scatter_species_prediction_sno_nb = os.path.join(config['figures']['scatter'],

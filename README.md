@@ -10,9 +10,9 @@ This pipeline also predicts by default the abundance status of mouse snoRNAs and
 status of several vertebrate species (see below).
 
 ## Requirements
-* Conda (Tested with version=4.11.0)
+* Conda (Tested with version=4.12.0)
 * Mamba (Tested with version=0.15.3)
-* Snakemake (Tested with version=7.1.0)
+* Snakemake (Tested with version=6.0.5)
 
 1 - Conda (Miniconda3) needs to be installed (https://docs.conda.io/en/latest/miniconda.html).
 For Linux users:
@@ -42,9 +42,9 @@ conda activate snakemake
 ```bash
 snakemake all_downloads --conda-create-envs-only --use-conda --conda-frontend mamba --cores 1
 ```
-#### Secondly, datasets need to be downloaded:
+#### Secondly, datasets need to be downloaded (this might take a while):
 ```bash
-snakemake all_downloads --use-conda --conda-frontend mamba --cores 1
+snakemake all_downloads --use-conda --cores 1
 ```
 #### Thirdly, environments required by tools and calculations need to be created:
 ```bash
@@ -54,3 +54,29 @@ snakemake --conda-create-envs-only --use-conda --conda-frontend mamba --cores 1
 ```bash
 snakemake -j 999 --use-conda --immediate-submit --notemp --cluster-config cluster.json --cluster 'python3 slurmSubmit.py {dependencies}'
 ```
+#### Finally, generating figures for the human and mouse snoRNAs is done as follows on the cluster:
+```bash
+snakemake all_figures -j 999 --use-conda --immediate-submit --notemp --cluster-config cluster.json --cluster 'python3 slurmSubmit.py {dependencies}'
+```
+#### or locally (of note: mouse figures might differ slightly from those in the paper since RNAcentral data is updated frequently):
+```bash
+snakemake all_figures --use-conda --cores 1'
+```
+
+
+## Running the pipeline on Slurm-based cluster (to predict the abundance status of vertebrate species snoRNAs)
+#### Firstly, the human/mouse snoRNA pipeline described above needs to be run (to generate the model used to predict species snoRNA abundance status)
+#### Secondly, datasets need to be downloaded (this might take a while):
+```bash
+snakemake species_downloads --use-conda --cores 1
+```
+#### Thirdly, running the species prediction pipeline using computation nodes and the previously created envs is done as follows:
+```bash
+snakemake species_predictions -j 999 --use-conda --immediate-submit --notemp --cluster-config cluster.json --cluster 'python3 slurmSubmit.py {dependencies}'
+```
+#### Finally, generating figures for the vertebrate species snoRNAs is done as follows locally (of note: figures might differ slightly from those in the paper since RNAcentral data is updated frequently):
+```bash
+snakemake species_figures --use-conda --cores 1'
+```
+
+
