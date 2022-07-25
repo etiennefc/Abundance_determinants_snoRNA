@@ -122,114 +122,12 @@ rule all:
 	# Mouse snoRNA quantification
         #qc_before_trim = expand("data/FastQC/Before_trim/{id}_1_fastqc.html", id=all_sample_ids),
         #qc_after_trim = expand("data/FastQC/After_trim/{id}_R1_fastqc.html", id=all_sample_ids),
-        #coco_cc_mouse = os.path.join(config['path']['coco_merge_mouse'], "merged_tpm.tsv"),
+        coco_cc_mouse = os.path.join(config['path']['coco_merge_mouse'], "merged_tpm.tsv"),
         feature_df_mouse = config['path']['feature_df_mouse'],
-        #####test_accuracy_mouse = expand(os.path.join(config['path']['test_accuracy_mouse'],'{models2}_test_accuracy_{manual_iteration}.tsv'), **config),
-        #####confusion_value_mouse = os.path.join(config['path']['confusion_matrix_f1_mouse'], 'consensus_confusion_value_per_sno.tsv'),
-        #####consensus_conf_val_df_per_model = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'], 'consensus_confusion_value_per_sno_{models2}.tsv'), **config),
+        test_accuracy_mouse = expand(os.path.join(config['path']['test_accuracy_mouse'],'{models2}_test_accuracy_{manual_iteration}.tsv'), **config),
+        confusion_value_mouse = os.path.join(config['path']['confusion_matrix_f1_mouse'], 'consensus_confusion_value_per_sno.tsv'),
+        consensus_conf_val_df_per_model = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'], 'consensus_confusion_value_per_sno_{models2}.tsv'), **config),
 
-        ###### Species prediction
-        #####test_accuracy_species_prediction = expand(os.path.join(config['path']['test_accuracy_mouse'],
-        #####                                        '{models2}_test_accuracy_top4_species_prediction.tsv'), **config),
-        #####confusion_matrix_species_prediction = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
-        #####                            '{models2}_confusion_matrix_w_f1_score_top4_species_prediction.tsv'), **config),
-
-        ###### Species prediction 5 random_state datasets split for top 4 features
-        #####test_accuracy_rs_top4 = expand(os.path.join(config['path']['test_accuracy_mouse'],
-        #####                            '{models2}_test_accuracy_top4_species_prediction_{rs}.tsv'), **config),
-        #####confusion_matrix_rs_top4 = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
-        #####                            '{models2}_confusion_matrix_w_f1_score_top4_species_prediction_{rs}.tsv'), **config),
-
-        ###### Species prediction 5 random_state datasets split for top 3 features
-        #####test_accuracy_rs_top3 = expand(os.path.join(config['path']['test_accuracy_mouse'],
-        #####                            '{models2}_test_accuracy_top3_species_prediction_{rs}.tsv'), **config),
-        #####confusion_matrix_rs_top3 = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
-        #####                            '{models2}_confusion_matrix_w_f1_score_top3_species_prediction_{rs}.tsv'), **config),
-
-        ###### Log reg thresh species prediction top4 and top3
-        #####confusion_matrix_log_reg_thresh_top4 = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
-        #####                'log_reg_confusion_matrix_w_f1_score_top4_species_prediction_thresh_{rs}.tsv'), **config),
-        #####confusion_matrix_log_reg_thresh_top3 = expand(os.path.join(config['path']['confusion_matrix_f1_mouse'],
-        #####                'log_reg_confusion_matrix_w_f1_score_top3_species_prediction_thresh_{rs}.tsv'), **config),
-        #####threshold = expand(os.path.join(config['path']['test_accuracy_mouse'],
-        #####                            'log_reg_top4_species_prediction_threshold_value_{rs}.tsv'), **config),
-
-        ###### GTEx host gene expression analyses
-        #####test_accuracy_gtex_HG = expand(os.path.join(config['path']['test_accuracy'],
-        #####                            '{models2}_test_accuracy_scale_after_split_gtex_HG_{manual_iteration}.tsv'), **config),
-        #####confusion_matrix_gtex_HG = expand(os.path.join(config['path']['confusion_matrix_f1'],
-        #####                            '{models2}_confusion_matrix_w_f1_score_scale_after_split_gtex_HG_{manual_iteration}.tsv'), **config),
-        #####concat_df = config['path']['all_feature_rank_df_manual_split_gtex_HG'],
-
-        #fake_log2 = 'log/fake_log_snora77b.log'
-        #hamming_distance_box_df = config['path']['hamming_distance_box_df'],
-        #h_aca_box_location_expressed = config['path']['h_aca_box_location_expressed'],
-        #a = config['path']['c_d_and_prime_box_location_not_expressed'],
-        ##log_create_env = "log/create_local_env.log",  #to put in all_downloads
-        ##log_create_env_2 = "log/create_local_env_2.log",
-        #one_hot_encoded_df = config['path']['one_hot_encoded_df_before_split'],
-        ##HG_not_expressed_sno_bed = os.path.join(config['path']['sno_bed_vap'],
-        ##                            "HG_not_expressed_snoRNA.bed"),
-        ##test_accuracy = expand(os.path.join(config['path']['test_accuracy'], ##Added knn with models2
-        ##                '{models2}_test_accuracy.tsv'), models2=config['models2']),
-        ##confusion_matrix = expand(os.path.join(config['path']['confusion_matrix_f1'],
-        ##                '{models}_confusion_matrix_w_f1_score.tsv'), models=config['models']),
-        ##top_features_df = config['path']['all_feature_rank_df'],
-        ##shap_local_FN_log_scale_after_split = expand("log/shap_local_FN_{models2}_scale_after_split.log", models2=config['models2']),
-        ##shap_local_FP_log_scale_after_split = expand("log/shap_local_FP_{models2}_scale_after_split.log", models2=config['models2']),
-        ##shap_local_TN_log_scale_after_split = expand("log/shap_local_TN_{models2}_scale_after_split.log", models2=config['models2']),
-        ##shap_local_TP_log_scale_after_split = expand("log/shap_local_TP_{models2}_scale_after_split.log", models2=config['models2']),
-        ##snora77b_terminal_stem = config['path']['snora77b_terminal_stem_fasta'],
-        ##test_accuracy_wo_clusters = expand(os.path.join(config['path']['test_accuracy'],
-        ##                            '{models2}_test_accuracy_wo_clusters.tsv'), models2=config['models2']),
-        ##confusion_matrix_wo_clusters = expand(os.path.join(config['path']['confusion_matrix_f1'],
-        ##                '{models}_confusion_matrix_w_f1_score_wo_clusters.tsv'), models=config['models']),
-        ##test_accuracy_wo_feature_effect = expand(os.path.join(config['path']['test_accuracy'],
-        ##                            '{models2}_test_accuracy_wo_{feature_effect}.tsv'),
-        ##                            models2=config['models2'], feature_effect=config['feature_effect']),
-        ##confusion_matrix_wo_conservation = expand(os.path.join(config['path']['confusion_matrix_f1'],
-        ##                '{models}_confusion_matrix_w_f1_score_wo_{feature_effect}.tsv'),
-        ##                models=config['models'], feature_effect=config['feature_effect']),
-        ##test_accuracy_one_feature = expand(os.path.join(config['path']['test_accuracy'],
-        ##                            '{models2}_test_accuracy_only_{one_feature}.tsv'),
-        ##                            models2=config['models2'], one_feature=config['one_feature']),
-        ##confusion_matrix_one_feature = expand(os.path.join(config['path']['confusion_matrix_f1'],
-        ##                '{models}_confusion_matrix_w_f1_score_only_{one_feature}.tsv'),
-        ##                models=config['models'], one_feature=config['one_feature']),
-
-        ### Do scaling after split to avoid overestimate of the models performance
-        ##test_accuracy_scale_after_split = expand(os.path.join(config['path']['test_accuracy'],
-        ##                            '{models2}_test_accuracy_scale_after_split.tsv'), models2=config['models2']),
-        ##confusion_matrix_f1_scale_after_split = expand(os.path.join(config['path']['confusion_matrix_f1'],
-        ##                '{models2}_confusion_matrix_w_f1_score_scale_after_split.tsv'), models2=config['models']),
-
-        # Consensus sequence of SNORA77B-terminal stem across vertebrates
-        #cs = "CS.stk",
-
-
-        #bp_distance = config['path']['bp_distance']
-        #sno_HG_df = config['path']['sno_tpm_df'],
-        #sno_bed_path = config['path']['all_sno_bed']
-        #snhg14_sno_bed = os.path.join(config['path']['sno_bed'], "snhg14_snoRNA.bed")
-
-        #snhg14_bed = config['path']['snhg14_bed'],
-        #intronic_sno_bed = os.path.join(config['path']['sno_bed'], "all_intronic_snoRNA.bed"),
-        #output_table = config['path']['sno_location_table'],
-        #hg_gtf = config['path']['hg_gtf'],
-        #temp = 'data/temp.txt',
-        ##bp_distance = config['path']['bp_distance'],
-        #HG_bed = config['path']['hg_bed']
-        #sno_bp_distance = config['path']['sno_distance_bp'],
-        #sno_conservation = config['path']['sno_conservation'],
-        #sno_length = config['path']['sno_length'],
-        #mfe_final = config['path']['structure_stability_tsv'],
-        #snodb_formatted = config['path']['snodb_formatted'],
-        #mfe_stem = config['path']['terminal_stem_mfe_tsv'],
-        #length_stem = config['path']['terminal_stem_length'],
-        #tpm_cutoff = config['path']['sno_tpm_df_cutoff'],
-
-
-        ##variable_sno_labels_df = config['path']['variable_sno_label_same_host']
 
 
 rule all_downloads:
