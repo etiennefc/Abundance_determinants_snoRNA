@@ -30,7 +30,7 @@ conda install -n base -c conda-forge mamba
 3 - Snakemake needs to be installed via mamba:
 ```bash
 conda activate base
-mamba create -c conda-forge -c bioconda -n snakemake snakemake
+mamba create -c conda-forge -c bioconda -n snakemake snakemake=6.0.5
 ```
 To activate the 'snakemake' environment that was just created:
 ```bash
