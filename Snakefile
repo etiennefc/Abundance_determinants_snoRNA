@@ -121,7 +121,8 @@ rule all:
         sno_per_confusion_value_manual_split = config['path']['sno_per_confusion_value_manual_split']
 	
 
-rule all_mouse:                                                                                                                                                                                                              input:
+rule all_mouse:
+    input:
 	# Mouse snoRNA quantification
         #qc_before_trim = expand("data/FastQC/Before_trim/{id}_1_fastqc.html", id=all_sample_ids),
         #qc_after_trim = expand("data/FastQC/After_trim/{id}_R1_fastqc.html", id=all_sample_ids),
