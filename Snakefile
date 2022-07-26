@@ -118,7 +118,10 @@ rule all:
         confusion_matrix_top4 = expand(os.path.join(config['path']['confusion_matrix_f1'],
                                             '{models2}_confusion_matrix_w_f1_score_scale_after_split_top4_{manual_iteration}.tsv'), **config),
         multi_HG_different_label_snoRNAs = config['path']['multi_HG_different_label_snoRNAs'],
-        sno_per_confusion_value_manual_split = config['path']['sno_per_confusion_value_manual_split'],
+        sno_per_confusion_value_manual_split = config['path']['sno_per_confusion_value_manual_split']
+	
+
+rule all_mouse:                                                                                                                                                                                                              input:
 	# Mouse snoRNA quantification
         #qc_before_trim = expand("data/FastQC/Before_trim/{id}_1_fastqc.html", id=all_sample_ids),
         #qc_after_trim = expand("data/FastQC/After_trim/{id}_R1_fastqc.html", id=all_sample_ids),
