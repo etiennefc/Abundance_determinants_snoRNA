@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 import pandas as pd
 import subprocess as sp
-
-species = snakemake.wildcards.species
+if 'Mus_musculus' in snakemake.input.gtf_bed:
+    species = 'mus_musculus'
+else:
+    species = snakemake.wildcards.species
 df = pd.read_csv(snakemake.input.gtf_bed, sep='\t',
                     names=['chr', 'start', 'end', 'gene_id', 'dot',
                             'strand', 'source', 'feature', 'dot2', 'attributes'], index_col=False)
