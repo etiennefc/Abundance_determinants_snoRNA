@@ -54,7 +54,10 @@ snakemake --conda-create-envs-only --use-conda --conda-frontend mamba --cores 1
 ```bash
 snakemake -j 999 --use-conda --immediate-submit --notemp --cluster-config cluster.json --cluster 'python3 slurmSubmit.py {dependencies}'
 ```
-#### Fifthly, running the pipeline using computation nodes and the previously created envs is done as follows (Mouse snoRNA prediction):                                                                           ```bash                                                                                                                                                                                                            snakemake all_mouse -j 999 --use-conda --immediate-submit --notemp --cluster-config cluster.json --cluster 'python3 slurmSubmit.py {dependencies}'                                                                           ``` 
+#### Fifthly, running the pipeline using computation nodes and the previously created envs is done as follows (Mouse snoRNA prediction):                                                                           
+```bash
+snakemake all_mouse -j 999 --use-conda --immediate-submit --notemp --cluster-config cluster.json --cluster 'python3 slurmSubmit.py {dependencies}'
+``` 
 #### Finally, generating figures for the human and mouse snoRNAs is done as follows on the cluster:
 ```bash
 snakemake all_figures -j 999 --use-conda --immediate-submit --notemp --cluster-config cluster.json --cluster 'python3 slurmSubmit.py {dependencies}'
