@@ -4,20 +4,21 @@ from pybedtools import BedTool
 import subprocess as sp
 import re
 
+species = snakemake.wildcards.species
 sno_bed_path = snakemake.input.sno_bed
 gtf_bed_path = snakemake.input.formatted_gtf_bed
 sno_bed = BedTool(sno_bed_path)
 
 # Intersect sno_bed with bed of genes from gtf to find if any are a snoRNA host gene
 # Intersect must be on the same strand (s=True) and must fully include the snoRNA (f=1)
-intersection = sno_bed.intersect(gtf_bed_path, s=True, f=1, wb=True, sorted=True).saveas('temp_snoRNA_HG.bed')
+intersection = sno_bed.intersect(gtf_bed_path, s=True, f=1, wb=True, sorted=True).saveas(f'{species}_temp_snoRNA_HG.bed')
 
 # Load intersect_df
 cols = ['chr_sno', 'start_sno', 'end_sno', 'gene_id_sno', 'dot', 'strand_sno',
         'source_sno', 'feature_sno', 'dot2', 'attributes_sno', 'chr_host',
         'start_host', 'end_host', 'host_id', 'dot3', 'strand_host', 'source_host',
         'feature_host', 'dot4', 'attributes_host']
-intersect_df = pd.read_csv('temp_snoRNA_HG.bed', sep='\t', names=cols, header=None)
+intersect_df = pd.read_csv(f'{species}_temp_snoRNA_HG.bed', sep='\t', names=cols, header=None)
 
 
 # Retrieve host name and biotype from the attribtes_host column
@@ -68,4 +69,4 @@ for i, group in intersect_df.groupby('gene_id_sno'):
 final_host_df = pd.concat(dfs)
 final_host_df.to_csv(snakemake.output.species_snoRNA_HG, sep='\t', index=False)
 
-sp.call('rm temp_snoRNA_HG.bed', shell=True)
+sp.call(f'rm {species}_temp_snoRNA_HG.bed', shell=True)
