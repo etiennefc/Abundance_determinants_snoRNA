@@ -169,8 +169,8 @@ def density_x(df_list, xlabel, ylabel, xscale, title, colors, critère_liste, pa
     for i, crit in enumerate(critère_liste):
         legend_element = mpatches.Patch(color=colors[i], label=crit)
         legend_list.append(legend_element)
-    plt.legend(handles=legend_list, loc='upper left', bbox_to_anchor=(0,1.1),
-                fontsize=30)
+    plt.legend(handles=legend_list, loc='upper right', bbox_to_anchor=(0,1.1),
+                fontsize=20)
 
     fig.suptitle(title, fontsize=20)
     plt.savefig(path, bbox_inches='tight', dpi=500)
@@ -522,6 +522,25 @@ def grouped_stacked_bar(lists, x_tick_labels, labels, title, xlabel,
     legend = ax.legend(handles=legend_list, bbox_to_anchor=(1.1,1.1), fontsize=15)
     legend.set_title(legend_title,prop={'size':18})
     ax.add_artist(legend)
+
+    plt.savefig(path, bbox_inches='tight', dpi=600)
+
+
+def plot_clustered_stacked2(df_list, colors, xlabel, ylabel, x_tick_labels, path, **kwargs):
+    """ Given a list of 2 dataframes (two stacked bars per xtick), create a clustered stacked 
+        bar plot. Colors is a list of list of colors for each df. Each df has a column for each variable composing its hue"""
+
+    rc = {'ytick.labelsize': 20, 'xtick.labelsize': 25}
+    plt.rcParams.update(**rc)
+    plt.rcParams['svg.fonttype'] = 'none'
+    axe = plt.subplot(111)
+    df_list[0].plot(kind='bar', stacked=True, ax=axe, position=-0.05, width=0.35, color=colors[0])
+    df_list[1].plot(kind='bar', stacked=True, ax=axe, position=1.05, width=0.35, color=colors[1])
+    plt.xlabel(xlabel, fontsize=30)
+    plt.ylabel(ylabel, fontsize=30)
+    axe.set_xticklabels(x_tick_labels, rotation=0)
+    plt.autoscale()
+    plt.margins(0.02)
 
     plt.savefig(path, bbox_inches='tight', dpi=600)
 

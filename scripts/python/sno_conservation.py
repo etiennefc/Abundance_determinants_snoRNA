@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import pandas as pd
 from pybedtools import BedTool
+import subprocess as sp
 
 """ Determine the intersection between a bed file of all snoRNAs and a bedGraph
     of the phastCons conservation score for each nucleotide in the human genome.
@@ -11,6 +12,17 @@ col = ['chr', 'start', 'end', 'gene_id', 'dot', 'strand', 'source', 'feature',
         'dot2', 'gene_info']
 sno_bed = pd.read_csv(snakemake.input.sno_bed, sep='\t', names=col)  # generated with gtf_to_bed
 
+# Get bed of 100 nt upstream of snoRNA instead of snoRNA itself (account for strandness)
+upstream = sno_bed.copy()
+upstream['start_up'] = upstream['start'] - 1
+upstream.loc[upstream['strand'] == '+', 'start'] = upstream['start_up'] - 100
+upstream.loc[upstream['strand'] == '+', 'end'] = upstream['start_up']
+
+upstream['end_up'] = upstream['end'] + 1
+upstream.loc[upstream['strand'] == '-', 'end'] = upstream['end_up'] + 100
+upstream.loc[upstream['strand'] == '-', 'start'] = upstream['end_up']
+upstream = upstream[col]
+upstream.to_csv('upstream_temp.bed', sep='\t', index=False, header=False)
 
 def intersection(sno_bed, phastcons_bedgraph, output_path):
     """ Get the intersection between the snoRNA bed file and the sorted
@@ -44,5 +56,12 @@ def main(sno_bed_path, phastcons_bedgraph_path, output_path_intersection,
 
 
 
+# Get snoRNA average conservation across 100 vertebrates
 main(snakemake.input.sno_bed, snakemake.input.phastcons_bg,
     snakemake.output.intersection_sno_conservation, sno_bed, snakemake.output.sno_conservation)
+
+# Get average conservation of the 100 nt upstream of the snoRNAs (~promoter region)
+main('upstream_temp.bed', snakemake.input.phastcons_bg,
+    snakemake.output.intersection_upstream_sno_conservation, upstream, snakemake.output.upstream_sno_conservation)
+
+sp.call('rm upstream_temp.bed', shell=True)

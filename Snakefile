@@ -85,10 +85,24 @@ include: "rules/cv_train_test_manual_split_gtex_HG.smk"
 include: "rules/downloads_species.smk"
 include: "rules/species_prediction.smk"
 include: "rules/species_prediction_figures.smk"
+include: "rules/supplementary_analyses.smk"
+include: "rules/supplementary_analyses_figures.smk"
 
 
 rule all:
     input:
+        ## New analyses following rebuttal
+        # Conservation of expressed intergenic snoRNAs and of the region upstream of 100 nt
+        sno_conservation = config['path']['sno_conservation'],
+        density = os.path.join(config['figures']['density'], 'upstream_cons_intergenic_sno.svg'),
+        bar_fig1 = os.path.join(config['figures']['bar'], 'ab_status_sno_type_host_biotype.svg'),
+        density_terminal_stem = os.path.join(config['figures']['density'], 'dist_to_bp_thresh_terminal_stem_cd.svg'),
+        overlap_sno_AQR = 'data/references/eCLIP/overlap_sno_AQR.filtered.bed',
+        bar_HG_cd = os.path.join(config['figures']['bar'],
+                            'dist_to_bp_thresh_HG_AQR_overlap_cd.svg'),
+        box_degeneration = os.path.join(config['figures']['logo'], 'expressed_c_prime_box_wo_blank.svg'),
+        bar_haca_dkc1_eclip = os.path.join(config['figures']['bar'],
+                            'DKC1_binding_eCLIP_ab_status_haca.svg'),
         # Do manual split of 10 test sets
         confusion_matrix = expand(os.path.join(config['path']['confusion_matrix_f1'],
                                 '{models2}_confusion_matrix_w_f1_score_scale_after_split_{manual_iteration}.tsv'), **config),
@@ -118,7 +132,8 @@ rule all:
         confusion_matrix_top4 = expand(os.path.join(config['path']['confusion_matrix_f1'],
                                             '{models2}_confusion_matrix_w_f1_score_scale_after_split_top4_{manual_iteration}.tsv'), **config),
         multi_HG_different_label_snoRNAs = config['path']['multi_HG_different_label_snoRNAs'],
-        sno_per_confusion_value_manual_split = config['path']['sno_per_confusion_value_manual_split']
+        sno_per_confusion_value_manual_split = config['path']['sno_per_confusion_value_manual_split'],
+        
 	
 
 rule all_mouse:

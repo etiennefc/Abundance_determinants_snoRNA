@@ -3,7 +3,7 @@ import pandas as pd
 import logomaker
 import matplotlib.pyplot as plt
 from math import log2
-from scipy.stats import entropy
+from scipy.stats import entropy, kstest
 
 """ Create logo of C and D boxes from fasta of either expressed or
     not expressed C/D box snoRNAs."""
@@ -47,7 +47,9 @@ def pie_simple_annot(count_list, colors, annotation, path, **kwargs):
                 bbox_to_anchor=(1, 1.18), prop={'size': 35})
     plt.savefig(path, dpi=600)
 
+
 # Get all box sequences (not sno_id) in a list
+f_obs_dict = {}
 for fasta in fastas:
     # Get the name of the box and if in expressed or not expressed snoRNAs to redirect figure to correct output
     ab_status_box = fasta.split('/')[-1].rstrip('.fa')
@@ -64,7 +66,7 @@ for fasta in fastas:
     prob_matrix = logomaker.transform_matrix(counts_matrix, from_type='counts',
                                             to_type='probability')
 
-    # Create logo wo blanks
+   # Create logo wo blanks
     rc = {'ytick.labelsize': 32}
     plt.rcParams.update(**rc)
     plt.rcParams['svg.fonttype'] = 'none'
@@ -75,7 +77,28 @@ for fasta in fastas:
     # Compute entropy of each logo (blanks removed)
     entropy_ = str(get_entropy(prob_matrix))
 
+    print(ab_status_box, prob_matrix)
 
+    # Get the observed frequency into a flattened list
+    l = prob_matrix.values.tolist()
+    f_obs = [j for sublist in l for j in sublist]
+    f_obs_dict[ab_status_box] = f_obs
+    
     # Create pie chart of found vs not found motif per box
     percent = [(len_seqs_wo_blank/len_seqs)*100, ((len_seqs - len_seqs_wo_blank)/len_seqs)*100]
     pie_simple_annot(percent, color_dict, f'{entropy_} bits', pie_output)
+
+# Compute Kolmogorov-Smirnov test to see if the statistical significance of box degeneration between expressed/not expressed snoRNAs
+res = kstest(f_obs_dict['not_expressed_c_box'], f_obs_dict['expressed_c_box'])
+print(res)
+res = kstest(f_obs_dict['not_expressed_d_box'], f_obs_dict['expressed_d_box'])
+print(res)
+res = kstest(f_obs_dict['not_expressed_c_prime_box'], f_obs_dict['expressed_c_prime_box'])
+print(res)
+res = kstest(f_obs_dict['not_expressed_d_prime_box'], f_obs_dict['expressed_d_prime_box'])
+print(res)
+res = kstest(f_obs_dict['not_expressed_aca_box'], f_obs_dict['expressed_aca_box'])
+print(res)
+res = kstest(f_obs_dict['not_expressed_h_box'], f_obs_dict['expressed_h_box'])
+print(res)
+

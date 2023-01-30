@@ -97,6 +97,15 @@ rule HG_gtf_to_bed:
         """sed -E 's/to_remove"//g; s/";to_remove//g; s/to_delete.*gene_id/gene_id/g' | """
         """sort -n -k1,1 -k2,2 > {output.HG_bed} """
 
+rule filter_HG_bed:
+    """ Keep only gene lines and add chr for HG bed file lines."""
+    input:
+        HG_gtf_bed = rules.HG_gtf_to_bed.output.HG_bed
+    output:
+        HG_bed = 'data/bed_files/host_genes_filtered.bed'
+    shell:
+        """awk '$8=="gene" {{print "chr"$0}}' {input.HG_gtf_bed} | sort -k1,1 -k2,2n > {output.HG_bed}"""
+
 rule generate_snoRNA_beds:
     """ From a bed file containing all snoRNAs (generated via gtf_to_bed.sh) and
         a csv file containing snoRNA info (i.e. their HG), generate snoRNA bed

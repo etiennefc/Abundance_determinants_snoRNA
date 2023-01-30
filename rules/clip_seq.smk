@@ -10,12 +10,13 @@ include: "figures_model_output.smk"
 
 rule merge_bed_peaks:
     """ For each bed obtained from the PAR-CLIP datasets, merge peaks on same
-        strand that overlap by summing their enrichment value."""
+        strand that overlap by summing their enrichment value. Not done for DKC1 which is 
+        processed the same way but at the same time as the DKC1 eCLIP data."""
     input:
         input_beds = rules.par_clip_download.output
     output:
         merge_beds = expand(os.path.join(config['path']['par_clip'], '{rbp}_merged.bed'),
-                            rbp=['NOP58_repA', 'NOP58_repB', 'NOP56', 'FBL', 'FBL_mnase', 'DKC1'])
+                            rbp=['NOP58_repA', 'NOP58_repB', 'NOP56', 'FBL', 'FBL_mnase'])
     conda:
         "../envs/python.yaml"
     script:

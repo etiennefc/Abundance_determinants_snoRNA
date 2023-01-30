@@ -264,6 +264,8 @@
     "sno_length": "data/sno_length/sno_length.tsv",
     "intersection_sno_conservation": "data/references/intersection_sno_conservation_bedgraph.bed",
     "sno_conservation": "data/references/sno_conservation.tsv",
+    "intersection_upstream_sno_conservation": "data/references/intersection_upstream_sno_conservation_bedgraph.bed",
+    "upstream_sno_conservation": "data/references/upstream_sno_conservation.tsv",
     "phastcons_bw": "data/references/phastcons_100_vert.bw",
     "phastcons_bg": "data/references/phastcons_100_vert.bedGraph",
     "snodb": "data/references/snoDB1.1.1_for_hg38_Ensembl_V101_Scottlab_2020.tsv",
@@ -394,6 +396,9 @@
     "hamming_distance_box_df_yeast": "data/references/hamming_distance_box_df_yeast.tsv",
     "TARDBP_rep1_eclip_bed": "data/references/eCLIP/TARDBP_rep1.bed",
     "TARDBP_rep2_eclip_bed": "data/references/eCLIP/TARDBP_rep2.bed",
+    "AQR_HepG2_rep1_2_eclip_bed": "data/references/eCLIP/AQR_HepG2_rep1_2_merged.bed",
+    "AQR_K562_rep1_2_eclip_bed": "data/references/eCLIP/AQR_K562_rep1_2_merged.bed",
+    "DKC1_HepG2_rep1_2_eclip_bed": "data/references/eCLIP/DKC1_HepG2_rep1_2_merged.bed",
     "liftover_chain_file": "data/references/liftover_hg19_to_hg38.chain",
     "par_clip": "data/references/PAR_CLIP/",
     "NOP58_repA_par_clip": "data/references/PAR_CLIP/NOP58_repA.bed",
@@ -479,6 +484,9 @@
     "forgi": "https://github.com/ViennaRNA/forgi.git",
     "TARDBP_rep1_eclip": "https://www.encodeproject.org/files/ENCFF022DCK/@@download/ENCFF022DCK.bigBed",
     "TARDBP_rep2_eclip": "https://www.encodeproject.org/files/ENCFF118WWO/@@download/ENCFF118WWO.bigBed",
+    "AQR_merged_rep1_2_HepG2_eclip": "https://www.encodeproject.org/files/ENCFF323PUC/@@download/ENCFF323PUC.bed.gz",
+    "AQR_merged_rep1_2_K562_eclip": "https://www.encodeproject.org/files/ENCFF949QGM/@@download/ENCFF949QGM.bed.gz",
+    "DKC1_merged_rep1_2_HepG2_eclip": "https://www.encodeproject.org/files/ENCFF633LQC/@@download/ENCFF633LQC.bed.gz",
     "liftover_chain_file": "https://hgdownload.cse.ucsc.edu/goldenpath/hg19/liftOver/hg19ToHg38.over.chain.gz",
     "NOP58_repA_par_clip": "ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1067nnn/GSM1067861/suppl/GSM1067861%5FETHZ%5FBSSE%5F100205%5F433DMAAXX%5F7%2Ebed%2Egz",
     "NOP58_repB_par_clip": "ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1067nnn/GSM1067862/suppl/GSM1067862%5FETHZ%5FBSSE%5F100205%5F433DMAAXX%5F8%2Ebed%2Egz",
@@ -631,6 +639,21 @@
     {
       "long_intron": "#737373",
       "small_intron": "#bdbdbd"
+    },
+    "dist_to_bp_group":
+    {
+      "close": "#1b7837",
+      "far": "#542788"
+    },
+    "AQR_binding":
+    {
+      "Intron is bound by AQR": "#252525",
+      "Intron is not bound by AQR": "#bdbdbd"
+    },
+    "RBP_binding":
+    {
+      "RBP is bound to snoRNA": "#252525",
+      "RBP is not bound to snoRNA": "#bdbdbd"
     },
     "confusion_value":
     {

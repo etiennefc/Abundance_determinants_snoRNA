@@ -60,15 +60,15 @@ rule ensembl_genome:
         "sed '/>KI270728.1/Q' temp > {output.genome} && "
         "rm temp"
 
-#rule phastcons_download:
-#    """ Download phastCons conservation score across 100 vertebrates for all
-#        nucleotides in the human genome (hg38) in a bigwig format."""
-#    output:
-#        phastcons = config['path']['phastcons_bw']
-#    params:
-#        link = config['download']['phastcons']
-#    shell:
-#        "wget -O {output.phastcons} {params.link}"
+rule phastcons_download:
+    """ Download phastCons conservation score across 100 vertebrates for all
+        nucleotides in the human genome (hg38) in a bigwig format."""
+    output:
+        phastcons = config['path']['phastcons_bw']
+    params:
+        link = config['download']['phastcons']
+    shell:
+        "wget -O {output.phastcons} {params.link}"
 
 rule snodb_nmd_di_promoters_download:
     """ Download the snodb table used for this analysis, and the NMD substrates
@@ -133,6 +133,31 @@ rule eclip_encode_download:
         "wget -O temp_bigbed_2.bb {params.link_bed_file_2} && "
         "bigBedToBed temp_bigbed_2.bb {output.bed_file_2} && "
         "rm temp_bigbed_*"
+
+rule eclip_encode_download_AQR:
+    """ Download the eCLIP-Seq datasets for the AQR RNA binding protein.(ENCODE)"""
+    output:
+        bed_file_1 = config['path']['AQR_HepG2_rep1_2_eclip_bed'],
+        bed_file_2 = config['path']['AQR_K562_rep1_2_eclip_bed'],
+    params:
+        link_bed_file_1 = config['download']['AQR_merged_rep1_2_HepG2_eclip'],
+        link_bed_file_2 = config['download']['AQR_merged_rep1_2_K562_eclip']
+    shell:
+        "wget -O {output.bed_file_1}.gz {params.link_bed_file_1} && "
+        "gunzip {output.bed_file_1}.gz && "
+        "wget -O {output.bed_file_2}.gz {params.link_bed_file_2} && "
+        "gunzip {output.bed_file_2}.gz"
+
+rule eclip_encode_download_DKC1:
+    """ Download the eCLIP-Seq datasets for the DKC1 RNA binding protein. (ENCODE)"""
+    output:
+        bed_file = config['path']['DKC1_HepG2_rep1_2_eclip_bed'],
+    params:
+        link_bed_file = config['download']['DKC1_merged_rep1_2_HepG2_eclip']
+    shell:
+        "wget -O DKC1_temp.gz {params.link_bed_file} && "
+        "gunzip DKC1_temp.gz && sort -k1,1 -k2,2n DKC1_temp > {output.bed_file} && "
+        "rm DKC1_temp*"
 
 rule liftover_chain_file_download:
     """ Download the chain file (hg19 to hg38) needed for the liftover of par-clip beds"""
